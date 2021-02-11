@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sakuramiku.lightblog.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.User">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <id column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="nick_name" jdbcType="VARCHAR" property="nickName"/>
+        <result column="state" jdbcType="TINYINT" property="state"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
+        <collection property="roles" ofType="cn.sakuramiku.lightblog.entity.Role"
+                    resultMap="cn.sakuramiku.lightblog.mapper.RoleMapper.BaseResultMap"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        `user`.id, `user`.username,`user`.nick_name ,`user`.`state`, `user`.email, `user`.last_login_time, `user`.last_login_ip, `user`.create_time, `user`.modified_time
+    </sql>
+
+    <sql id="User_Column_List">
+        <include refid="Base_Column_List"/>,
+        <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>,
+        <include refid="cn.sakuramiku.lightblog.mapper.RightMapper.Base_Column_List"/>
+    </sql>
+
+    <select id="selectUserByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="User_Column_List"/>
+        from `user`
+        left join `role`
+        on `user`.id = `role`.reference
+        left join `right`
+        on `role`.id = `right`.reference
+        <where>
+            <if test="null != id">
+                id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="null != username">
+                username = #{username,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserByKeyword" resultMap="BaseResultMap">
+        select
+        <include refid="User_Column_List"/>
+        from `user`
+        left join `role`
+        on `user`.id = `role`.reference
+        left join `right`
+        on `role`.id = `right`.reference
+        <where>
+            <if test="null != keyword and ''!=keyword ">
+                username like CONCAT('%',#{keyword},'%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.User"
+            useGeneratedKeys="true">
+        insert into `user`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">
+                username,
+            </if>
+            <if test="state != null">
+                `state`,
+            </if>
+            <if test="email != null">
+                email,
+            </if>
+            <if test="lastLoginTime != null">
+                last_login_time,
+            </if>
+            <if test="lastLoginIp != null">
+                last_login_ip,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="modifiedTime != null">
+                modified_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="email != null">
+                #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="lastLoginTime != null">
+                #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastLoginIp != null">
+                #{lastLoginIp,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifiedTime != null">
+                #{modifiedTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.User">
+        update `user`
+        <set>
+            <if test="state != null">
+                `state` = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="email != null">
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="lastLoginTime != null">
+                last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastLoginIp != null">
+                last_login_ip = #{lastLoginIp,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+        or username = #{username,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.User">
+        update `user`
+        set `state`         = #{state,jdbcType=INTEGER},
+            email           = #{email,jdbcType=VARCHAR},
+            last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+            last_login_ip   = #{lastLoginIp,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+           or username = #{username,jdbcType=VARCHAR}
+    </update>
+</mapper>

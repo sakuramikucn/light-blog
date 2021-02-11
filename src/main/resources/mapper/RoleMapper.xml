@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sakuramiku.lightblog.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Role">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="reference" jdbcType="VARCHAR" property="reference"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
+        <collection property="rights" ofType="cn.sakuramiku.lightblog.entity.Right"
+                    resultMap="cn.sakuramiku.lightblog.mapper.RightMapper.BaseResultMap"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        `role`.id, `role`.`name`, `role`.`desc`, `role`.reference, `role`.create_time, `role`.modified_time
+    </sql>
+
+    <sql id="Role_Column_List">
+        <include refid="Base_Column_List"/>,
+        <include refid="cn.sakuramiku.lightblog.mapper.RightMapper.Base_Column_List"/>
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Role_Column_List"/>
+        from `role`
+        left join `right`
+        on `role`.id = `right`.reference
+        where `role`.id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectBySelective" resultMap="BaseResultMap">
+        select
+        <include refid="Role_Column_List"/>
+        from `role`
+        left join `right`
+        on `role`.id = `right`.reference
+        <where>
+            <if test="null != ref">
+                role.reference = #{ref}
+            </if>
+            <if test="null != keyword">
+                and name like CONCAT('%',#{keyword},'%') or `desc` like CONCAT('%',#{keyword},'%')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from `role`
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insert" parameterType="cn.sakuramiku.lightblog.entity.Role">
+        insert into `role` (id, `name`, `desc`, reference, create_time)
+        values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{desc,jdbcType=VARCHAR},
+                #{reference,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Role"
+            useGeneratedKeys="true">
+        insert into `role`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="null != desc">
+                `desc`
+            </if>
+            <if test="reference != null">
+                reference,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="null != desc">
+                #{desc,jdbcType=VARCHAR},
+            </if>
+            <if test="reference != null">
+                #{reference,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.Role">
+        update `role`
+        <set>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="null != desc">
+                `desc` = #{desc,jdbcType=VARCHAR},
+            </if>
+            <if test="reference != null">
+                reference = #{reference,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.Role">
+        update `role`
+        set `name`    = #{name,jdbcType=VARCHAR},
+            `desc`    = #{desc,jdbcType=VARCHAR},
+            reference = #{reference,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>

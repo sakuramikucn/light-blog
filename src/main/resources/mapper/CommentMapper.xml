@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sakuramiku.lightblog.mapper.CommentMapper">
+  <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Comment">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="reference" jdbcType="VARCHAR" property="reference" />
+    <result column="nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="state" jdbcType="BOOLEAN" property="state" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, parent_id, reference, nick_name, email, `state`, content, create_time, modified_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from comment
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from comment
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Comment" useGeneratedKeys="true">
+    insert into comment (parent_id, reference, nick_name, 
+      email, `state`, content, 
+      create_time, modified_time)
+    values (#{parentId,jdbcType=BIGINT}, #{reference,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, 
+      #{email,jdbcType=VARCHAR}, #{state,jdbcType=BOOLEAN}, #{content,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{modifiedTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Comment" useGeneratedKeys="true">
+    insert into comment
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="reference != null">
+        reference,
+      </if>
+      <if test="nickName != null">
+        nick_name,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="state != null">
+        `state`,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifiedTime != null">
+        modified_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="reference != null">
+        #{reference,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null">
+        #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=BOOLEAN},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifiedTime != null">
+        #{modifiedTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.Comment">
+    update comment
+    <set>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="reference != null">
+        reference = #{reference,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null">
+        nick_name = #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        `state` = #{state,jdbcType=BOOLEAN},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifiedTime != null">
+        modified_time = #{modifiedTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.Comment">
+    update comment
+    set parent_id = #{parentId,jdbcType=BIGINT},
+      reference = #{reference,jdbcType=VARCHAR},
+      nick_name = #{nickName,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      `state` = #{state,jdbcType=BOOLEAN},
+      content = #{content,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modified_time = #{modifiedTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

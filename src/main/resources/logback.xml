@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--    <appender name="FILE" class="ch.qos.logback.core.FileAppender">-->
+    <!--        <file>${catalina.base}/logs/lightblog/lightblog_%d{yyyyMMdd}.log</file>-->
+    <!--        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">&lt;!&ndash; 必须指定，否则不会往文件输出内容 &ndash;&gt;-->
+    <!--            <pattern>%d{HH:mm:ss.SSS} %level %thread %10logger %file %line %msg %n</pattern>-->
+    <!--            <charset>UTF-8</charset>-->
+    <!--        </encoder>-->
+    <!--        <append>true</append>-->
+    <!--        <prudent>false</prudent>-->
+    <!--    </appender>-->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <!--        <appender-ref ref="FILE" />-->
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="cn.sakuramiku.lightblog" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>

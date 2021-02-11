@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sakuramiku.lightblog.mapper.ArticleMapper">
+  <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Article">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+    <result column="desc" jdbcType="VARCHAR" property="desc" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="author" jdbcType="VARCHAR" property="author" />
+    <result column="category" jdbcType="VARCHAR" property="category" />
+    <result column="mark_del_time" jdbcType="TIMESTAMP" property="markDelTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="page_views" jdbcType="INTEGER" property="pageViews" />
+    <result column="cover_url" jdbcType="VARCHAR" property="coverUrl" />
+    <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime" />
+    <result column="mask" jdbcType="INTEGER" property="mask" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, title, `state`, `desc`, content, author, category, mark_del_time, create_time, 
+    page_views, cover_url, modified_time, mask
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from article
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from article
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Article" useGeneratedKeys="true">
+    insert into article (title, `state`, `desc`, 
+      content, author, category, 
+      mark_del_time, create_time, page_views, 
+      cover_url, modified_time, mask
+      )
+    values (#{title,jdbcType=VARCHAR}, #{state,jdbcType=TINYINT}, #{desc,jdbcType=VARCHAR}, 
+      #{content,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR}, #{category,jdbcType=VARCHAR}, 
+      #{markDelTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, #{pageViews,jdbcType=INTEGER}, 
+      #{coverUrl,jdbcType=VARCHAR}, #{modifiedTime,jdbcType=TIMESTAMP}, #{mask,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Article" useGeneratedKeys="true">
+    insert into article
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="title != null">
+        title,
+      </if>
+      <if test="state != null">
+        `state`,
+      </if>
+      <if test="desc != null">
+        `desc`,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="author != null">
+        author,
+      </if>
+      <if test="category != null">
+        category,
+      </if>
+      <if test="markDelTime != null">
+        mark_del_time,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="pageViews != null">
+        page_views,
+      </if>
+      <if test="coverUrl != null">
+        cover_url,
+      </if>
+      <if test="modifiedTime != null">
+        modified_time,
+      </if>
+      <if test="mask != null">
+        mask,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=TINYINT},
+      </if>
+      <if test="desc != null">
+        #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null">
+        #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="category != null">
+        #{category,jdbcType=VARCHAR},
+      </if>
+      <if test="markDelTime != null">
+        #{markDelTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageViews != null">
+        #{pageViews,jdbcType=INTEGER},
+      </if>
+      <if test="coverUrl != null">
+        #{coverUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="modifiedTime != null">
+        #{modifiedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mask != null">
+        #{mask,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.Article">
+    update article
+    <set>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        `state` = #{state,jdbcType=TINYINT},
+      </if>
+      <if test="desc != null">
+        `desc` = #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null">
+        author = #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="category != null">
+        category = #{category,jdbcType=VARCHAR},
+      </if>
+      <if test="markDelTime != null">
+        mark_del_time = #{markDelTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageViews != null">
+        page_views = #{pageViews,jdbcType=INTEGER},
+      </if>
+      <if test="coverUrl != null">
+        cover_url = #{coverUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="modifiedTime != null">
+        modified_time = #{modifiedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mask != null">
+        mask = #{mask,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.Article">
+    update article
+    set title = #{title,jdbcType=VARCHAR},
+      `state` = #{state,jdbcType=TINYINT},
+      `desc` = #{desc,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      category = #{category,jdbcType=VARCHAR},
+      mark_del_time = #{markDelTime,jdbcType=TIMESTAMP},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      page_views = #{pageViews,jdbcType=INTEGER},
+      cover_url = #{coverUrl,jdbcType=VARCHAR},
+      modified_time = #{modifiedTime,jdbcType=TIMESTAMP},
+      mask = #{mask,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

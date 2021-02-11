@@ -3,3 +3,5 @@
 *.iml
 target/
 out/
+/tomcat.8888/
+/web/
