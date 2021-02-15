@@ -5,9 +5,13 @@ import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.mapper.RoleMapper;
 import cn.sakuramiku.lightblog.service.RoleService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +24,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "Role",keyGenerator = "keyGenerator")
+@CacheConfig(cacheNames = "role", keyGenerator = "keyGenerator")
 @Service
 public class RoleServiceImpl implements RoleService {
 
@@ -29,45 +33,49 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Role saveRole(Role role) {
+    public Long saveRole(@NonNull Role role) {
         if (ObjectUtil.isNull(role)) {
             return null;
         }
-        role.setId(IdUtil.nextId());
+        long id = IdUtil.nextId();
+        role.setId(id);
         role.setCreateTime(LocalDateTime.now());
-        roleMapper.insertSelective(role);
-        return role;
+        roleMapper.insert(role);
+        return id;
     }
 
     @CachePut(key = "#role.getId()")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean updateRole(Role role) {
-        return roleMapper.updateByPrimaryKeySelective(role);
+    public Boolean updateRole(@NonNull Role role) {
+        return roleMapper.update(role);
     }
 
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean removeRole(Long id) {
-        return roleMapper.deleteByPrimaryKey(id);
+    public Boolean removeRole(@NonNull Long id) {
+        return roleMapper.delete(id);
     }
 
-    @Cacheable(key = "#id")
+    @Cacheable(key = "#id", unless = "null == #result")
     @Override
-    public Role getRole(Long id) {
-        return roleMapper.selectByPrimaryKey(id);
+    public Role getRole(@NonNull Long id) {
+        return roleMapper.get(id);
     }
 
-    @Cacheable
     @Override
-    public List<Role> getRoles(Long userId) {
-        return roleMapper.selectBySelective(String.valueOf(userId), null);
+    public PageInfo<Role> getRoles(@NonNull Long userId, @Nullable Integer page, @Nullable Integer pageSize) {
+        return searchRole(userId, null, page, pageSize);
     }
 
-    @Cacheable
+    @Cacheable(unless = "null == #result || 0 == #result.size()")
     @Override
-    public List<Role> searchRole(Long userId, String keyword) {
-        return roleMapper.selectBySelective(String.valueOf(userId), keyword);
+    public PageInfo<Role> searchRole(@Nullable Long userId, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize) {
+        if (null != page && null != pageSize) {
+            PageHelper.startPage(page, pageSize, true);
+        }
+        List<Role> roles = roleMapper.search(String.valueOf(userId), keyword);
+        return PageInfo.of(roles);
     }
 }

@@ -123,6 +123,27 @@ public class SimpleResultPage<E> implements ResultPage<E> {
     }
 
     /**
+     * 简单包装
+     *
+     * @param items     已分页数据
+     * @param page      第几页
+     * @param pageSize  每页项数
+     * @param count     总项数
+     * @param pageCount 分几页
+     * @param <E>       数据类型
+     * @return 分页对象
+     */
+    public static <E> ResultPage<E> wrap(List<E> items, int page, int pageSize, int count, int pageCount) {
+        SimpleResultPage<E> result = new SimpleResultPage<>();
+        result.items = items;
+        result.page = page;
+        result.pageSize = pageSize;
+        result.count = count;
+        result.pageCount = pageCount;
+        return result;
+    }
+
+    /**
      * 逻辑分页
      *
      * @param items

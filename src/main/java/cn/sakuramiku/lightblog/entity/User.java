@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * user
+ * 用户实体类
  *
- * @author
+ * @author lyy
  */
-@ApiModel(value = "cn.sakuramiku.lightblog.entity.User用户表")
+@ApiModel(value = "用户实体类")
 public class User implements Serializable {
 
     /**

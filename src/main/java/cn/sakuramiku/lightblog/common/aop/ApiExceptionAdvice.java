@@ -49,6 +49,7 @@ public class ApiExceptionAdvice {
         String className = e.getClass().getName();
         Set<String> keywords = new HashSet<>();
         keywords.add("jdbc");
+        keywords.add("dao");
         for (String word : keywords) {
             if (className.contains(word)) {
                 return new RespResult<>(RespCode.SERVER_INTERNAL_ERROR);

@@ -41,7 +41,8 @@ public class IndexController {
     public Result<String> login(String username, String password) throws ApiException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
-        if (userService.login(username,password)){
+        Boolean login = userService.login(username, password);
+        if (login){
             User user = userService.getUser(username);
             String token = JwtUtil.genToken(user);
             return RespResult.ok(token);

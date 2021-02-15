@@ -3,30 +3,37 @@
 <mapper namespace="cn.sakuramiku.lightblog.mapper.UserMapper">
 
     <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.User">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <id column="username" jdbcType="VARCHAR" property="username"/>
-        <result column="nick_name" jdbcType="VARCHAR" property="nickName"/>
-        <result column="state" jdbcType="TINYINT" property="state"/>
-        <result column="email" jdbcType="VARCHAR" property="email"/>
-        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
-        <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
+        <id column="user_id" jdbcType="BIGINT" property="id"/>
+        <id column="user_username" jdbcType="VARCHAR" property="username"/>
+        <result column="user_nick_name" jdbcType="VARCHAR" property="nickName"/>
+        <result column="user_state" jdbcType="TINYINT" property="state"/>
+        <result column="user_email" jdbcType="VARCHAR" property="email"/>
+        <result column="user_last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="user_last_login_ip" jdbcType="VARCHAR" property="lastLoginIp"/>
+        <result column="user_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="user_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
         <collection property="roles" ofType="cn.sakuramiku.lightblog.entity.Role"
                     resultMap="cn.sakuramiku.lightblog.mapper.RoleMapper.BaseResultMap"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        `user`.id, `user`.username,`user`.nick_name ,`user`.`state`, `user`.email, `user`.last_login_time, `user`.last_login_ip, `user`.create_time, `user`.modified_time
+        `user`.id AS user_id,
+        `user`.username AS user_username,
+        `user`.nick_name AS user_nick_name,
+        `user`.`state` AS user_state,
+        `user`.email AS user_email,
+        `user`.last_login_time AS user_last_login_time,
+        `user`.last_login_ip AS user_last_login_ip,
+        `user`.create_time AS user_create_time,
+        `user`.modified_time AS user_modified_time
     </sql>
 
     <sql id="User_Column_List">
         <include refid="Base_Column_List"/>,
-        <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>,
-        <include refid="cn.sakuramiku.lightblog.mapper.RightMapper.Base_Column_List"/>
+        <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>
     </sql>
 
-    <select id="selectUserByPrimaryKey" resultMap="BaseResultMap">
+    <select id="get" resultMap="BaseResultMap">
         select
         <include refid="User_Column_List"/>
         from `user`
@@ -36,7 +43,22 @@
         on `role`.id = `right`.reference
         <where>
             <if test="null != id">
-                id = #{id,jdbcType=BIGINT}
+                `user`.id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="null != username">
+                username = #{username,jdbcType=BIGINT}
+            </if>
+            <if test="null == id and null == username">
+                1 = 2;
+            </if>
+        </where>
+    </select>
+    <select id="selectByUserNameOrId_COUNT" resultType="long">
+        select count(0)
+        from `user`
+        <where>
+            <if test="null != id">
+                `user`.id = #{id,jdbcType=BIGINT}
             </if>
             <if test="null != username">
                 username = #{username,jdbcType=BIGINT}
@@ -44,7 +66,7 @@
         </where>
     </select>
 
-    <select id="selectUserByKeyword" resultMap="BaseResultMap">
+    <select id="search" resultMap="BaseResultMap">
         select
         <include refid="User_Column_List"/>
         from `user`
@@ -53,19 +75,25 @@
         left join `right`
         on `role`.id = `right`.reference
         <where>
-            <if test="null != keyword and ''!=keyword ">
-                username like CONCAT('%',#{keyword},'%')
+            <if test="null != keyword and '' != keyword ">
+                nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
+            </if>
+        </where>
+    </select>
+    <select id="search_COUNT" resultType="long">
+        select count(0)
+        from `user`
+        <where>
+            <if test="null != keyword and '' != keyword ">
+                nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
             </if>
         </where>
     </select>
 
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.User"
-            useGeneratedKeys="true">
+    <insert id="insert" parameterType="cn.sakuramiku.lightblog.entity.User">
         insert into `user`
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="username != null">
-                username,
-            </if>
+            id,username,
             <if test="state != null">
                 `state`,
             </if>
@@ -81,14 +109,9 @@
             <if test="createTime != null">
                 create_time,
             </if>
-            <if test="modifiedTime != null">
-                modified_time,
-            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="username != null">
-                #{username,jdbcType=VARCHAR},
-            </if>
+            #{id,jdbcType=BIGINT}, #{username,jdbcType=VARCHAR},
             <if test="state != null">
                 #{state,jdbcType=INTEGER},
             </if>
@@ -104,13 +127,10 @@
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
-            <if test="modifiedTime != null">
-                #{modifiedTime,jdbcType=TIMESTAMP},
-            </if>
         </trim>
     </insert>
 
-    <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.User">
+    <update id="update" parameterType="cn.sakuramiku.lightblog.entity.User">
         update `user`
         <set>
             <if test="state != null">
@@ -130,13 +150,4 @@
         or username = #{username,jdbcType=VARCHAR}
     </update>
 
-    <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.User">
-        update `user`
-        set `state`         = #{state,jdbcType=INTEGER},
-            email           = #{email,jdbcType=VARCHAR},
-            last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
-            last_login_ip   = #{lastLoginIp,jdbcType=VARCHAR}
-        where id = #{id,jdbcType=BIGINT}
-           or username = #{username,jdbcType=VARCHAR}
-    </update>
 </mapper>

@@ -1,8 +1,9 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Article;
-
-import java.util.List;
+import cn.sakuramiku.lightblog.vo.SearchArticleParam;
+import com.github.pagehelper.PageInfo;
+import org.springframework.lang.NonNull;
 
 /**
  * 文章服务接口
@@ -14,48 +15,40 @@ public interface ArticleService {
     /**
      * 创建文章
      *
-     * @param article
-     * @return
+     * @param article 文章
+     * @return 文章ID
      */
-    Article saveArticle(Article article);
+    Long saveArticle(@NonNull Article article);
 
     /**
      * 修改文章
      *
-     * @param article
-     * @return
+     * @param article 参数
+     * @return 是否成功
      */
-    Article updateArticle(Article article);
+    Boolean updateArticle(@NonNull Article article);
 
     /**
      * 删除文章
      *
-     * @param id
-     * @return
+     * @param id 文章ID
+     * @return 是否成功
      */
-    boolean removeArticle(String id);
+    Boolean removeArticle(@NonNull Long id);
 
     /**
      * 获取文章
      *
-     * @param id
-     * @return
+     * @param id 文章ID
+     * @return 文章
      */
-    Article getArticle(String id);
+    Article getArticle(@NonNull Long id);
 
     /**
      * 搜索文章
      *
-     * @param condition
-     * @return
+     * @param param 搜索参数
+     * @return 文章列表
      */
-    List<Article> searchArticle(Article condition);
-
-    /**
-     * 状态扭转
-     *
-     * @param state
-     * @return
-     */
-    Article opsStatus(int state);
+    PageInfo<Article> searchArticle(@NonNull SearchArticleParam param);
 }

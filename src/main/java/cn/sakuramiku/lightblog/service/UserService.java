@@ -1,8 +1,9 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.User;
-
-import java.util.List;
+import com.github.pagehelper.PageInfo;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * 用户服务接口
@@ -14,50 +15,60 @@ public interface UserService {
     /**
      * 登录
      *
-     * @param username
-     * @param password
-     * @return
+     * @param username 用户名
+     * @param password 密码
+     * @return 是否成功
      */
-    boolean login(String username, String password);
+    Boolean login(@NonNull String username, @NonNull String password);
 
     /**
      * 注册
      *
-     * @param username
-     * @param password
-     * @return
+     * @param username 用户名
+     * @param password 密码
+     * @return 是否成功
      */
-    boolean register(String username, String password);
+    Boolean register(@NonNull String username, @NonNull String password);
 
     /**
      * 获取用户
      *
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return 用户
      */
-    User getUser(String username);
+    User getUser(@NonNull String username);
 
     /**
      * 获取用户
      *
      * @param id 用户ID
-     * @return
+     * @return 用户
      */
-    User getUser(long id);
+    User getUser(@NonNull Long id);
 
     /**
      * 修改用户
      *
-     * @param user
-     * @return
+     * @param user 参数
+     * @return 是否成功
      */
-    boolean updateUser(User user);
+    Boolean updateUser(@NonNull User user);
 
     /**
      * 搜索用户
      *
-     * @param keyword
-     * @return
+     * @param keyword 用户名/昵称关键字
+     * @return 用户列表
      */
-    List<User> searchUser(String keyword);
+    PageInfo<User> searchUser(@Nullable String keyword);
+
+    /**
+     * 搜索用户
+     *
+     * @param keyword  用户名/昵称关键字
+     * @param page     第几页
+     * @param pageSize 每页项数
+     * @return 用户列表
+     */
+    PageInfo<User> searchUser(@Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize);
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.annotation.ShiroPass;
+import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
@@ -73,8 +74,9 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/tag/**", "jwt");
         filterChainDefinitionMap.put("/link/**", "jwt");
         filterChainDefinitionMap.put("/category/**", "jwt");
-        filterChainDefinitionMap.putAll(getPassUrls());
-
+        if (Boolean.parseBoolean(System.getProperty("shiro.enable","true"))){
+            filterChainDefinitionMap.putAll(getPassUrls());
+        }
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
         return shiroFilterFactoryBean;
@@ -143,24 +145,28 @@ public class ShiroConfig {
                             methodUrl = method.getAnnotation(PostMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
+                        baseUrl = BlogHelper.genReqUrl("POST",baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(GetMapping.class))) {
                         methodUrl = method.getAnnotation(GetMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(GetMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
+                        baseUrl = BlogHelper.genReqUrl("GET",baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(DeleteMapping.class))) {
                         methodUrl = method.getAnnotation(DeleteMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(DeleteMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
+                        baseUrl = BlogHelper.genReqUrl("DELETE",baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(PutMapping.class))) {
                         methodUrl = method.getAnnotation(PutMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(PutMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
+                        baseUrl = BlogHelper.genReqUrl("PUT",baseUrl);
                     } else {
                         methodUrl = method.getAnnotation(RequestMapping.class).value();
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);

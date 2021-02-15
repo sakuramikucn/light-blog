@@ -1,6 +1,5 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.common.util.SecurityUtil;
 import cn.sakuramiku.lightblog.entity.Account;
@@ -8,9 +7,12 @@ import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.mapper.AccountMapper;
 import cn.sakuramiku.lightblog.mapper.UserMapper;
 import cn.sakuramiku.lightblog.service.UserService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,6 @@ import java.util.List;
  */
 @Service("userService")
 @CacheConfig(cacheNames = "user", keyGenerator = "keyGenerator")
-@CachePut()
 public class UserServiceImpl implements UserService {
 
     @Resource
@@ -36,15 +37,15 @@ public class UserServiceImpl implements UserService {
     private AccountMapper accountMapper;
 
     @Override
-    public boolean login(String username, String password) {
+    public Boolean login(@NonNull String username, @NonNull String password) {
         password = SecurityUtil.md5(password);
         Account account = accountMapper.checkLogin(username, password);
-        return !ObjectUtil.isNull(account);
+        return null != account;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean register(String username, String password) {
+    public Boolean register(@NonNull String username, @NonNull String password) {
         long id = IdUtil.nextId();
         LocalDateTime now = LocalDateTime.now(ZoneId.ofOffset("GMT", ZoneOffset.ofHours(8)));
         password = SecurityUtil.md5(password);
@@ -54,33 +55,45 @@ public class UserServiceImpl implements UserService {
         account.setPassword(password);
         account.setCreateTime(now);
         accountMapper.insert(account);
-        return userMapper.insertBase(id, username, now);
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+        user.setCreateTime(now);
+        return userMapper.insert(user);
     }
 
-    @Cacheable(key = "#username")
+    @Cacheable(key = "#username", unless = "null == #result")
     @Override
-    public User getUser(String username) {
-        List<User> users = userMapper.selectUserByPrimaryKey(null, username);
-        return users.get(0);
+    public User getUser(@NonNull String username) {
+        return userMapper.get(null, username);
     }
 
-    @Cacheable
+    @Cacheable(unless = "null == #result")
     @Override
-    public User getUser(long id) {
-        List<User> users = userMapper.selectUserByPrimaryKey(id, null);
-        return users.get(0);
+    public User getUser(@NonNull Long id) {
+        return userMapper.get(id, null);
     }
 
     @CachePut(key = "#user.getUsername()")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean updateUser(User user) {
-        return userMapper.updateByPrimaryKeySelective(user);
+    public Boolean updateUser(@NonNull User user) {
+        return userMapper.update(user);
     }
 
-    @Cacheable
+    @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
-    public List<User> searchUser(String keyword) {
-        return userMapper.selectUserByKeyword(keyword);
+    public PageInfo<User> searchUser(String keyword) {
+        return searchUser(keyword, null, null);
+    }
+
+    @Cacheable(unless = "#result==null || 0 == #result.size()")
+    @Override
+    public PageInfo<User> searchUser(String keyword, Integer page, Integer pageSize) {
+        if (null != page && null != pageSize) {
+            PageHelper.startPage(page, pageSize, true);
+        }
+        List<User> users = userMapper.search(keyword);
+        return PageInfo.of(users);
     }
 }

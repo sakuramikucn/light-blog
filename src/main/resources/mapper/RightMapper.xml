@@ -2,39 +2,57 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.sakuramiku.lightblog.mapper.RightMapper">
     <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Right">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="pattern" jdbcType="VARCHAR" property="pattern"/>
-        <result column="rule" jdbcType="BOOLEAN" property="rule"/>
-        <result column="reference" jdbcType="VARCHAR" property="reference"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
+        <id column="right_id" jdbcType="BIGINT" property="id"/>
+        <result column="right_pattern" jdbcType="VARCHAR" property="pattern"/>
+        <result column="right_rule" jdbcType="BOOLEAN" property="rule"/>
+        <result column="right_ref" jdbcType="VARCHAR" property="reference"/>
+        <result column="right_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="right_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        `right`.id, `right`.pattern, `right`.`rule`, `right`.reference, `right`.create_time, `right`.modified_time
+        `right`.id as right_id,
+        `right`.pattern as right_pattern,
+        `right`.`rule` as right_rule,
+        `right`.reference as right_ref,
+        `right`.create_time as right_create_time,
+        `right`.modified_time as right_modified_time
     </sql>
 
-    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="get" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from `right`
         where id = #{id,jdbcType=BIGINT}
     </select>
 
-    <select id="selectByRef" resultMap="BaseResultMap">
+    <select id="search" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from `right`
-        where reference = #{ref,jdbcType=VARCHAR}
+        <where>
+            <if test="null != ref and '' != ref ">
+                reference = #{ref,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <select id="search_COUNT" resultMap="BaseResultMap">
+        select count(0)
+        from `right`
+        <where>
+            <if test="null != ref and '' != ref ">
+                reference = #{ref,jdbcType=VARCHAR}
+            </if>
+        </where>
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <delete id="delete" parameterType="java.lang.Long">
         delete
         from `right`
         where id = #{id,jdbcType=BIGINT}
     </delete>
 
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Right"
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Right"
             useGeneratedKeys="true">
         insert into `right`
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -69,7 +87,7 @@
         </trim>
     </insert>
 
-    <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.Right">
+    <update id="update" parameterType="cn.sakuramiku.lightblog.entity.Right">
         update `right`
         <set>
             <if test="pattern != null">
@@ -77,9 +95,6 @@
             </if>
             <if test="rule != null">
                 `rule` = #{rule,jdbcType=BOOLEAN},
-            </if>
-            <if test="reference != null">
-                reference = #{reference,jdbcType=VARCHAR},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

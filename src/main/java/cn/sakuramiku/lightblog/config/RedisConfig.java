@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,12 +30,13 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -75,17 +77,22 @@ public class RedisConfig {
      * 在获取连接的时候检查有效性
      */
     @Value("${redis.pool.testOnBorrow:false}")
-    private boolean testOnBorrow;
+    private Boolean testOnBorrow;
     /**
      * 在空闲时检查有效性
      */
     @Value("${redis.pool.testWhileIdle:false}")
-    private boolean testWhileIdle;
+    private Boolean testWhileIdle;
     /**
      * 是否使用缓存
      */
     @Value("${redis.useCache:true}")
-    private boolean useCache;
+    private Boolean useCache;
+    /**
+     * 过期时间(秒)，默认30分钟
+     */
+    @Value("${redis.ttl:1800}")
+    private Long ttl;
 
     /**
      * 管理缓存管理器
@@ -116,12 +123,26 @@ public class RedisConfig {
         RedisSerializationContext.SerializationPair<String> keyPair = RedisSerializationContext.SerializationPair.fromSerializer(stringRedisSerializer);
         RedisSerializationContext.SerializationPair<Object> valuePair = RedisSerializationContext.SerializationPair.fromSerializer(objectRedisSerializer);
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig().serializeKeysWith(keyPair).serializeValuesWith(valuePair);
+        defaultCacheConfig.entryTtl(Duration.ofSeconds(ttl));
         return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
     }
 
     @Bean
     public KeyGenerator keyGenerator() {
-        return (Object o, Method method, Object... objects) -> method.getName() + ":" + Arrays.toString(objects);
+        return (Object o, Method method, Object... objects) -> {
+            StringBuilder sb = new StringBuilder();
+            for (Object param : objects) {
+                if (null == param) {
+                    continue;
+                }
+                sb.append(param).append(":");
+            }
+            String params = sb.toString();
+            if (!StringUtils.isEmpty(params) && ':' == sb.charAt(params.length() - 1)) {
+                params = sb.deleteCharAt(sb.lastIndexOf(":")).toString();
+            }
+            return method.getName() + ":" + params;
+        };
     }
 
     @Bean
@@ -147,7 +168,7 @@ public class RedisConfig {
         Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         //必须设置，否则无法将JSON转化为对象，会转化成Map类型
         objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
 

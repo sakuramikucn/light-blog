@@ -1,41 +1,47 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Right;
-
-import java.util.List;
+import com.github.pagehelper.PageInfo;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * 权限服务接口
+ *
  * @author lyy
  */
 public interface RightService {
 
     /**
      * 添加权限
-     * @param right
-     * @return
+     *
+     * @param right 权限
+     * @return 权限ID
      */
-    Right saveRight(Right right);
+    Long saveRight(@NonNull Right right);
 
     /**
      * 修改权限
-     * @param right
-     * @return
+     *
+     * @param right 参数
+     * @return 是否成功
      */
-    boolean updateRight(Right right);
+    Boolean updateRight(@NonNull Right right);
 
     /**
      * 删除一个权限
-     * @param id
-     * @return
+     *
+     * @param id 权限ID
+     * @return 是否成功
      */
-    boolean removeRight(Long id);
+    Boolean removeRight(@NonNull Long id);
 
 
     /**
      * 获取reference关联的权限
-     * @param reference
-     * @return
+     *
+     * @param reference 引用，一般为角色ID
+     * @return 权限列表
      */
-    List<Right> getRights(String reference);
+    PageInfo<Right> getRights(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize);
 }

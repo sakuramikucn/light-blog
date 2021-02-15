@@ -1,21 +1,19 @@
-package cn.sakuramiku.lightblog.entity;
+package cn.sakuramiku.lightblog.vo;
 
+import cn.sakuramiku.lightblog.entity.Article;
+import cn.sakuramiku.lightblog.entity.Category;
+import cn.sakuramiku.lightblog.entity.Tag;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.v3.oas.annotations.Hidden;
 
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 文章实体类
- *
  * @author lyy
  */
-@ApiModel(value = "文章实体类")
-public class Article implements Serializable {
+@ApiModel("简单的文章视图")
+public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
     /**
      * ID，唯一标识
      */
@@ -25,28 +23,14 @@ public class Article implements Serializable {
     /**
      * 标题
      */
-    @NotNull
     @ApiModelProperty(value = "标题")
     private String title;
-
-    /**
-     * 状态，1=正常，2=待删除
-     */
-    @Hidden
-    private Byte state;
 
     /**
      * 文章简介
      */
     @ApiModelProperty(value = "文章简介")
     private String desc;
-
-    /**
-     * 文章内容
-     */
-    @NotNull
-    @ApiModelProperty(value = "文章内容")
-    private String content;
 
     /**
      * 作者
@@ -61,22 +45,10 @@ public class Article implements Serializable {
     private Category category;
 
     /**
-     * 标记为 ‘待删除’ 状态的时间，用于判断最终删除时间
-     */
-    @Hidden
-    private LocalDateTime markDelTime;
-
-    /**
      * 创建时间
      */
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
-
-    /**
-     * 文章浏览数，非最新数据，定时持久化
-     */
-    @ApiModelProperty(value = "文章浏览数，非最新数据，定时持久化")
-    private Integer pageViews;
 
     /**
      * 封面图片链接
@@ -84,22 +56,24 @@ public class Article implements Serializable {
     @ApiModelProperty(value = "封面图片链接")
     private String coverUrl;
 
-    /**
-     * 最后修改时间
-     */
-    @ApiModelProperty(value = "最后修改时间")
-    private LocalDateTime modifiedTime;
-
-    /**
-     * 布尔类型标记
-     */
-    @Hidden
-    private Integer mask;
-
     @ApiModelProperty(value = "标签")
     private List<Tag> tags;
 
-    private static final long serialVersionUID = 1L;
+    @Override
+    public SimpleArticleView valueOf(Article article) {
+        if (null == article) {
+            return null;
+        }
+        id = article.getId();
+        author = article.getAuthor();
+        title = article.getTitle();
+        category = article.getCategory();
+        desc = article.getDesc();
+        tags = article.getTags();
+        coverUrl = article.getCoverUrl();
+        createTime = article.getCreateTime();
+        return this;
+    }
 
     public Long getId() {
         return id;
@@ -117,28 +91,12 @@ public class Article implements Serializable {
         this.title = title;
     }
 
-    public Byte getState() {
-        return state;
-    }
-
-    public void setState(Byte state) {
-        this.state = state;
-    }
-
     public String getDesc() {
         return desc;
     }
 
     public void setDesc(String desc) {
         this.desc = desc;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public String getAuthor() {
@@ -157,14 +115,6 @@ public class Article implements Serializable {
         this.category = category;
     }
 
-    public LocalDateTime getMarkDelTime() {
-        return markDelTime;
-    }
-
-    public void setMarkDelTime(LocalDateTime markDelTime) {
-        this.markDelTime = markDelTime;
-    }
-
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -173,36 +123,12 @@ public class Article implements Serializable {
         this.createTime = createTime;
     }
 
-    public Integer getPageViews() {
-        return pageViews;
-    }
-
-    public void setPageViews(Integer pageViews) {
-        this.pageViews = pageViews;
-    }
-
     public String getCoverUrl() {
         return coverUrl;
     }
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
-    }
-
-    public LocalDateTime getModifiedTime() {
-        return modifiedTime;
-    }
-
-    public void setModifiedTime(LocalDateTime modifiedTime) {
-        this.modifiedTime = modifiedTime;
-    }
-
-    public Integer getMask() {
-        return mask;
-    }
-
-    public void setMask(Integer mask) {
-        this.mask = mask;
     }
 
     public List<Tag> getTags() {

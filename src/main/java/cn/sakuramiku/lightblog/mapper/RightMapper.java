@@ -3,18 +3,55 @@ package cn.sakuramiku.lightblog.mapper;
 
 import cn.sakuramiku.lightblog.entity.Right;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
+/**
+ * 权限SQL映射
+ *
+ * @author LYY
+ */
 public interface RightMapper {
 
-    boolean deleteByPrimaryKey(@Param("id") Long id);
+    /**
+     * 删除权限
+     *
+     * @param id 权限ID
+     * @return 是否成功
+     */
+    Boolean delete(@NonNull @Param("id") Long id);
 
-    boolean insertSelective(Right record);
+    /**
+     * 添加权限
+     *
+     * @param record 权限
+     * @return 是否成功
+     */
+    Boolean insert(@NonNull Right record);
 
-    Right selectByPrimaryKey(@Param("id") Long id);
+    /**
+     * 获取权限
+     *
+     * @param id 权限ID
+     * @return 权限
+     */
+    Right get(@NonNull @Param("id") Long id);
 
-    boolean updateByPrimaryKeySelective(Right record);
+    /**
+     * 修改权限
+     *
+     * @param record 参数
+     * @return 是否成功
+     */
+    Boolean update(@NonNull Right record);
 
-    List<Right> selectByRef(@Param("ref")String ref);
+    /**
+     * 搜索权限
+     *
+     * @param ref 引用，一般为角色ID
+     * @return 权限列表
+     */
+    List<Right> search(@Nullable @Param("ref") String ref);
 }

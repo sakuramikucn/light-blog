@@ -3,51 +3,62 @@ package cn.sakuramiku.lightblog.mapper;
 import cn.sakuramiku.lightblog.entity.Account;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
+/**
+ * 账户SQL映射
+ *
+ * @author LYY
+ */
 public interface AccountMapper {
 
     /**
      * 登录
      *
-     * @param username
-     * @param password
-     * @return
+     * @param username 用户名
+     * @param password 密码
+     * @return 账号
      */
     @Select("select id from account where username=#{username} and password=#{password}")
-    Account checkLogin(@Param("username") String username, @Param("password") String password);
+    Account checkLogin(@NonNull @Param("username") String username, @NonNull @Param("password") String password);
 
     /**
-     * 根据用户名查询
+     * 获取账号
      *
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return 账户
      */
     @Select("select id,username from account where username=#{username}")
-    Account selectAccountByUsername(String username);
+    Account get(@NonNull String username);
 
     /**
-     * 根据主键删除账号
+     * 删除账号
      *
-     * @param id
-     * @param username
-     * @return
+     * @param id       账号ID
+     * @param username 用户名
+     * @return 是否成功
      */
-    boolean deleteBySelective(@Param("id") long id, @Param("username") String username);
+    Boolean delete(@Nullable @Param("id") Long id, @Nullable @Param("username") String username);
 
     /**
      * 添加账号
      *
-     * @param record
-     * @return
+     * @param record 参数
+     * @return 是否成功
      */
-    boolean insert(Account record);
+    Boolean insert(@NonNull Account record);
 
     /**
-     * 更新密码
+     * 修改密码
      *
-     * @param record
-     * @return
+     * @param id       账号ID,与{@code username}二选一
+     * @param username 用户名,与{@code id}二选一
+     * @param password 新密码
+     * @return 是否成功
      */
-    boolean updateByPrimaryKeySelective(Account record);
+    Boolean update(@Nullable @Param("id") Long id,
+                   @Nullable @Param("username") String username,
+                   @NonNull @Param("password") String password);
 
 }

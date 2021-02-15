@@ -2,61 +2,63 @@ package cn.sakuramiku.lightblog.entity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * comment
- * @author 
+ * 评论实体类
+ *
+ * @author lyy
  */
-@ApiModel(value="cn.sakuramiku.lightblog.entity.Comment评论表")
+@ApiModel(value = "评论实体类")
 public class Comment implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value="唯一标识")
+    @ApiModelProperty(value = "唯一标识")
     private Long id;
 
     /**
      * 父评论ID，为0则表示没有父评论
      */
-    @ApiModelProperty(value="父评论ID，为0则表示没有父评论")
+    @ApiModelProperty(value = "父评论ID，为0则表示没有父评论")
     private Long parentId;
 
     /**
      * 引用标识，用于找回对象的评论，一般为对象ID
      */
-    @ApiModelProperty(value="引用标识，用于找回对象的评论，一般为对象ID")
+    @ApiModelProperty(value = "引用标识，用于找回对象的评论，一般为对象ID")
     private String reference;
 
     /**
      * 发表评论时的昵称
      */
-    @ApiModelProperty(value="发表评论时的昵称")
+    @ApiModelProperty(value = "发表评论时的昵称")
     private String nickName;
 
     /**
      * 接收回复通知的邮箱
      */
-    @ApiModelProperty(value="接收回复通知的邮箱")
+    @ApiModelProperty(value = "接收回复通知的邮箱")
     private String email;
 
     /**
      * 状态，0=正常，1=屏蔽，3=删除
      */
-    @ApiModelProperty(value="状态，0=正常，1=屏蔽，3=删除")
+    @ApiModelProperty(value = "状态，0=正常，1=屏蔽，3=删除")
     private Boolean state;
 
     /**
      * 评论内容
      */
-    @ApiModelProperty(value="评论内容")
+    @ApiModelProperty(value = "评论内容")
     private String content;
 
     /**
      * 评论时间
      */
-    @ApiModelProperty(value="评论时间")
+    @ApiModelProperty(value = "评论时间")
     private LocalDateTime createTime;
 
     private LocalDateTime modifiedTime;

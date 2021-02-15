@@ -1,122 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.sakuramiku.lightblog.mapper.LogMapper">
-  <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Log">
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="operator" jdbcType="VARCHAR" property="operator" />
-    <result column="action" jdbcType="VARCHAR" property="action" />
-    <result column="what" jdbcType="VARCHAR" property="what" />
-    <result column="note" jdbcType="VARCHAR" property="note" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="reference" jdbcType="VARCHAR" property="reference" />
-    <result column="modified_time" jdbcType="TIMESTAMP" property="modifiedTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    id, `operator`, `action`, what, note, create_time, reference, modified_time
-  </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
-    from log
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from log
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Log" useGeneratedKeys="true">
-    insert into log (`operator`, `action`, what, 
-      note, create_time, reference, 
-      modified_time)
-    values (#{operator,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{what,jdbcType=VARCHAR}, 
-      #{note,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{reference,jdbcType=VARCHAR}, 
-      #{modifiedTime,jdbcType=TIMESTAMP})
-  </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Log" useGeneratedKeys="true">
-    insert into log
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="operator != null">
-        `operator`,
-      </if>
-      <if test="action != null">
-        `action`,
-      </if>
-      <if test="what != null">
-        what,
-      </if>
-      <if test="note != null">
-        note,
-      </if>
-      <if test="createTime != null">
-        create_time,
-      </if>
-      <if test="reference != null">
-        reference,
-      </if>
-      <if test="modifiedTime != null">
-        modified_time,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="operator != null">
-        #{operator,jdbcType=VARCHAR},
-      </if>
-      <if test="action != null">
-        #{action,jdbcType=VARCHAR},
-      </if>
-      <if test="what != null">
-        #{what,jdbcType=VARCHAR},
-      </if>
-      <if test="note != null">
-        #{note,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="reference != null">
-        #{reference,jdbcType=VARCHAR},
-      </if>
-      <if test="modifiedTime != null">
-        #{modifiedTime,jdbcType=TIMESTAMP},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="cn.sakuramiku.lightblog.entity.Log">
-    update log
-    <set>
-      <if test="operator != null">
-        `operator` = #{operator,jdbcType=VARCHAR},
-      </if>
-      <if test="action != null">
-        `action` = #{action,jdbcType=VARCHAR},
-      </if>
-      <if test="what != null">
-        what = #{what,jdbcType=VARCHAR},
-      </if>
-      <if test="note != null">
-        note = #{note,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="reference != null">
-        reference = #{reference,jdbcType=VARCHAR},
-      </if>
-      <if test="modifiedTime != null">
-        modified_time = #{modifiedTime,jdbcType=TIMESTAMP},
-      </if>
-    </set>
-    where id = #{id,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="cn.sakuramiku.lightblog.entity.Log">
-    update log
-    set `operator` = #{operator,jdbcType=VARCHAR},
-      `action` = #{action,jdbcType=VARCHAR},
-      what = #{what,jdbcType=VARCHAR},
-      note = #{note,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      reference = #{reference,jdbcType=VARCHAR},
-      modified_time = #{modifiedTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+
+    <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Log">
+        <id column="log_id" jdbcType="BIGINT" property="id"/>
+        <result column="log_operator" jdbcType="VARCHAR" property="operator"/>
+        <result column="log_action" jdbcType="VARCHAR" property="action"/>
+        <result column="log_what" jdbcType="VARCHAR" property="what"/>
+        <result column="log_note" jdbcType="VARCHAR" property="note"/>
+        <result column="log_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="log_reference" jdbcType="VARCHAR" property="reference"/>
+        <result column="log_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        log.id as log_id,
+        log.`operator` as `log_operator`,
+        log.`action` as `log_action`,
+        log.what as log_what,
+        log.note as log_note,
+        log.create_time as log_create_time,
+        log.reference as log_reference,
+        log.modified_time as log_modified_time
+    </sql>
+
+    <select id="get" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from log
+        where log.id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from log
+        <where>
+            <if test="null != ref and '' != ref">
+                reference = #{ref,jdbcType=VARCHAR}
+            </if>
+            <if test="null != begin and null != end">
+                and create_time &gt;= #{begin,jdbcType=TIMESTAMP}
+                and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+    <select id="search_COUNT" resultMap="BaseResultMap">
+        select count(0)
+        from log
+        <where>
+            <if test="null != ref and '' != ref">
+                reference = #{ref,jdbcType=VARCHAR}
+            </if>
+            <if test="null != begin and null != end">
+                and create_time &gt;= #{begin,jdbcType=TIMESTAMP}
+                and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        delete
+        from log
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Log"
+            useGeneratedKeys="true">
+        insert into log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="operator != null">
+                `operator`,
+            </if>
+            <if test="action != null">
+                `action`,
+            </if>
+            <if test="what != null">
+                what,
+            </if>
+            <if test="note != null">
+                note,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="reference != null">
+                reference,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{id,jdbcType=BIGINT},
+            <if test="operator != null">
+                #{operator,jdbcType=VARCHAR},
+            </if>
+            <if test="action != null">
+                #{action,jdbcType=VARCHAR},
+            </if>
+            <if test="what != null">
+                #{what,jdbcType=VARCHAR},
+            </if>
+            <if test="note != null">
+                #{note,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="reference != null">
+                #{reference,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
 </mapper>

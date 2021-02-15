@@ -1,18 +1,53 @@
 package cn.sakuramiku.lightblog.mapper;
 
-
 import cn.sakuramiku.lightblog.entity.Log;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * 日志SQL映射
+ *
+ * @author LYY
+ */
 public interface LogMapper {
-    int deleteByPrimaryKey(Long id);
 
-    int insert(Log record);
+    /**
+     * 删除日志
+     *
+     * @param id 日志ID
+     * @return 是否成功
+     */
+    Boolean delete(@NonNull Long id);
 
-    int insertSelective(Log record);
+    /**
+     * 添加日志
+     *
+     * @param record 日志
+     * @return 是否成功
+     */
+    Boolean insert(@NonNull Log record);
 
-    Log selectByPrimaryKey(Long id);
+    /**
+     * 获取日志
+     *
+     * @param id 日志ID
+     * @return 日志
+     */
+    Log get(@NonNull Long id);
 
-    int updateByPrimaryKeySelective(Log record);
-
-    int updateByPrimaryKey(Log record);
+    /**
+     * 搜索日志
+     *
+     * @param ref   引用，一般为被记录对象的ID
+     * @param begin 开始时间
+     * @param end   截止时间
+     * @return 日志列表
+     */
+    List<Log> search(@Nullable @Param("ref") String ref,
+                     @Nullable @Param("begin") LocalDateTime begin,
+                     @Nullable @Param("end") LocalDateTime end);
 }

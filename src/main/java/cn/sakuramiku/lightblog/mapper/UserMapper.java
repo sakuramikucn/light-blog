@@ -1,24 +1,49 @@
 package cn.sakuramiku.lightblog.mapper;
 
 import cn.sakuramiku.lightblog.entity.User;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 用户SQL映射
+ *
+ * @author LYY
+ */
 public interface UserMapper {
 
-    List<User> selectUserByPrimaryKey(@Param("id") Long id, @Param("username") String username);
+    /**
+     * 获取用户
+     *
+     * @param id       用户ID
+     * @param username 用户名
+     * @return 用户
+     */
+    User get(@Nullable @Param("id") Long id, @Nullable @Param("username") String username);
 
-    List<User> selectUserByKeyword(@Param("keyword") String keyword);
+    /**
+     * 搜索用户
+     *
+     * @param keyword 用户名/昵称 关键字
+     * @return 用户列表
+     */
+    List<User> search(@Nullable @Param("keyword") String keyword);
 
-    @Insert("insert into user(id,username,create_time) values(#{id},#{username},#{createTime})")
-    boolean insertBase(@Param("id") Long id, @Param("username") String username, @Param("createTime") LocalDateTime createTime);
+    /**
+     * 添加用户
+     *
+     * @param record 用户
+     * @return 是否成功
+     */
+    Boolean insert(@NonNull User record);
 
-    boolean insertSelective(User record);
-
-    boolean updateByPrimaryKeySelective(User record);
-
-    boolean updateByPrimaryKey(User record);
+    /**
+     * 修改用户
+     *
+     * @param record 参数
+     * @return 是否成功
+     */
+    Boolean update(@NonNull User record);
 }

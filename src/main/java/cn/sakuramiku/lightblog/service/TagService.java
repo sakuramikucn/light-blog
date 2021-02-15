@@ -1,8 +1,9 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Tag;
-
-import java.util.List;
+import com.github.pagehelper.PageInfo;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * 标签服务接口
@@ -14,47 +15,52 @@ public interface TagService {
     /**
      * 创建标签
      *
-     * @param tag
-     * @return
+     * @param tag 标签
+     * @return 标签ID
      */
-    Tag saveTag(Tag tag);
+    Long saveTag(@NonNull Tag tag);
 
     /**
      * 修改标签
      *
-     * @param tag
-     * @return
+     * @param tag 参数
+     * @return 是否成功
      */
-    Tag updateTag(Tag tag);
+    Boolean updateTag(@NonNull Tag tag);
 
     /**
      * 删除标签
      *
-     * @param id
-     * @return
+     * @param id 标签ID
+     * @return 是否成功
      */
-    boolean removeTag(String id);
+    Boolean removeTag(@NonNull Long id);
 
     /**
      * 获取标签
      *
-     * @param id
-     * @return
+     * @param id 标签ID
+     * @return 标签
      */
-    Tag getTag(String id);
+    Tag getTag(@NonNull Long id);
 
     /**
-     * 所有标签
+     * 搜索标签
      *
-     * @return
+     * @param ref      引用，一般为文章ID
+     * @param keyword  名称关键字
+     * @param page     第几页
+     * @param pageSize 每页项数
+     * @return 标签列表
      */
-    List<Tag> listTags();
+    PageInfo<Tag> search(@Nullable String ref, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize);
 
     /**
-     * 获取reference关联的标签
+     * 搜索标签
      *
-     * @param reference
-     * @return
+     * @param ref     引用，一般为文章ID
+     * @param keyword 名称关键字
+     * @return 标签列表
      */
-    List<Tag> getTags(String reference);
+    PageInfo<Tag> search(@Nullable String ref, @Nullable String keyword);
 }

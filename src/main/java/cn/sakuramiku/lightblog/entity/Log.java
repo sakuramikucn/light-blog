@@ -7,51 +7,52 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * log
- * @author 
+ * 日志实体类
+ *
+ * @author lyy
  */
-@ApiModel(value="generate.Log日志表")
+@ApiModel(value = "日志实体类")
 public class Log implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value="唯一标识")
+    @ApiModelProperty(value = "唯一标识")
     private Long id;
 
     /**
      * 操作人
      */
-    @ApiModelProperty(value="操作人")
+    @ApiModelProperty(value = "操作人")
     private String operator;
 
     /**
      * 行为，比如删除、创建
      */
-    @ApiModelProperty(value="行为，比如删除、创建")
+    @ApiModelProperty(value = "行为，比如删除、创建")
     private String action;
 
     /**
      * 做了什么
      */
-    @ApiModelProperty(value="做了什么")
+    @ApiModelProperty(value = "做了什么")
     private String what;
 
     /**
      * 备注
      */
-    @ApiModelProperty(value="备注")
+    @ApiModelProperty(value = "备注")
     private String note;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value="创建时间")
+    @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
 
     /**
      * 引用标识（用于找回日志），对象ID、标识字符串等
      */
-    @ApiModelProperty(value="引用标识（用于找回日志），对象ID、标识字符串等")
+    @ApiModelProperty(value = "引用标识（用于找回日志），对象ID、标识字符串等")
     private String reference;
 
     private LocalDateTime modifiedTime;

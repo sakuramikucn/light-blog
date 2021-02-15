@@ -22,7 +22,7 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="cn.sakuramiku.lightblog" level="DEBUG" additivity="false">
+    <logger name="cn.sakuramiku.lightblog.mapper" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 </configuration>

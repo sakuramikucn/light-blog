@@ -2,29 +2,33 @@ package cn.sakuramiku.lightblog.entity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * category
- * @author 
+ * 分类实体类
+ *
+ * @author lyy
  */
-@ApiModel(value="cn.sakuramiku.lightblog.entity.Category分类表")
+@ApiModel(value = "分类实体类")
 public class Category implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value="唯一标识")
+    @ApiModelProperty(value = "唯一标识")
     private Long id;
 
     /**
      * 名称
      */
-    @ApiModelProperty(value="名称")
+    @ApiModelProperty(value = "名称")
     private String name;
 
+    @ApiModelProperty("创建时间")
     private LocalDateTime createTime;
 
+    @ApiModelProperty("修改时间")
     private LocalDateTime modifiedTime;
 
     private static final long serialVersionUID = 1L;

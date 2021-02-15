@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.shiro;
 
 import cn.hutool.core.util.StrUtil;
+import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -62,6 +63,8 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
         String uri = httpServletRequest.getRequestURI();
+        String method = httpServletRequest.getMethod();
+        uri = BlogHelper.genReqUrl(method,uri);
         // 处理标记为 @ShiroPass 的方法
         for (String url : Constant.SHIRO_PASS_URL) {
             if (!StrUtil.isEmpty(uri) && uri.startsWith(url)) {

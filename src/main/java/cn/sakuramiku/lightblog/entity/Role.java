@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * role
+ * 角色实体类
  *
- * @author
+ * @author lyy
  */
-@ApiModel(value = "generate.Role角色表")
+@ApiModel(value = "角色实体类")
 public class Role implements Serializable {
     /**
      * 唯一标识

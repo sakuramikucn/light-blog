@@ -160,6 +160,8 @@ public class DataBaseConfig {
         properties.setProperty("helperDialect", "mysql");
         properties.setProperty("offsetAsPageNum", "true");
         properties.setProperty("rowBoundsWithCount", "true");
+        properties.setProperty("pageSizeZero", "true");
+        properties.setProperty("reasonable", "true");
         interceptor.setProperties(properties);
         return interceptor;
     }
