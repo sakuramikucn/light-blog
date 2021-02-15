@@ -45,6 +45,7 @@
                 and comment.parentId = #{parentId,jdbcType=BIGINT}
             </if>
         </where>
+        order by create_time DESC
     </select>
     <select id="search_COUNT" resultMap="BaseResultMap">
         select count(0)
@@ -124,7 +125,7 @@
         update comment
         <set>
             <if test="state != null">
-                `state` = #{state,jdbcType=BOOLEAN},
+                `state` = #{state,jdbcType=TINYINT},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

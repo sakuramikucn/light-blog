@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "article", keyGenerator = "keyGenerator")
+@CacheConfig(cacheNames = "article", keyGenerator = "simpleKeyGenerator")
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -57,7 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
         return id;
     }
 
-    @CachePut(key = "#article.getId()")
+    @CachePut(key = "#article.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateArticle(@NonNull Article article) {

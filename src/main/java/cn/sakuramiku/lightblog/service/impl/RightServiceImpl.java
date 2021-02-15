@@ -1,6 +1,5 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Right;
@@ -25,7 +24,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "right", keyGenerator = "keyGenerator")
+@CacheConfig(cacheNames = "light_blog:right", keyGenerator = "simpleKeyGenerator")
 @Service
 public class RightServiceImpl implements RightService {
 
@@ -35,9 +34,6 @@ public class RightServiceImpl implements RightService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveRight(@NonNull Right right) {
-        if (ObjectUtil.isNull(right)) {
-            return null;
-        }
         long id = IdUtil.nextId();
         right.setId(id);
         right.setCreateTime(LocalDateTime.now());
@@ -59,7 +55,7 @@ public class RightServiceImpl implements RightService {
         return rightMapper.delete(id);
     }
 
-    @Cacheable(unless = "null == #result || 0 == #result.list.size()")
+    @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Right> getRights(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize) {
         if (StrUtil.isEmpty(reference)) {

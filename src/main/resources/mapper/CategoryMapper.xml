@@ -31,7 +31,12 @@
             <if test="null != keyword and '' != keyword">
                 name like concat('%',#{keyword},'%')
             </if>
+            <if test="null != begin and null != end ">
+                and create_time &gt;= #{begin,jdbcType=TIMESTAMP}
+                and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+            </if>
         </where>
+        order by create_time DESC
     </select>
     <select id="search_COUNT" resultType="long">
         select count(0)

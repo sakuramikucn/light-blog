@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -42,9 +43,13 @@ public interface CategoryMapper {
      * 搜索分类
      *
      * @param keyword 名称关键字
+     * @param begin   开始时间
+     * @param end     截止时间
      * @return 分类集合
      */
-    List<Category> search(@Nullable String keyword);
+    List<Category> search(@Nullable @Param("keyword") String keyword,
+                          @Nullable @Param("begin") LocalDateTime begin,
+                          @Nullable @Param("end") LocalDateTime end);
 
     /**
      * 修改分类

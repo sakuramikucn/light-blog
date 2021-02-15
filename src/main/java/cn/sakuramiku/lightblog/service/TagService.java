@@ -23,10 +23,11 @@ public interface TagService {
     /**
      * 修改标签
      *
-     * @param tag 参数
+     * @param id   标签ID
+     * @param name 标签名称
      * @return 是否成功
      */
-    Boolean updateTag(@NonNull Tag tag);
+    Boolean updateTag(@NonNull Long id, @NonNull String name);
 
     /**
      * 删除标签

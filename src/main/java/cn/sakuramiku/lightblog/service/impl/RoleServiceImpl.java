@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "role", keyGenerator = "keyGenerator")
+@CacheConfig(cacheNames = "light_blog:role", keyGenerator = "simpleKeyGenerator")
 @Service
 public class RoleServiceImpl implements RoleService {
 
@@ -44,7 +44,7 @@ public class RoleServiceImpl implements RoleService {
         return id;
     }
 
-    @CachePut(key = "#role.getId()")
+    @CachePut(key = "#role.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateRole(@NonNull Role role) {

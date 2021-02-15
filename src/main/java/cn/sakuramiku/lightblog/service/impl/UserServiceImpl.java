@@ -28,7 +28,7 @@ import java.util.List;
  * @author lyy
  */
 @Service("userService")
-@CacheConfig(cacheNames = "user", keyGenerator = "keyGenerator")
+@CacheConfig(cacheNames = "light_blog:user", keyGenerator = "simpleKeyGenerator")
 public class UserServiceImpl implements UserService {
 
     @Resource
@@ -74,20 +74,19 @@ public class UserServiceImpl implements UserService {
         return userMapper.get(id, null);
     }
 
-    @CachePut(key = "#user.getUsername()")
+    @CachePut(key = "#user.username")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateUser(@NonNull User user) {
         return userMapper.update(user);
     }
 
-    @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<User> searchUser(String keyword) {
         return searchUser(keyword, null, null);
     }
 
-    @Cacheable(unless = "#result==null || 0 == #result.size()")
+    @Cacheable(unless = "#result==null || 0 == #result.total")
     @Override
     public PageInfo<User> searchUser(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {

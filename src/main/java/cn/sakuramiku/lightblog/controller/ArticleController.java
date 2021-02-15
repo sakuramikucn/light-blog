@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 /**
- * 文章方法集
+ * 文章模块方法集
  *
  * @author lyy
  */

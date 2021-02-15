@@ -37,7 +37,7 @@ public interface CommentMapper {
      * @param state 评论状态 {@link cn.sakuramiku.lightblog.util.Constant#COMMENT_STATE_NORMAL}
      * @return 是否成功
      */
-    Boolean update(@NonNull @Param("id") Long id, @NonNull @Param("state") Integer state);
+    Boolean update(@NonNull @Param("id") Long id, @NonNull @Param("state") Byte state);
 
     /**
      * 获取评论

@@ -41,6 +41,7 @@
                 and tag.create_time &lt;= #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
+        order by create_time DESC
     </select>
     <select id="search_COUNT" resultMap="BaseResultMap">
         select count(0)

@@ -128,7 +128,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public KeyGenerator keyGenerator() {
+    public KeyGenerator simpleKeyGenerator() {
         return (Object o, Method method, Object... objects) -> {
             StringBuilder sb = new StringBuilder();
             for (Object param : objects) {

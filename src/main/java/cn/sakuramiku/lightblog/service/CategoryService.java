@@ -1,8 +1,10 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Category;
+import com.github.pagehelper.PageInfo;
+import org.springframework.lang.Nullable;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * 分类服务接口
@@ -14,31 +16,38 @@ public interface CategoryService {
     /**
      * 创建分类
      *
-     * @param category
-     * @return
+     * @param category 分类
+     * @return 分类ID
      */
-    Category saveCategory(Category category);
+    Long saveCategory(Category category);
 
     /**
      * 修改分类
      *
-     * @param name
-     * @return
+     * @param id   分类ID
+     * @param name 名称
+     * @return 是否成功
      */
-    Category updateCategory(String name);
+    Boolean updateCategory(Long id, String name);
 
     /**
      * 删除分类
      *
-     * @param id
-     * @return
+     * @param id 分类ID
+     * @return 是否成功
      */
-    boolean removeCategory(String id);
+    Boolean removeCategory(Long id);
 
     /**
-     * 获取所有分类
+     * 搜索分类
      *
-     * @return
+     * @param keyword  名称关键字
+     * @param begin    开始时间
+     * @param end      截止时间
+     * @param page     第几页
+     * @param pageSize 每页多少项
+     * @return 分类列表
      */
-    List<Category> listCategories();
+    PageInfo<Category> search(@Nullable String keyword, @Nullable LocalDateTime begin, @Nullable LocalDateTime end,
+                              @Nullable Integer page, @Nullable Integer pageSize);
 }
