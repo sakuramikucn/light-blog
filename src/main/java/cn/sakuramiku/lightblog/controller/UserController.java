@@ -56,16 +56,16 @@ public class UserController {
     @RequiresAuthentication
     @ApiOperation("搜索用户")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "keyword",dataTypeClass = String.class,value = "关键字"),
-            @ApiImplicitParam(name = "page", dataTypeClass = Integer.class,value = "第几页", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize",dataTypeClass = Integer.class,value = "每页多少项", defaultValue = "20")
+            @ApiImplicitParam(name = "keyword", dataTypeClass = String.class, value = "关键字"),
+            @ApiImplicitParam(name = "page", dataTypeClass = Integer.class, value = "第几页", defaultValue = "1"),
+            @ApiImplicitParam(name = "pageSize", dataTypeClass = Integer.class, value = "每页多少项", defaultValue = "20")
     })
     @GetMapping("/search/{keyword}/{page}/{pageSize}")
     public Result<PageInfo<User>> users(@PathVariable("keyword") String keyword, @PathVariable("page") Integer page, @PathVariable("pageSize") Integer pageSize) {
         if (StrUtil.isBlank(keyword)) {
             keyword = null;
         }
-        PageInfo<User> users = userService.searchUser(keyword);
+        PageInfo<User> users = userService.searchUser(keyword, page, pageSize);
         return RespResult.ok(users);
     }
 }

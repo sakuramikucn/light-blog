@@ -63,10 +63,20 @@
         </where>
     </select>
 
-    <delete id="delete" parameterType="java.lang.Long">
+    <delete id="delete">
         delete
         from `role`
-        where id = #{id,jdbcType=BIGINT}
+        <where>
+            <if test="null != id">
+                id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="null != ref and '' != ref ">
+                and `reference` = #{ref,jdbcType=VARCHAR}
+            </if>
+            <if test="null == id and (ref == null or ref == '' )">
+                1=2
+            </if>
+        </where>
     </delete>
 
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Role"

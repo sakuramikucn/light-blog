@@ -29,19 +29,22 @@ public interface RightService {
     Boolean updateRight(@NonNull Right right);
 
     /**
-     * 删除一个权限
+     * 删除权限
      *
-     * @param id 权限ID
+     * @param id  权限ID
+     * @param ref 角色ID
      * @return 是否成功
      */
-    Boolean removeRight(@NonNull Long id);
+    Boolean removeRight(Long id, String ref);
 
 
     /**
-     * 获取reference关联的权限
+     * 搜索权限
      *
      * @param reference 引用，一般为角色ID
+     * @param page      页
+     * @param pageSize  项数
      * @return 权限列表
      */
-    PageInfo<Right> getRights(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize);
+    PageInfo<Right> searchRight(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize);
 }

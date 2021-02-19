@@ -37,7 +37,7 @@ public interface CommentMapper {
      * @param state 评论状态 {@link cn.sakuramiku.lightblog.util.Constant#COMMENT_STATE_NORMAL}
      * @return 是否成功
      */
-    Boolean update(@NonNull @Param("id") Long id, @NonNull @Param("state") Byte state);
+    Boolean update(@NonNull @Param("id") Long id, @NonNull @Param("state") Integer state);
 
     /**
      * 获取评论
@@ -50,9 +50,10 @@ public interface CommentMapper {
     /**
      * 搜索评论
      *
+     * @param state    状态{@link cn.sakuramiku.lightblog.util.Constant#COMMENT_STATE_NORMAL}
      * @param ref      引用，一般是文章ID
      * @param parentId 父评论ID
      * @return 评论列表
      */
-    List<Comment> search(@Nullable @Param("ref") String ref, @Nullable @Param("parentId") Long parentId);
+    List<Comment> search(@NonNull @Param("state") Integer state, @Nullable @Param("ref") String ref, @Nullable @Param("parentId") Long parentId);
 }

@@ -12,9 +12,9 @@ import io.swagger.annotations.ApiModelProperty;
 public class PageParam {
 
     @ApiModelProperty(value = "第几页", example = "1")
-    protected Integer page = 1;
+    protected Integer page;
     @ApiModelProperty(value = "每页多少项", example = "20")
-    protected Integer pageSize = 20;
+    protected Integer pageSize;
 
     public Integer getPage() {
         return page;

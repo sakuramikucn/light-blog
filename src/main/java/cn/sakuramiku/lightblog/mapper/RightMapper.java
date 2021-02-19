@@ -19,9 +19,11 @@ public interface RightMapper {
      * 删除权限
      *
      * @param id 权限ID
+     * @param ref 引用，一般为角色ID
      * @return 是否成功
      */
-    Boolean delete(@NonNull @Param("id") Long id);
+    Boolean delete(@Param("id") Long id,@Param("ref") String ref);
+
 
     /**
      * 添加权限

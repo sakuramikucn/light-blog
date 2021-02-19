@@ -31,10 +31,11 @@ public interface RoleService {
     /**
      * 移除角色
      *
-     * @param id 角色ID
+     * @param id  角色ID
+     * @param ref 引用，一般为用户ID
      * @return 是否成功
      */
-    Boolean removeRole(@NonNull Long id);
+    Boolean removeRole(Long id, String ref);
 
     /**
      * 获取角色
@@ -55,9 +56,11 @@ public interface RoleService {
     /**
      * 搜索角色
      *
-     * @param userId  用户ID
-     * @param keyword 名称或描述关键字
-     * @return
+     * @param userId   用户ID
+     * @param keyword  名称或描述关键字
+     * @param page     页
+     * @param pageSize 项数
+     * @return 角色列表
      */
     PageInfo<Role> searchRole(@Nullable Long userId, @Nullable String keyword,
                               @Nullable Integer page, @Nullable Integer pageSize);

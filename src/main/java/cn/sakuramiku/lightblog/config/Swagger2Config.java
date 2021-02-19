@@ -1,7 +1,5 @@
 package cn.sakuramiku.lightblog.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +25,6 @@ import java.util.List;
 @EnableSwagger2
 @PropertySource("classpath:base-conf.properties")
 public class Swagger2Config {
-
-    private static final Logger logger = LoggerFactory.getLogger(Swagger2Config.class);
 
     @Value("${swagger.enable:true}")
     private boolean enable;

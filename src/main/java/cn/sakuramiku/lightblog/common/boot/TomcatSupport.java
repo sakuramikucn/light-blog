@@ -6,17 +6,13 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * Tomcat 容器应用支持
  *
  * @author lyy
  */
-public class TomcatSupport extends AbstractBootSupport{
+public class TomcatSupport extends AbstractBootSupport {
 
     protected static final Logger logger = LoggerFactory.getLogger(LightBlogApplication.class);
 
@@ -28,18 +24,11 @@ public class TomcatSupport extends AbstractBootSupport{
      * 初始化Tomcat参数
      */
     private void init() {
-        try {
-            ClassPathResource resource = new ClassPathResource("base-conf.properties");
-            Properties properties = new Properties();
-            properties.load(resource.getInputStream());
-            port = Integer.parseInt(properties.getProperty("tomcat.port", "8080"));
-            contextPath = properties.getProperty("tomcat.contextPath", "/");
-            encoding = properties.getProperty("tomcat.encoding", "UTF-8");
-        } catch (IOException e) {
-            logger.error("加载Tomcat启动参数失败！", e);
-        }
+        port = Integer.parseInt(System.getProperty("tomcat.port", "8080"));
+        contextPath = System.getProperty("tomcat.contextPath", "/");
+        encoding = System.getProperty("tomcat.encoding", "UTF-8");
     }
-    
+
     @Override
     protected void start() {
         long start = System.currentTimeMillis();

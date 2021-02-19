@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,12 +25,14 @@ public class Role implements Serializable {
     /**
      * 名称
      */
+    @NotEmpty
     @ApiModelProperty(value = "名称")
     private String name;
 
     /**
      * 引用，主要是用户ID，用于组织用户的权限
      */
+    @NotEmpty
     @ApiModelProperty(value = "引用，主要是用户ID，用于组织用户的权限")
     private String reference;
 

@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.shiro;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.entity.Role;
@@ -43,14 +44,14 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         String jwtToken = (String) token.getPrincipal();
         String userName = JwtUtil.getUserName(jwtToken);
-        if (StrUtil.isEmpty(userName)){
+        if (StrUtil.isEmpty(userName)) {
             throw new UnknownAccountException("无效的用户");
         }
         User user = userService.getUser(userName);
-        if (ObjectUtil.isNull(user)){
+        if (ObjectUtil.isNull(user)) {
             throw new UnknownAccountException("无效的用户");
         }
-        return  new SimpleAuthenticationInfo(jwtToken,jwtToken,getName());
+        return new SimpleAuthenticationInfo(jwtToken, jwtToken, getName());
     }
 
     /**
@@ -68,6 +69,9 @@ public class UserRealm extends AuthorizingRealm {
             throw new UnknownAccountException(String.format("授权失败，无此用户(%s)", userName));
         }
         List<Role> userRoles = user.getRoles();
+        if (CollectionUtil.isEmpty(userRoles)) {
+            return null;
+        }
         Set<String> roles = new HashSet<>(userRoles.size());
         Set<String> rights = new HashSet<>();
         userRoles.parallelStream().forEach(role -> {

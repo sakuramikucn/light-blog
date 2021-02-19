@@ -51,13 +51,13 @@ public class RightServiceImpl implements RightService {
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean removeRight(@NonNull Long id) {
-        return rightMapper.delete(id);
+    public Boolean removeRight(Long id, String ref) {
+        return rightMapper.delete(id, ref);
     }
 
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
-    public PageInfo<Right> getRights(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize) {
+    public PageInfo<Right> searchRight(@Nullable String reference, @Nullable Integer page, @Nullable Integer pageSize) {
         if (StrUtil.isEmpty(reference)) {
             return new PageInfo<>();
         }

@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -22,6 +23,7 @@ public class FriendLink implements Serializable {
     /**
      * 名称
      */
+    @NotBlank(message = "名称不能为空")
     @ApiModelProperty(value = "名称")
     private String name;
 

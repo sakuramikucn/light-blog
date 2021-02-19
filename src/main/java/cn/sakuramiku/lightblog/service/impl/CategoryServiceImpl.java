@@ -29,9 +29,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveCategory(Category category) {
+    public Long saveCategory(String name) {
         long id = IdUtil.nextId();
+        Category category = new Category();
         category.setId(id);
+        category.setName(name);
         category.setCreateTime(LocalDateTime.now());
         categoryMapper.insert(category);
         return id;

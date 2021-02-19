@@ -18,10 +18,11 @@ public interface RoleMapper {
     /**
      * 删除角色
      *
-     * @param id 角色ID
+     * @param id  角色ID
+     * @param ref 用户ID
      * @return 是否成功
      */
-    Boolean delete(@NonNull @Param("id") Long id);
+    Boolean delete(@Param("id") Long id, @Param("ref") String ref);
 
     /**
      * 添加角色

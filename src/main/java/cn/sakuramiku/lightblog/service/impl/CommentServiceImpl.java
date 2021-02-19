@@ -47,17 +47,26 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean hiddenComment(@NonNull Long id) {
-        return commentMapper.update(id, Constant.COMMENT_STATE_HIDDEN);
+    public Boolean deleteComment(@NonNull Long id) {
+        return commentMapper.delete(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean hiddenComment(@NonNull Long id, @NonNull Boolean isHidden) {
+        if (isHidden) {
+            return commentMapper.update(id, Constant.COMMENT_STATE_HIDDEN);
+        }
+        return commentMapper.update(id, Constant.COMMENT_STATE_NORMAL);
     }
 
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
-    public PageInfo<Comment> searchComment(String ref, Long parentId, Integer page, Integer pageSize) {
+    public PageInfo<Comment> searchComment(Integer state, String ref, Long parentId, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
             PageHelper.startPage(page, pageSize, true);
         }
-        List<Comment> comments = commentMapper.search(ref, parentId);
+        List<Comment> comments = commentMapper.search(state, ref, parentId);
         return PageInfo.of(comments);
     }
 

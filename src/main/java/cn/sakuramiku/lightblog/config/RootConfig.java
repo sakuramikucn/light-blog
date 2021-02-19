@@ -17,6 +17,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 public class RootConfig {
 
+    /**
+     * 解决 @Value 注入失败
+     */
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();

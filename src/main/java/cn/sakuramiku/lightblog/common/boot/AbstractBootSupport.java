@@ -48,7 +48,7 @@ public abstract class AbstractBootSupport {
     abstract void start();
 
     /**
-     * 运行容器
+     * 运行应用
      */
     protected void run() {
         before();
@@ -57,7 +57,7 @@ public abstract class AbstractBootSupport {
     }
 
     /**
-     * 结束容器
+     * 结束工作
      */
     protected void destory() {
 

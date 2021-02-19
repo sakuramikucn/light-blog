@@ -15,21 +15,21 @@ public final class ValidateUtil {
     /**
      * 是否为null或长度为0
      *
-     * @param value
-     * @param tip
-     * @throws ApiException
+     * @param value 字符串值
+     * @param tip 提示
+     * @throws ApiException 接口异常
      */
     public static void isEmpty(String value, String tip) throws ApiException {
-        checkIllegalArgument(StrUtil.isEmpty(value), tip);
+        checkIllegalArgument(StrUtil.isBlank(value), tip);
     }
 
     /**
      * 是否为null或长度为0
      *
-     * @param list
-     * @param tip
-     * @param <E>
-     * @throws ApiException
+     * @param list 列表
+     * @param tip 提示
+     * @param <E> 列表组件类型
+     * @throws ApiException 接口异常
      */
     public static <E> void isEmpty(List<E> list, String tip) throws ApiException {
         checkIllegalArgument(null == list || 0 == list.size(), tip);
@@ -39,8 +39,8 @@ public final class ValidateUtil {
      * 是否为空
      *
      * @param obj 对象
-     * @param tip
-     * @throws ApiException
+     * @param tip 提示
+     * @throws ApiException 接口异常
      */
     public static void isNull(Object obj, String tip) throws ApiException {
         checkIllegalArgument(null == obj, tip);
@@ -60,10 +60,10 @@ public final class ValidateUtil {
     /**
      * 检查参数
      *
-     * @param condition
-     * @param code
+     * @param condition 条件
+     * @param code 错误码 {@link RespCode}
      * @param message   错误信息
-     * @throws ApiException
+     * @throws ApiException 接口异常
      */
     public static void check(boolean condition, RespCode code, String message) throws ApiException {
         if (condition) {

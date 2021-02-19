@@ -125,10 +125,11 @@ public class JwtUtil {
                     .getBody();
         } catch (ExpiredJwtException e1) {
             logger.error("Token已过期{{}}", token);
+            throw e1;
         } catch (Exception e2) {
             logger.error("无效的Token{{}}", token);
+            throw e2;
         }
-        return null;
     }
 
     public static String getUserName(@NonNull String token) {

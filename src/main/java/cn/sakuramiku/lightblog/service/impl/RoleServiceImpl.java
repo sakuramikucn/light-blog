@@ -1,9 +1,12 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.mapper.RoleMapper;
+import cn.sakuramiku.lightblog.service.RightService;
 import cn.sakuramiku.lightblog.service.RoleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -30,17 +33,31 @@ public class RoleServiceImpl implements RoleService {
 
     @Resource
     private RoleMapper roleMapper;
+    @Resource
+    private RightService rightService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveRole(@NonNull Role role) {
-        if (ObjectUtil.isNull(role)) {
-            return null;
-        }
         long id = IdUtil.nextId();
         role.setId(id);
-        role.setCreateTime(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        role.setCreateTime(now);
         roleMapper.insert(role);
+        List<Right> rights = role.getRights();
+        // 如果权限列表不为空，添加权限
+        if (!CollectionUtil.isEmpty(rights)) {
+            for (Right right : rights) {
+                if (StrUtil.isBlank(right.getPattern())) {
+                    continue;
+                }
+                long rId = IdUtil.nextId();
+                right.setId(rId);
+                right.setCreateTime(now);
+                right.setReference(String.valueOf(id));
+                rightService.saveRight(right);
+            }
+        }
         return id;
     }
 
@@ -54,8 +71,10 @@ public class RoleServiceImpl implements RoleService {
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean removeRole(@NonNull Long id) {
-        return roleMapper.delete(id);
+    public Boolean removeRole(Long id, String ref) {
+        // 删除关联的权限
+        rightService.removeRight(null, String.valueOf(id));
+        return roleMapper.delete(id, ref);
     }
 
     @Cacheable(key = "#id", unless = "null == #result")

@@ -31,10 +31,13 @@ public class TagServiceImpl implements TagService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveTag(@NonNull Tag tag) {
+    public Long saveTag(@NonNull String ref, @NonNull String name) {
         long id = IdUtil.nextId();
+        Tag tag = new Tag();
         tag.setId(id);
         tag.setCreateTime(LocalDateTime.now());
+        tag.setName(name);
+        tag.setReference(ref);
         tagMapper.insert(tag);
         return id;
     }

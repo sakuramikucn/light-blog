@@ -3,7 +3,6 @@ package cn.sakuramiku.lightblog.vo;
 import cn.sakuramiku.lightblog.util.Constant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.v3.oas.annotations.Hidden;
 
 import java.util.Date;
 
@@ -15,13 +14,13 @@ import java.util.Date;
 @ApiModel("搜索文章参数")
 public class SearchArticleParam extends PageParam {
 
-    @Hidden
-    protected Byte state = Constant.ARTICLE_STATE_NORMAL;
+    @ApiModelProperty("状态（1=正常，2=待删除）")
+    protected Integer state = Constant.ARTICLE_STATE_NORMAL;
     @ApiModelProperty("文章关键字")
     protected String keyword;
-    @ApiModelProperty("开始时间")
+    @ApiModelProperty(value = "开始时间", dataType = "LocalDateTime")
     protected Date begin;
-    @ApiModelProperty("截止时间")
+    @ApiModelProperty(value = "截止时间", dataType = "LocalDateTime")
     protected Date end;
     @ApiModelProperty("排序方式，创键时间（ASC=升序,DESC=降序）")
     protected String order = "DESC";
@@ -68,11 +67,11 @@ public class SearchArticleParam extends PageParam {
         isFull = full;
     }
 
-    public Byte getState() {
+    public Integer getState() {
         return state;
     }
 
-    public void setState(Byte state) {
+    public void setState(Integer state) {
         this.state = state;
     }
 

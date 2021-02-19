@@ -38,8 +38,11 @@
         <include refid="Base_Column_List"/>
         from comment
         <where>
+            <if test="null != state">
+                comment.state = #{state,jdbcType=TINYINT}
+            </if>
             <if test="null != ref and '' != ref">
-                comment.reference = #{ref,jdbcType=VARCHAR}
+                and comment.reference = #{ref,jdbcType=VARCHAR}
             </if>
             <if test="null != parentId">
                 and comment.parentId = #{parentId,jdbcType=BIGINT}
@@ -51,8 +54,11 @@
         select count(0)
         from comment
         <where>
+            <if test="null != state">
+                comment.state = #{state,jdbcType=TINYINT}
+            </if>
             <if test="null != ref and '' != ref">
-                comment.reference = #{ref,jdbcType=VARCHAR}
+                and comment.reference = #{ref,jdbcType=VARCHAR}
             </if>
             <if test="null != parentId">
                 and comment.parentId = #{parentId,jdbcType=BIGINT}

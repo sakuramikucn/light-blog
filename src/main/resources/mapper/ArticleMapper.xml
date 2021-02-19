@@ -71,8 +71,8 @@
                 title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
-                and article.create_time &gt;= #{begin,jdbcType=DATETIME}
-                and article.create_time &lt;= #{end,jdbcType=DATETIME}
+                and article.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
+                and article.create_time &lt;= #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>
@@ -85,8 +85,8 @@
                 title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
-                and article.create_time &gt;= #{begin,jdbcType=DATETIME}
-                and article.create_time &lt;= #{end,jdbcType=DATETIME}
+                and article.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
+                and article.create_time &lt;= #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>

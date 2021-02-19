@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.shiro;
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
+import io.jsonwebtoken.JwtException;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
@@ -27,12 +28,6 @@ import java.io.IOException;
 public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
-
-    /**
-     * 未授权请求接口
-     */
-    private static final String UNAUTHORIZED_URL = "/unauthorized";
-
 
     /**
      * 1. 对跨域提供支持</br>
@@ -64,7 +59,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
         String uri = httpServletRequest.getRequestURI();
         String method = httpServletRequest.getMethod();
-        uri = BlogHelper.genReqUrl(method,uri);
+        uri = BlogHelper.genReqUrl(method, uri);
         // 处理标记为 @ShiroPass 的方法
         for (String url : Constant.SHIRO_PASS_URL) {
             if (!StrUtil.isEmpty(uri) && uri.startsWith(url)) {
@@ -74,9 +69,12 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         if (isLoginAttempt(request, response)) {
             try {
                 return executeLogin(request, response);
-            } catch (Exception e) {
-                logger.error("认证失败", e);
-                response401(request, response);
+            } catch (JwtException e) {
+                forward(request, response, Constant.REQUEST_LOGIN_EXPIRED);
+            } catch (AuthenticationException e2) {
+                forward(request, response, Constant.REQUEST_NOT_LOGIN);
+            } catch (Exception e4) {
+                forward(request, response, Constant.REQUEST_UNAUTHORIZED);
             }
         }
         return false;
@@ -123,15 +121,15 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     }
 
     /**
-     * 将非法请求跳转到 /unauthorized
+     * 转发到指定请求路径
      */
-    private void response401(ServletRequest req, ServletResponse resp) {
+    private void forward(ServletRequest req, ServletResponse resp, String url) {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
         try {
-            request.getRequestDispatcher(UNAUTHORIZED_URL).forward(request, response);
+            request.getRequestDispatcher(url).forward(req, response);
         } catch (ServletException | IOException e) {
-            logger.error("请求转发到[{}]失败", UNAUTHORIZED_URL, e);
+            logger.error("请求转发到[{}]失败", url, e);
         }
     }
 }

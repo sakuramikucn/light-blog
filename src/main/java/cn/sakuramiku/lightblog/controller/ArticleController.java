@@ -8,11 +8,13 @@ import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
+import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import cn.sakuramiku.lightblog.vo.SimpleArticleView;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,7 +61,7 @@ public class ArticleController {
         return RespResult.ok(id);
     }
 
-    @RequiresAuthentication
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("修改文章")
     @ApiResponse(code = 0, message = "ok", examples = @Example(@ExampleProperty(mediaType = "文章ID", value = "文章ID")))
     @PutMapping
@@ -68,6 +70,7 @@ public class ArticleController {
         return RespResult.ok(succ);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("删除文章")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id",dataTypeClass = Long.class,value = "文章ID",required = true)

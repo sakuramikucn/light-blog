@@ -16,10 +16,10 @@ public interface CategoryService {
     /**
      * 创建分类
      *
-     * @param category 分类
+     * @param name 名称
      * @return 分类ID
      */
-    Long saveCategory(Category category);
+    Long saveCategory(String name);
 
     /**
      * 修改分类

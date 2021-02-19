@@ -2,7 +2,6 @@ package cn.sakuramiku.lightblog.entity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -19,7 +18,7 @@ public class Article implements Serializable {
     /**
      * ID，唯一标识
      */
-    @ApiModelProperty(value = "ID，唯一标识")
+    @ApiModelProperty(value = "ID，唯一标识", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
     /**
@@ -32,8 +31,8 @@ public class Article implements Serializable {
     /**
      * 状态，1=正常，2=待删除
      */
-    @Hidden
-    private Byte state;
+    @ApiModelProperty(value = "状态，1=正常，2=待删除", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
+    private Integer state;
 
     /**
      * 文章简介
@@ -51,7 +50,7 @@ public class Article implements Serializable {
     /**
      * 作者
      */
-    @ApiModelProperty(value = "作者")
+    @ApiModelProperty(value = "作者", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private String author;
 
     /**
@@ -63,19 +62,19 @@ public class Article implements Serializable {
     /**
      * 标记为 ‘待删除’ 状态的时间，用于判断最终删除时间
      */
-    @Hidden
+    @ApiModelProperty(value = "标记为 ‘待删除’ 状态的时间，用于判断最终删除时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime markDelTime;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "创建时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime createTime;
 
     /**
      * 文章浏览数，非最新数据，定时持久化
      */
-    @ApiModelProperty(value = "文章浏览数，非最新数据，定时持久化")
+    @ApiModelProperty(value = "文章浏览数，非最新数据，定时持久化", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Integer pageViews;
 
     /**
@@ -87,13 +86,12 @@ public class Article implements Serializable {
     /**
      * 最后修改时间
      */
-    @ApiModelProperty(value = "最后修改时间")
+    @ApiModelProperty(value = "最后修改时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime modifiedTime;
 
     /**
      * 布尔类型标记
      */
-    @Hidden
     private Integer mask;
 
     @ApiModelProperty(value = "标签")
@@ -117,11 +115,11 @@ public class Article implements Serializable {
         this.title = title;
     }
 
-    public Byte getState() {
+    public Integer getState() {
         return state;
     }
 
-    public void setState(Byte state) {
+    public void setState(Integer state) {
         this.state = state;
     }
 

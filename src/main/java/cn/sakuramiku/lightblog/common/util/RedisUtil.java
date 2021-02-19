@@ -68,7 +68,7 @@ public class RedisUtil {
      * @return 值
      */
     public Object get(String key) {
-        return String.valueOf(template.opsForValue().get(key));
+        return template.opsForValue().get(key);
     }
 
     /**

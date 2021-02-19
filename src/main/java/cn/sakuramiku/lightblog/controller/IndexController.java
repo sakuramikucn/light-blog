@@ -2,19 +2,13 @@ package cn.sakuramiku.lightblog.controller;
 
 import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
-import cn.sakuramiku.lightblog.common.util.RespCode;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -28,10 +22,8 @@ import javax.annotation.Resource;
 @RestController
 public class IndexController {
 
-    protected static final Logger logger = LoggerFactory.getLogger(IndexController.class);
-
     @Resource
-    UserService userService;
+    private UserService userService;
 
     @PostMapping("/login")
     @ApiOperation("登录")
@@ -39,12 +31,12 @@ public class IndexController {
             @ApiImplicitParam(name = "username", dataTypeClass = String.class, value = "用户名"),
             @ApiImplicitParam(name = "password", dataTypeClass = String.class, value = "登录密码"),
     })
-    @ApiResponse(code = 0, message = "Token")
-    public Result<String> login(String username, String password) throws ApiException {
+    public @ApiResponse(code = 0, message = "Token")
+    Result<String> login(String username, String password) throws ApiException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
         Boolean login = userService.login(username, password);
-        if (login){
+        if (login) {
             User user = userService.getUser(username);
             String token = JwtUtil.genToken(user);
             return RespResult.ok(token);
@@ -58,10 +50,13 @@ public class IndexController {
             @ApiImplicitParam(name = "username", dataTypeClass = String.class, value = "用户名"),
             @ApiImplicitParam(name = "password", dataTypeClass = String.class, value = "登录密码")
     })
-    public Result<Object> register( String username,  String password) throws ApiException {
+    public Result<String> register(String username, String password) throws ApiException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
-        User user1 = new User();
+        User user = userService.getUser(username);
+        if (null != user) {
+            return RespResult.fail("用户名重复");
+        }
         boolean flag = userService.register(username, password);
         if (!flag) {
             return RespResult.fail("注册失败");
@@ -69,11 +64,16 @@ public class IndexController {
         return RespResult.ok();
     }
 
-    @ApiOperation("未授权")
-    @GetMapping("/unauthorized")
-    public Result<Object> unauthorized(){
-        return RespResult.build().code(RespCode.UNAUTHORIZED);
+    @GetMapping("/check/{username}")
+    @ApiOperation("检查用户名是否可用")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", dataTypeClass = String.class, value = "用户名", required = true)
+    })
+    public Result<Boolean> check(@PathVariable("username") String username) {
+        User user = userService.getUser(username);
+        if (null == user) {
+            return RespResult.ok(true);
+        }
+        return RespResult.fail("用户名重复");
     }
-
-
 }

@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -16,19 +17,20 @@ public class Category implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value = "唯一标识")
+    @ApiModelProperty(value = "唯一标识", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
     /**
      * 名称
      */
+    @NotBlank
     @ApiModelProperty(value = "名称")
     private String name;
 
-    @ApiModelProperty("创建时间")
+    @ApiModelProperty(value = "创建时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime createTime;
 
-    @ApiModelProperty("修改时间")
+    @ApiModelProperty(value = "修改时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime modifiedTime;
 
     private static final long serialVersionUID = 1L;

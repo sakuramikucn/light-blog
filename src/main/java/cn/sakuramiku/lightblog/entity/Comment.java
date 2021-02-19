@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -16,7 +17,7 @@ public class Comment implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value = "唯一标识")
+    @ApiModelProperty(value = "唯一标识", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
     /**
@@ -46,21 +47,23 @@ public class Comment implements Serializable {
     /**
      * 状态，0=正常，1=屏蔽，3=删除
      */
-    @ApiModelProperty(value = "状态，0=正常，1=屏蔽，3=删除")
-    private Boolean state;
+    @ApiModelProperty(value = "状态，0=正常，1=屏蔽，3=删除", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
+    private Byte state;
 
     /**
      * 评论内容
      */
+    @NotBlank
     @ApiModelProperty(value = "评论内容")
     private String content;
 
     /**
      * 评论时间
      */
-    @ApiModelProperty(value = "评论时间")
+    @ApiModelProperty(value = "评论时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime createTime;
 
+    @ApiModelProperty(value = "评论时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime modifiedTime;
 
     private static final long serialVersionUID = 1L;
@@ -105,11 +108,11 @@ public class Comment implements Serializable {
         this.email = email;
     }
 
-    public Boolean getState() {
+    public Byte getState() {
         return state;
     }
 
-    public void setState(Boolean state) {
+    public void setState(Byte state) {
         this.state = state;
     }
 

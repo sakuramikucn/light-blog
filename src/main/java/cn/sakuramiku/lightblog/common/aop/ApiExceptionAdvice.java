@@ -4,10 +4,14 @@ import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespCode;
 import cn.sakuramiku.lightblog.common.util.RespResult;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.apache.shiro.ShiroException;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,16 +34,36 @@ public class ApiExceptionAdvice {
         return new RespResult<>(null, e.getCode(), e.getMessage());
     }
 
-    @ExceptionHandler({ShiroException.class, UnauthorizedException.class, UnknownAccountException.class})
+    @ExceptionHandler({UnauthenticatedException.class, UnknownAccountException.class})
+    public Result<Object> handleUnauthenticatedException() {
+        return RespResult.build().code(RespCode.NOT_LOGIN);
+    }
+
+    @ExceptionHandler({ShiroException.class, UnauthorizedException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Result<Object> handleShiroException(Exception e) {
-        return commonResult(e, RespCode.UNAUTHORIZED);
+    public Result<Object> handleShiroException() {
+        return RespResult.build().code(RespCode.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public Result<Object> handleTokenExpireException() {
+        return RespResult.build().code(RespCode.NOT_LOGIN).msg("登录过期（Token Expired）");
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public Result<Object> handleJwtException(){
+        return RespResult.build().code(RespCode.NOT_LOGIN);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<Object> handleNohandlerException(NoHandlerFoundException e) {
+    public Result<Object> handleNoHandlerException(NoHandlerFoundException e) {
         return RespResult.fail(e.getMessage());
+    }
+
+    @ExceptionHandler(BindException.class)
+    public Result<Object> handleBindException(BindException e) {
+        return commonResult(e, RespCode.BAD_REQUEST_PARAMETER);
     }
 
     @ExceptionHandler(Exception.class)
@@ -62,6 +86,7 @@ public class ApiExceptionAdvice {
      * 公共代码
      *
      * @param e
+     * @param code
      * @return
      */
     private Result<Object> commonResult(Exception e, RespCode code) {
@@ -69,6 +94,20 @@ public class ApiExceptionAdvice {
             code = RespCode.SERVER_INTERNAL_ERROR;
         }
         e.printStackTrace();
-        return new RespResult<>(null, code,  e.getMessage());
+        return new RespResult<>(null, code, e.getMessage());
+    }
+
+    /**
+     * 公共代码
+     *
+     * @param e
+     * @param code
+     * @return
+     */
+    private Result<Object> simpleCommonResult(Exception e, RespCode code) {
+        if (null == code) {
+            code = RespCode.SERVER_INTERNAL_ERROR;
+        }
+        return new RespResult<>(null, code, e.getMessage());
     }
 }

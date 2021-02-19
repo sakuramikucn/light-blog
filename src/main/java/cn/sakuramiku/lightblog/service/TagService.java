@@ -15,10 +15,11 @@ public interface TagService {
     /**
      * 创建标签
      *
-     * @param tag 标签
+     * @param ref  引用标识，一般为文章ID
+     * @param name 标签名称
      * @return 标签ID
      */
-    Long saveTag(@NonNull Tag tag);
+    Long saveTag(@NonNull String ref, @NonNull String name);
 
     /**
      * 修改标签

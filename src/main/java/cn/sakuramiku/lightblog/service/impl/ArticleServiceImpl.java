@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "article", keyGenerator = "simpleKeyGenerator")
+@CacheConfig(cacheNames = "light_blog:article", keyGenerator = "simpleKeyGenerator")
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
