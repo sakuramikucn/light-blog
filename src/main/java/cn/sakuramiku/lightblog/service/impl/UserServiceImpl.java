@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@Service("userService")
+@Service
 @CacheConfig(cacheNames = "light_blog:user", keyGenerator = "simpleKeyGenerator")
 public class UserServiceImpl implements UserService {
 
@@ -40,7 +40,14 @@ public class UserServiceImpl implements UserService {
     public Boolean login(@NonNull String username, @NonNull String password) {
         password = SecurityUtil.md5(password);
         Account account = accountMapper.checkLogin(username, password);
-        return null != account;
+        if (null != account) {
+            User user = new User();
+            user.setId(account.getId());
+            user.setLastLoginTime(LocalDateTime.now());
+            userMapper.update(user);
+            return true;
+        }
+        return false;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -54,12 +61,15 @@ public class UserServiceImpl implements UserService {
         account.setUsername(username);
         account.setPassword(password);
         account.setCreateTime(now);
-        accountMapper.insert(account);
-        User user = new User();
-        user.setId(id);
-        user.setUsername(username);
-        user.setCreateTime(now);
-        return userMapper.insert(user);
+        Boolean insert = accountMapper.insert(account);
+        if (insert) {
+            User user = new User();
+            user.setId(id);
+            user.setUsername(username);
+            user.setCreateTime(now);
+            return userMapper.insert(user);
+        }
+        return false;
     }
 
     @Cacheable(key = "#username", unless = "null == #result")

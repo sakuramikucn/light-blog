@@ -18,7 +18,7 @@ public class RedisUtil {
     @Resource
     private RedisTemplate<String, Object> template;
 
-    private static final Long EXPIRE = (long) (30 * 60 * 1000);
+    private static final Long EXPIRE = (long) (30 * 60);
 
     /**
      * <b>String</b><br/>
@@ -37,11 +37,11 @@ public class RedisUtil {
      *
      * @param key     键
      * @param value   值
-     * @param timeout 过期时间，毫秒
+     * @param timeout 过期时间，秒
      */
     public Boolean set(String key, Object value, Long timeout) {
         try {
-            template.opsForValue().set(key, value, timeout);
+            template.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
             return true;
         } catch (Exception e) {
             return false;
@@ -90,7 +90,7 @@ public class RedisUtil {
      * @param timeout 过期时间，秒
      * @return true=成功，false=失败
      */
-    public Boolean setExpire(String key, Long timeout) {
+    public Boolean expire(String key, Long timeout) {
         return template.expire(key, timeout, TimeUnit.SECONDS);
     }
 
@@ -103,6 +103,27 @@ public class RedisUtil {
      */
     public Long getExpire(String key) {
         return template.getExpire(key, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 是否过期
+     *
+     * @param key
+     * @return
+     */
+    public Boolean isExpired(String key) {
+        Long expire = template.getExpire(key, TimeUnit.MILLISECONDS);
+        return expire <= 0;
+    }
+
+    /**
+     * 是否存在键
+     *
+     * @param key
+     * @return
+     */
+    public Boolean hasKey(String key) {
+        return template.hasKey(key);
     }
 
     /**

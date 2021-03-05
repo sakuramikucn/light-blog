@@ -19,7 +19,7 @@ public class Role implements Serializable {
     /**
      * 唯一标识
      */
-    @ApiModelProperty(value = "唯一标识")
+    @ApiModelProperty(value = "唯一标识",accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
     /**
@@ -29,18 +29,11 @@ public class Role implements Serializable {
     @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 引用，主要是用户ID，用于组织用户的权限
-     */
-    @NotEmpty
-    @ApiModelProperty(value = "引用，主要是用户ID，用于组织用户的权限")
-    private String reference;
-
     @ApiModelProperty(value = "说明")
     private String desc;
 
 
-    @ApiModelProperty(value = "权限")
+    @ApiModelProperty(value = "权限",dataType = "List")
     private List<Right> rights;
 
     /**
@@ -71,14 +64,6 @@ public class Role implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
     }
 
     public LocalDateTime getCreateTime() {

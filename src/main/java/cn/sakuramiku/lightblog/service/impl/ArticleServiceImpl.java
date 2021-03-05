@@ -1,10 +1,14 @@
 package cn.sakuramiku.lightblog.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Article;
+import cn.sakuramiku.lightblog.entity.Tag;
 import cn.sakuramiku.lightblog.mapper.ArticleMapper;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.ArticleService;
+import cn.sakuramiku.lightblog.service.TagService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
@@ -24,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 文章服务
@@ -36,6 +41,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     private ArticleMapper articleMapper;
+    @Resource
+    private TagService tagService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,7 +60,14 @@ public class ArticleServiceImpl implements ArticleService {
         if (!StrUtil.isBlank(nickName)) {
             article.setAuthor(nickName);
         }
-        articleMapper.insert(article);
+        // 添加文章
+        Boolean succ = articleMapper.insert(article);
+        List<Tag> tags = article.getTags();
+        // 添加标签
+        if (succ && !CollectionUtil.isEmpty(tags)) {
+            List<BatchInsertParam> insertParams = tags.parallelStream().map(tag -> BatchInsertParam.valueOf(id, tag.getId())).collect(Collectors.toList());
+            tagService.batchInsert(insertParams);
+        }
         return id;
     }
 
@@ -86,6 +100,10 @@ public class ArticleServiceImpl implements ArticleService {
     public PageInfo<Article> searchArticle(@NonNull SearchArticleParam param) {
         Page<Article> page = PageHelper.startPage(param.getPage(), param.getPageSize(), true);
         page.setOrderBy("article.create_time " + param.getOrder());
+        String keyword = param.getKeyword();
+        if (StrUtil.isBlank(keyword)) {
+            param.setKeyword(null);
+        }
         List<Article> articles = articleMapper.search(param);
         return new PageInfo<>(articles);
     }

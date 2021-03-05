@@ -5,7 +5,6 @@
     <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Tag">
         <id column="tag_id" jdbcType="BIGINT" property="id"/>
         <result column="tag_name" jdbcType="VARCHAR" property="name"/>
-        <result column="tag_ref" jdbcType="VARCHAR" property="reference"/>
         <result column="tag_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="tag_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
     </resultMap>
@@ -13,7 +12,6 @@
     <sql id="Base_Column_List">
         tag.`id` as tag_id,
         tag.`name` as tag_name,
-        tag.`reference` as tag_ref,
         tag.create_time as tag_create_time,
         tag.modified_time as tag_modified_time
     </sql>
@@ -30,15 +28,11 @@
         <include refid="Base_Column_List"/>
         from tag
         <where>
-            <if test="null != ref and '' != ref">
-                tag.reference = #{ref,jdbcType=VARCHAR}
-            </if>
             <if test="null != keyword and '' != keyword">
                 and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
-                and tag.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and tag.create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
         order by create_time DESC
@@ -47,15 +41,40 @@
         select count(0)
         from tag
         <where>
-            <if test="null != ref and '' != ref">
-                tag.reference = #{ref,jdbcType=VARCHAR}
-            </if>
             <if test="null != keyword and '' != keyword">
                 and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
-                and tag.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and tag.create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+
+    <select id="find" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from article_tag
+        left join tag on tag.id = article_tag.tag_id
+        <where>
+            article_tag.article_id = #{articleId,jdbcType=BIGINT}
+            <if test="null != keyword and '' != keyword">
+                and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="null != begin and null != end">
+                and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+    <select id="find_COUNT" resultType="long">
+        select count(0)
+        from article_tag
+        <where>
+            article_tag.article_id = #{articleId,jdbcType=BIGINT}
+            <if test="null != keyword and '' != keyword">
+                and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="null != begin and null != end">
+                and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>
@@ -86,6 +105,15 @@
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
         </trim>
+    </insert>
+
+    <insert id="batchInsert" parameterType="List">
+        insert into article_tag(article_id, tag_id) values
+        <foreach collection="list" index="key" item="item" separator=",">
+            <trim prefix="(" suffixOverrides="," suffix=")">
+                #{item.originId},#{item.targetId}
+            </trim>
+        </foreach>
     </insert>
 
     <update id="update">

@@ -10,6 +10,8 @@ import java.util.Set;
  */
 public class Constant {
 
+    public static final String PREFIX_REFRESH_TOKEN = "light_blog:token:";
+
     /** 请求路径-未授权 */
     public static final String REQUEST_UNAUTHORIZED = "/error/unauthorized";
     /** 请求路径-未登录 */
@@ -39,4 +41,21 @@ public class Constant {
     public static final Integer COMMENT_STATE_HIDDEN = 1;
     /** 评论状态-删除 */
     public static final Integer COMMENT_STATE_DELETE = 2;
+
+    /** 引用标识-标签 */
+    public static final String REF_TAG = "Tag";
+    /** 引用标识-评论 */
+    public static final String REF_COMMENT = "Comment";
+    /** 引用标识-角色 */
+    public static final String REF_ROLE = "Role";
+    /** 引用标识-权限 */
+    public static final String REF_RIGHT = "Right";
+    /** 引用标识-文章 */
+    public static final String REF_ARTICLE = "Article";
+    /** 引用标识-友链 */
+    public static final String REF_FRIENDLINK = "FriendLink";
+    /** 引用标识-用户 */
+    public static final String REF_USER = "User";
+    /** 引用标识-分类 */
+    public static final String REF_CATEGORY = "Category";
 }

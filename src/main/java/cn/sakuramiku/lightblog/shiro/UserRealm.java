@@ -3,6 +3,7 @@ package cn.sakuramiku.lightblog.shiro;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.service.UserService;
@@ -76,11 +77,17 @@ public class UserRealm extends AuthorizingRealm {
         Set<String> rights = new HashSet<>();
         userRoles.parallelStream().forEach(role -> {
             roles.add(role.getName());
-            role.getRights().parallelStream().forEach(right -> rights.add(right.getPattern()));
+            for (Right right : role.getRights()) {
+                if (right.getRule() != Right.RULE_ALLOW) {
+                    continue;
+                }
+                rights.add(right.getName());
+            }
         });
         info.setRoles(roles);
         info.setStringPermissions(rights);
         return info;
     }
+
 
 }

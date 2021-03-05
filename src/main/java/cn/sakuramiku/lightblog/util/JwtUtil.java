@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class JwtUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+    public static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     /**
      * 签发者
@@ -50,10 +50,10 @@ public class JwtUtil {
             e.printStackTrace();
         }
         String sec = properties.getProperty("jwt.secret", "sakuramiku.cn");
-        String exp = properties.getProperty("jwt.expire", "3600");
+        String exp = properties.getProperty("jwt.expire", "900");
 
         SECRET = sec;
-        EXPIRE = Long.parseLong(exp) * 1000;
+        EXPIRE = Long.parseLong(exp);
     }
 
 
@@ -124,7 +124,7 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e1) {
-            logger.error("Token已过期{{}}", token);
+//            logger.error("Token已过期{{}}", token);
             throw e1;
         } catch (Exception e2) {
             logger.error("无效的Token{{}}", token);
@@ -138,6 +138,16 @@ public class JwtUtil {
             return null;
         }
         return claims.get("username", String.class);
+    }
+
+    public static Map<String, Object> getPayload(@NonNull String token) {
+        Claims claims = getClaims(token);
+        Map<String, Object> payload = new HashMap<>();
+        Set<String> keys = claims.keySet();
+        for (String key : keys) {
+            payload.put(key, claims.get(key));
+        }
+        return payload;
     }
 
     /**
@@ -166,7 +176,7 @@ public class JwtUtil {
      * @return 过期时间
      */
     private static Date getTokenExpire() {
-        return new Date(System.currentTimeMillis() + EXPIRE);
+        return new Date(System.currentTimeMillis() + EXPIRE * 1000);
     }
 
 }

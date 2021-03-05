@@ -30,11 +30,10 @@ public class RightController {
     @Resource
     private RightService rightService;
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+//    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("添加权限")
     @PostMapping
-    public Result<Long> add(Right right) throws ApiException {
-        ValidateUtil.isEmpty(right.getReference(), "参数异常，引用标识为空");
+    public Result<Long> add(Right right) {
         Long id = rightService.saveRight(right);
         return RespResult.ok(id);
     }
@@ -42,8 +41,13 @@ public class RightController {
     @RequiresAuthentication
     @ApiOperation("搜索权限")
     @GetMapping("/search")
-    public Result<PageInfo<Right>> search(String ref, Integer page, Integer pageSize) {
-        PageInfo<Right> rights = rightService.searchRight(ref, page, pageSize);
+    public Result<PageInfo<Right>> search(Long roleId, Integer page, Integer pageSize) {
+        PageInfo<Right> rights;
+        if (null != roleId) {
+            rights = rightService.searchRight(roleId, null, page, pageSize);
+        } else {
+            rights = rightService.findRight(null, page, pageSize);
+        }
         return RespResult.ok(rights);
     }
 
@@ -52,6 +56,6 @@ public class RightController {
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException {
         ValidateUtil.isNull(id, "参数异常，ID为空");
-        return RespResult.ok(rightService.removeRight(id, null));
+        return RespResult.ok(rightService.removeRight(id));
     }
 }

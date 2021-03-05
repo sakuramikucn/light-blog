@@ -6,7 +6,6 @@ import cn.sakuramiku.lightblog.util.JwtUtil;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -18,7 +17,6 @@ import java.util.Set;
  * @author lyy
  */
 @Component
-@Lazy
 public class RedisCache<K, V> implements Cache<K, V> {
 
     protected static RedisUtil redisUtil;

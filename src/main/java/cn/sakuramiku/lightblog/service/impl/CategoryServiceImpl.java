@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.mapper.CategoryMapper;
@@ -27,6 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Resource
     private CategoryMapper categoryMapper;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveCategory(String name) {
@@ -39,12 +41,14 @@ public class CategoryServiceImpl implements CategoryService {
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateCategory(Long id, String name) {
         return categoryMapper.update(id, name);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean removeCategory(Long id) {

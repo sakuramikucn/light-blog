@@ -1,11 +1,11 @@
 package cn.sakuramiku.lightblog.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.mapper.RoleMapper;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.RightService;
 import cn.sakuramiku.lightblog.service.RoleService;
 import com.github.pagehelper.PageHelper;
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 角色服务
@@ -43,20 +44,12 @@ public class RoleServiceImpl implements RoleService {
         role.setId(id);
         LocalDateTime now = LocalDateTime.now();
         role.setCreateTime(now);
-        roleMapper.insert(role);
+        Boolean succ = roleMapper.add(role);
         List<Right> rights = role.getRights();
         // 如果权限列表不为空，添加权限
-        if (!CollectionUtil.isEmpty(rights)) {
-            for (Right right : rights) {
-                if (StrUtil.isBlank(right.getPattern())) {
-                    continue;
-                }
-                long rId = IdUtil.nextId();
-                right.setId(rId);
-                right.setCreateTime(now);
-                right.setReference(String.valueOf(id));
-                rightService.saveRight(right);
-            }
+        if (succ && !CollectionUtil.isEmpty(rights)) {
+            List<BatchInsertParam> params = rights.parallelStream().map(right -> BatchInsertParam.valueOf(id, right.getId())).collect(Collectors.toList());
+            rightService.addRight(params);
         }
         return id;
     }
@@ -73,7 +66,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Boolean removeRole(Long id, String ref) {
         // 删除关联的权限
-        rightService.removeRight(null, String.valueOf(id));
+        rightService.removeRight(null);
         return roleMapper.delete(id, ref);
     }
 
@@ -94,7 +87,11 @@ public class RoleServiceImpl implements RoleService {
         if (null != page && null != pageSize) {
             PageHelper.startPage(page, pageSize, true);
         }
-        List<Role> roles = roleMapper.search(String.valueOf(userId), keyword);
+        if (null == userId) {
+            List<Role> roles = roleMapper.find(keyword);
+            return PageInfo.of(roles);
+        }
+        List<Role> roles = roleMapper.search(userId, keyword);
         return PageInfo.of(roles);
     }
 }

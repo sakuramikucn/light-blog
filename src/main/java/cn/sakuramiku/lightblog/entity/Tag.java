@@ -20,9 +20,6 @@ public class Tag implements Serializable {
     @ApiModelProperty(value = "唯一标识")
     private Long id;
 
-    @ApiModelProperty("引用，一般为文章ID")
-    private String reference;
-
     /**
      * 名称
      */
@@ -73,13 +70,5 @@ public class Tag implements Serializable {
 
     public void setModifiedTime(LocalDateTime modifiedTime) {
         this.modifiedTime = modifiedTime;
-    }
-
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
     }
 }

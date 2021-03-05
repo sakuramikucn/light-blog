@@ -2,10 +2,12 @@ package cn.sakuramiku.lightblog.controller;
 
 import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
+import cn.sakuramiku.lightblog.common.util.RedisUtil;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.service.UserService;
+import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import io.swagger.annotations.*;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,8 @@ public class IndexController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private RedisUtil redisUtil;
 
     @PostMapping("/login")
     @ApiOperation("登录")
@@ -39,6 +43,8 @@ public class IndexController {
         if (login) {
             User user = userService.getUser(username);
             String token = JwtUtil.genToken(user);
+            // 用于Token刷新
+            redisUtil.set(Constant.PREFIX_REFRESH_TOKEN + username, token, 15 * 60L);
             return RespResult.ok(token);
         }
         return RespResult.fail("用户名或密码错误");
@@ -71,9 +77,6 @@ public class IndexController {
     })
     public Result<Boolean> check(@PathVariable("username") String username) {
         User user = userService.getUser(username);
-        if (null == user) {
-            return RespResult.ok(true);
-        }
-        return RespResult.fail("用户名重复");
+        return RespResult.ok(null == user);
     }
 }

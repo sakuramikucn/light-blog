@@ -32,18 +32,17 @@ public class TagController {
     @RequiresAuthentication
     @ApiOperation("添加标签")
     @PostMapping
-    public Result<Long> add(String ref, String name) throws ApiException {
-        ValidateUtil.isEmpty(ref, "参数错误，引用标识为空");
+    public Result<Long> add(String name) throws ApiException {
         ValidateUtil.isEmpty(name, "参数错误，标签名称为空");
-        Long id = tagService.saveTag(ref, name);
+        Long id = tagService.saveTag(name);
         return RespResult.ok(id);
     }
 
     @ShiroPass
     @ApiOperation("搜索标签")
     @GetMapping("/search")
-    public Result<PageInfo<Tag>> search(String ref, String keyword, Integer page, Integer pageSize) {
-        PageInfo<Tag> tags = tagService.search(ref, keyword, page, pageSize);
+    public Result<PageInfo<Tag>> search(Long articleId, String keyword, Integer page, Integer pageSize) {
+        PageInfo<Tag> tags = tagService.search(articleId, keyword, page, pageSize);
         return RespResult.ok(tags);
     }
 }

@@ -1,8 +1,10 @@
 package cn.sakuramiku.lightblog.service.impl;
 
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.Tag;
 import cn.sakuramiku.lightblog.mapper.TagMapper;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.TagService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -29,15 +31,15 @@ public class TagServiceImpl implements TagService {
     @Resource
     private TagMapper tagMapper;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveTag(@NonNull String ref, @NonNull String name) {
+    public Long saveTag(@NonNull String name) {
         long id = IdUtil.nextId();
         Tag tag = new Tag();
         tag.setId(id);
         tag.setCreateTime(LocalDateTime.now());
         tag.setName(name);
-        tag.setReference(ref);
         tagMapper.insert(tag);
         return id;
     }
@@ -64,16 +66,27 @@ public class TagServiceImpl implements TagService {
 
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
-    public PageInfo<Tag> search(String ref, String keyword, Integer page, Integer pageSize) {
+    public PageInfo<Tag> search(Long articleId, String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
             PageHelper.startPage(page, pageSize, true);
         }
-        List<Tag> tags = tagMapper.search(ref, keyword, null, null);
-        return PageInfo.of(tags);
+        if (null != articleId) {
+            List<Tag> tags = tagMapper.find(articleId, keyword, null, null);
+            return PageInfo.of(tags);
+        } else {
+            List<Tag> tags = tagMapper.search(keyword, null, null);
+            return PageInfo.of(tags);
+
+        }
     }
 
     @Override
-    public PageInfo<Tag> search(String ref, String keyword) {
-        return search(ref, keyword, null, null);
+    public PageInfo<Tag> search(Long articleId, String keyword) {
+        return search(articleId, keyword, null, null);
+    }
+
+    @Override
+    public Boolean batchInsert(List<BatchInsertParam> params) {
+        return tagMapper.batchInsert(params);
     }
 }

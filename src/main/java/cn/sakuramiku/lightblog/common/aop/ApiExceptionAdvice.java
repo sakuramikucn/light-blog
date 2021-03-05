@@ -51,7 +51,7 @@ public class ApiExceptionAdvice {
     }
 
     @ExceptionHandler(JwtException.class)
-    public Result<Object> handleJwtException(){
+    public Result<Object> handleJwtException() {
         return RespResult.build().code(RespCode.NOT_LOGIN);
     }
 
@@ -64,6 +64,17 @@ public class ApiExceptionAdvice {
     @ExceptionHandler(BindException.class)
     public Result<Object> handleBindException(BindException e) {
         return commonResult(e, RespCode.BAD_REQUEST_PARAMETER);
+    }
+
+    @ExceptionHandler(java.sql.SQLIntegrityConstraintViolationException.class)
+    public Result<Object> handlePrimaryKeyDuplicateException(Exception e) {
+        String message = e.getMessage();
+        if (message.contains("Duplicate")) {
+            String value = message.substring(message.indexOf("entry '") + 8, message.indexOf("' for key"));
+            String key = message.substring(message.indexOf("for key '") + 11);
+            return RespResult.build().code(RespCode.BAD_REQUEST_PARAMETER).msg("重复的数据，key=" + key + " value=" + value);
+        }
+        return handleAll(e);
     }
 
     @ExceptionHandler(Exception.class)

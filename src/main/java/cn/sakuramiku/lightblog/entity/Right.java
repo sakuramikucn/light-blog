@@ -11,42 +11,50 @@ import java.time.LocalDateTime;
  *
  * @author lyy
  */
-@ApiModel(value = "角色实体类")
+@ApiModel(value = "权限实体类")
 public class Right implements Serializable {
+
+    /**
+     * 规则-未指定
+     */
+    public static final int RULE_NOT = 0;
+    /**
+     * 规则-允许
+     */
+    public static final int RULE_ALLOW = 2;
+    /**
+     * 规则-禁止
+     */
+    public static final int RULE_BAN = 3;
+
     /**
      * 唯一标识
      */
     @ApiModelProperty(value = "唯一标识")
     private Long id;
 
-    /**
-     * 授权url，例如：/login、/admin/*
-     */
     @ApiModelProperty(value = "授权url，例如：/login、/admin/*")
-    private String pattern;
+    private String name;
 
     /**
      * 规则，0=未指定，1=允许，2=禁止
      */
     @ApiModelProperty(value = "规则，0=未指定，1=允许，2=禁止")
-    private Boolean rule;
+    private Integer rule = RULE_NOT;
 
-    /**
-     * 引用，主要是角色ID，用于组织角色的权限
-     */
-    @ApiModelProperty(value = "引用，主要是角色ID，用于组织角色的权限")
-    private String reference;
+    @ApiModelProperty(value = "权限描述")
+    private String desc;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "创建时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
-    @ApiModelProperty(value = "修改时间")
+    @ApiModelProperty(value = "修改时间", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private LocalDateTime modifiedTime;
 
     private static final long serialVersionUID = 1L;
@@ -59,28 +67,20 @@ public class Right implements Serializable {
         this.id = id;
     }
 
-    public String getPattern() {
-        return pattern;
+    public String getName() {
+        return name;
     }
 
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Boolean getRule() {
+    public int getRule() {
         return rule;
     }
 
-    public void setRule(Boolean rule) {
+    public void setRule(Integer rule) {
         this.rule = rule;
-    }
-
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
     }
 
     public LocalDateTime getCreateTime() {
@@ -97,5 +97,13 @@ public class Right implements Serializable {
 
     public void setModifiedTime(LocalDateTime modifiedTime) {
         this.modifiedTime = modifiedTime;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

@@ -1,8 +1,14 @@
 package cn.sakuramiku.lightblog.shiro;
 
 import cn.hutool.core.util.StrUtil;
+import cn.sakuramiku.lightblog.common.util.RedisUtil;
+import cn.sakuramiku.lightblog.entity.User;
+import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
+import cn.sakuramiku.lightblog.util.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -11,8 +17,10 @@ import org.apache.shiro.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -25,7 +33,13 @@ import java.io.IOException;
  *
  * @author lyy
  */
+@Component
 public class JwtFilter extends BasicHttpAuthenticationFilter {
+
+    @Resource
+    private UserService userService;
+    @Resource
+    private RedisUtil redisUtil;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
@@ -108,8 +122,38 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         String authzHeader = getAuthzHeader(request);
         JwtToken token = new JwtToken(authzHeader);
+        // 校验Token是否需要刷新
+        Boolean isRefresh = false;
+        try {
+            JwtUtil.getClaims(authzHeader);
+        } catch (ExpiredJwtException e) {
+            Claims claims = e.getClaims();
+            String username = (String) claims.get("username");
+            // Token过期了
+            String tokenKey = genTokenKey(username);
+            // 有缓存
+            if (redisUtil.hasKey(tokenKey)) {
+                // 缓存中Token未过期
+                if (!redisUtil.isExpired(tokenKey)) {
+                    // 刷新Token
+                    User user = userService.getUser(username);
+                    String newToken = JwtUtil.genToken(user);
+                    token = new JwtToken(newToken);
+                    redisUtil.delete(tokenKey);
+                    // 刷新缓存
+                    redisUtil.set(tokenKey, newToken, 30 * 60L);
+                    isRefresh = true;
+                    JwtUtil.logger.info("刷新了Token：{}", newToken);
+                }
+            }
+        }
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(token);
+        if (isRefresh) {
+            // 返回新的Token
+            HttpServletResponse servletResponse = (HttpServletResponse) response;
+            servletResponse.setHeader(AUTHORIZATION_HEADER, (String) token.getPrincipal());
+        }
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }
@@ -131,5 +175,15 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         } catch (ServletException | IOException e) {
             logger.error("请求转发到[{}]失败", url, e);
         }
+    }
+
+    /**
+     * 生成Token缓存key
+     *
+     * @param username
+     * @return
+     */
+    protected String genTokenKey(String username) {
+        return Constant.PREFIX_REFRESH_TOKEN + username;
     }
 }

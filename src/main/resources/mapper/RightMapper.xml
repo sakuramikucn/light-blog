@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.sakuramiku.lightblog.mapper.RightMapper">
+
     <resultMap id="BaseResultMap" type="cn.sakuramiku.lightblog.entity.Right">
         <id column="right_id" jdbcType="BIGINT" property="id"/>
-        <result column="right_pattern" jdbcType="VARCHAR" property="pattern"/>
-        <result column="right_rule" jdbcType="BOOLEAN" property="rule"/>
-        <result column="right_ref" jdbcType="VARCHAR" property="reference"/>
+        <result column="right_name" jdbcType="VARCHAR" property="name"/>
+        <result column="right_rule" jdbcType="TINYINT" property="rule"/>
+        <result column="right_desc" jdbcType="VARCHAR" property="desc"/>
         <result column="right_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="right_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         `right`.id as right_id,
-        `right`.pattern as right_pattern,
+        `right`.name as right_name,
         `right`.`rule` as right_rule,
-        `right`.reference as right_ref,
+        `right`.desc as right_desc,
         `right`.create_time as right_create_time,
         `right`.modified_time as right_modified_time
     </sql>
@@ -29,73 +30,80 @@
     <select id="search" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from `right`
+        from `role_right`
+        left join `right` on `right`.id = role_right.right_id
         <where>
-            <if test="null != ref and '' != ref ">
-                `reference` = #{ref,jdbcType=VARCHAR}
+            <if test="null != role">
+                `role_right`.role_id = #{role,jdbcType=BIGINT}
             </if>
         </where>
         order by create_time DESC
     </select>
     <select id="search_COUNT" resultMap="BaseResultMap">
         select count(0)
-        from `right`
+        from `role_right`
+        left join `right` on `right`.id = role_right.right_id
         <where>
-            <if test="null != ref and '' != ref ">
-                `reference` = #{ref,jdbcType=VARCHAR}
+            <if test="null != role">
+                `role_right`.role_id = #{role,jdbcType=BIGINT}
             </if>
         </where>
+    </select>
+
+
+    <select id="find" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from `right`
+    </select>
+    <select id="find_COUNT" resultMap="BaseResultMap">
+        select count(0)
+        from `right`
     </select>
 
     <delete id="delete">
         delete
         from `right`
-        <where>
-            <if test="null != id">
-                id = #{id,jdbcType=BIGINT}
-            </if>
-            <if test="null != ref and '' != ref ">
-                and `reference` = #{ref,jdbcType=VARCHAR}
-            </if>
-            <if test="null == id and (ref == null or ref == '' )">
-                1=2
-            </if>
-        </where>
+        where `right`.id = #{id,jdbcType=BIGINT}
     </delete>
 
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Right"
-            useGeneratedKeys="true">
+    <insert id="add" parameterType="cn.sakuramiku.lightblog.entity.Right">
         insert into `right`
         <trim prefix="(" suffix=")" suffixOverrides=",">
             id,
-            <if test="pattern != null">
-                pattern,
+            <if test="name != null">
+                `name`,
             </if>
             <if test="rule != null">
                 `rule`,
             </if>
-            <if test="reference != null">
-                `reference`,
+            <if test="desc != null">
+                `desc`,
             </if>
             <if test="createTime != null">
                 create_time,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            id = #{id,jdbcType=BIGINT},
-            <if test="pattern != null">
-                #{pattern,jdbcType=VARCHAR},
+            #{id,jdbcType=BIGINT},
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
             </if>
             <if test="rule != null">
                 #{rule,jdbcType=BOOLEAN},
             </if>
-            <if test="reference != null">
-                #{reference,jdbcType=VARCHAR},
+            <if test="desc != null">
+                #{desc,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
         </trim>
+    </insert>
+
+    <insert id="insert">
+        insert into role_right(role_id, right_id)
+        values (#{roleId}, #{rightId})
     </insert>
 
     <update id="update" parameterType="cn.sakuramiku.lightblog.entity.Right">
@@ -110,5 +118,14 @@
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into role_right(role_id, right_id) VALUES
+        <foreach collection="list" index="key" item="item" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.originId},#{item.targetId}
+            </trim>
+        </foreach>
+    </insert>
 
 </mapper>

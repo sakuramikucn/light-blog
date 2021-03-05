@@ -2,6 +2,7 @@ package cn.sakuramiku.lightblog.mapper;
 
 
 import cn.sakuramiku.lightblog.entity.Tag;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -32,6 +33,8 @@ public interface TagMapper {
      */
     Boolean insert(@NonNull Tag record);
 
+    Boolean batchInsert(List<BatchInsertParam> params);
+
     /**
      * 获取标签
      *
@@ -52,14 +55,29 @@ public interface TagMapper {
     /**
      * 搜索标签
      *
-     * @param ref     引用，一般为文章ID
      * @param keyword 名称关键字
      * @param begin   开始时间
      * @param end     截止时间
      * @return 标签列表
      */
-    List<Tag> search(@Nullable @Param("ref") String ref,
-                     @Nullable @Param("keyword") String keyword,
-                     @Nullable @Param("begin") LocalDateTime begin,
-                     @Nullable @Param("end") LocalDateTime end);
+    List<Tag> search(
+            @Nullable @Param("keyword") String keyword,
+            @Nullable @Param("begin") LocalDateTime begin,
+            @Nullable @Param("end") LocalDateTime end);
+
+    /**
+     * 根据文章ID搜索标签
+     * @param articleId
+     * @param keyword
+     * @param begin
+     * @param end
+     * @return
+     */
+    List<Tag> find(
+            @NonNull @Param("articleId") Long articleId,
+            @Nullable @Param("keyword") String keyword,
+            @Nullable @Param("begin") LocalDateTime begin,
+            @Nullable @Param("end") LocalDateTime end
+    );
+
 }

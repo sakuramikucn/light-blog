@@ -1,9 +1,12 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Tag;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * 标签服务接口
@@ -15,11 +18,10 @@ public interface TagService {
     /**
      * 创建标签
      *
-     * @param ref  引用标识，一般为文章ID
      * @param name 标签名称
      * @return 标签ID
      */
-    Long saveTag(@NonNull String ref, @NonNull String name);
+    Long saveTag(@NonNull String name);
 
     /**
      * 修改标签
@@ -49,20 +51,28 @@ public interface TagService {
     /**
      * 搜索标签
      *
-     * @param ref      引用，一般为文章ID
-     * @param keyword  名称关键字
-     * @param page     第几页
-     * @param pageSize 每页项数
+     * @param articleId 文章ID
+     * @param keyword   名称关键字
+     * @param page      第几页
+     * @param pageSize  每页项数
      * @return 标签列表
      */
-    PageInfo<Tag> search(@Nullable String ref, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize);
+    PageInfo<Tag> search(@Nullable Long articleId, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize);
 
     /**
      * 搜索标签
      *
-     * @param ref     引用，一般为文章ID
-     * @param keyword 名称关键字
+     * @param articleId 文章ID
+     * @param keyword   名称关键字
      * @return 标签列表
      */
-    PageInfo<Tag> search(@Nullable String ref, @Nullable String keyword);
+    PageInfo<Tag> search(@Nullable Long articleId, @Nullable String keyword);
+
+    /**
+     * 批量往中间表插入记录
+     *
+     * @param params
+     * @return
+     */
+    Boolean batchInsert(List<BatchInsertParam> params);
 }

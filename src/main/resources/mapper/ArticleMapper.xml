@@ -28,7 +28,7 @@
         article.`state` as article_state,
         article.`desc` as article_desc,
         article.content as article_content,
-        article.category as article_category
+        article.category as article_category,
         article.author as article_author,
         article.mark_del_time as article_mark_del_time,
         article.page_views as article_views,
@@ -48,14 +48,15 @@
         article.`id` as article_id, article.title as article_title, article.`state` as article_state,
         article.`desc` as article_desc,article.author as article_author,article.cover_url as article_cover_url,
         tag.`id` as tag_id, tag.`name` as tag_name,
-        category.`id` category_id,category.name category_name
+        category.`id` as category_id,category.name as category_name
     </sql>
 
     <select id="get" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Article_Column_List"/>
         from article
-        left join tag on article.id = tag.reference
+        left join article_tag on article.id = article_tag.article_id
+        left join tag on article_tag.tag_id = tag.id
         left join category on article.category = category.id
         where article.id = #{id,jdbcType=BIGINT}
     </select>
@@ -64,15 +65,16 @@
         select
         <include refid="Simple_Column_list"/>
         from article
-        left join tag on article.id = tag.reference
+        left join article_tag on article.id = article_tag.article_id
+        left join tag on article_tag.tag_id = tag.id
         left join category on article.category = category.id
         <where>
             <if test="null != keyword and ''!=keyword">
                 title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
-                and article.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and article.create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                article.create_time between and #{begin,jdbcType=TIMESTAMP} and article.create_time &lt;=
+                #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>

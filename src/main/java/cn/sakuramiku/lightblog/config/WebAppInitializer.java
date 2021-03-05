@@ -4,7 +4,6 @@ import ch.qos.logback.ext.spring.web.LogbackConfigListener;
 import com.alibaba.druid.support.http.StatViewServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
@@ -16,7 +15,6 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -30,6 +28,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
     /**
      * 父容器
+     *
      * @return
      */
     @Override
@@ -39,6 +38,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
     /**
      * 子容器
+     *
      * @return
      */
     @Override
@@ -53,6 +53,7 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
     /**
      * mvc启动
+     *
      * @param servletContext
      * @throws ServletException
      */
@@ -78,13 +79,13 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
         filters.add(encodingFilter);
 
         // shiro 过滤器代理，代理对象：ShiroConfig#shiroFilterFactoryBean
-        if (Boolean.parseBoolean(System.getProperty("shiro.enable","true"))){
+        if (Boolean.parseBoolean(System.getProperty("shiro.enable", "true"))) {
             DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
             delegatingFilterProxy.setTargetFilterLifecycle(true);
             delegatingFilterProxy.setTargetBeanName("shiroFilterFactoryBean");
             filters.add(delegatingFilterProxy);
         }
-        return  filters.toArray(new Filter[]{});
+        return filters.toArray(new Filter[]{});
     }
 
     @Override
@@ -137,13 +138,6 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
      * @return
      */
     private Properties getDbProperties() {
-        ClassPathResource resource = new ClassPathResource("db-conf.properties");
-        Properties properties = new Properties();
-        try {
-            properties.load(resource.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return properties;
+        return System.getProperties();
     }
 }

@@ -37,10 +37,10 @@
         select
         <include refid="User_Column_List"/>
         from `user`
-        left join `role`
-        on `user`.id = `role`.reference
-        left join `right`
-        on `role`.id = `right`.reference
+        left join user_role on `user`.id = user_role.user_id
+        left join `role` on user_role.role_id = role.id
+        left join role_right on role.id = role_right.role_id
+        left join `right` on role_right.right_id = `right`.id
         <where>
             <if test="null != id">
                 `user`.id = #{id,jdbcType=BIGINT}
@@ -53,30 +53,18 @@
             </if>
         </where>
     </select>
-    <select id="selectByUserNameOrId_COUNT" resultType="long">
-        select count(0)
-        from `user`
-        <where>
-            <if test="null != id">
-                `user`.id = #{id,jdbcType=BIGINT}
-            </if>
-            <if test="null != username">
-                username = #{username,jdbcType=BIGINT}
-            </if>
-        </where>
-    </select>
 
     <select id="search" resultMap="BaseResultMap">
         select
         <include refid="User_Column_List"/>
         from `user`
-        left join `role`
-        on `user`.id = `role`.reference
-        left join `right`
-        on `role`.id = `right`.reference
+        left join user_role on `user`.id = user_role.user_id
+        left join `role` on user_role.role_id = role.id
+        left join role_right on role.id = role_right.role_id
+        left join `right` on role_right.right_id = `right`.id
         <where>
             <if test="null != keyword and '' != keyword ">
-                nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
+                u.nick_name like CONCAT('%',#{keyword},'%') or u.username like CONCAT('%',#{keyword},'%')
             </if>
         </where>
     </select>
@@ -146,8 +134,17 @@
                 last_login_ip = #{lastLoginIp,jdbcType=VARCHAR},
             </if>
         </set>
-        where id = #{id,jdbcType=BIGINT}
-        or username = #{username,jdbcType=VARCHAR}
+        <where>
+            <if test="null != id">
+                id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="null != username and '' != username">
+                or username = #{username,jdbcType=VARCHAR}
+            </if>
+            <if test="null == id and (null == username or '' == username)">
+                false
+            </if>
+        </where>
     </update>
 
 </mapper>
