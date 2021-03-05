@@ -74,6 +74,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/tag/**", "jwt");
         filterChainDefinitionMap.put("/link/**", "jwt");
         filterChainDefinitionMap.put("/category/**", "jwt");
+        filterChainDefinitionMap.put("/logout", "jwt");
         if (Boolean.parseBoolean(System.getProperty("shiro.enable","true"))){
             filterChainDefinitionMap.putAll(getPassUrls());
         }

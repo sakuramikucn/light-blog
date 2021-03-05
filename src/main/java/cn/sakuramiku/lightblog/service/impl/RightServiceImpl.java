@@ -70,6 +70,7 @@ public class RightServiceImpl implements RightService {
         return PageInfo.of(rights);
     }
 
+    @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Right> findRight(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {

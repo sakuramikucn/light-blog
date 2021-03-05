@@ -9,10 +9,15 @@ import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import io.swagger.annotations.*;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 首页相关的方法集
@@ -44,7 +49,7 @@ public class IndexController {
             User user = userService.getUser(username);
             String token = JwtUtil.genToken(user);
             // 用于Token刷新
-            redisUtil.set(Constant.PREFIX_REFRESH_TOKEN + username, token, 15 * 60L);
+            redisUtil.set(Constant.PREFIX_REFRESH_TOKEN_REFRESH + username, token, 15 * 60L);
             return RespResult.ok(token);
         }
         return RespResult.fail("用户名或密码错误");
@@ -67,6 +72,19 @@ public class IndexController {
         if (!flag) {
             return RespResult.fail("注册失败");
         }
+        return RespResult.ok();
+    }
+
+    @RequiresAuthentication
+    @ApiOperation("注销")
+    @GetMapping("logout")
+    public Result<Object> logout() {
+        String token = (String) SecurityUtils.getSubject().getPrincipal();
+        Claims claims = JwtUtil.getClaims(token);
+        String id = claims.getId();
+        Date expiration = claims.getExpiration();
+        // 黑名单
+        redisUtil.set(Constant.PREFIX_REFRESH_TOKEN_BAN + id, token, expiration.getTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         return RespResult.ok();
     }
 

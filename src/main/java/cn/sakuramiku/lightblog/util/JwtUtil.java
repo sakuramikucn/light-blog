@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.util;
 
+import cn.sakuramiku.lightblog.common.util.IdUtil;
 import cn.sakuramiku.lightblog.entity.User;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -71,7 +72,7 @@ public class JwtUtil {
         claims.put("id", user.getId());
         claims.put("username", user.getUsername());
         claims.put("nickName", user.getNickName());
-        return genToken(claims, String.valueOf(user.getId()));
+        return genToken(claims, String.valueOf(IdUtil.nextId()));
     }
 
     /**
@@ -99,12 +100,12 @@ public class JwtUtil {
         byte[] keyBytes = SECRET.getBytes();
         SecretKey key = new SecretKeySpec(keyBytes, "AES");
         return Jwts.builder()
-                .setId(id)
-                .setIssuer(ISS)
-                .setSubject(subject)
                 .setClaims(claims)
+                .setId(id)
                 .setIssuedAt(createdTime)
                 .setExpiration(expirationTime)
+                .setIssuer(ISS)
+                .setSubject(subject)
                 .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
@@ -124,7 +125,28 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e1) {
-//            logger.error("Token已过期{{}}", token);
+            throw e1;
+        } catch (Exception e2) {
+            logger.error("无效的Token{{}}", token);
+            throw e2;
+        }
+    }
+
+    /**
+     * 从token中获取header
+     *
+     * @param token token
+     * @return claim 自定义内容
+     */
+    public static Header getHeader(@NonNull String token) {
+        try {
+            byte[] keyBytes = SECRET.getBytes();
+            SecretKey key = new SecretKeySpec(keyBytes, "AES");
+            return Jwts.parser()
+                    .setSigningKey(key)
+                    .parseClaimsJws(token)
+                    .getHeader();
+        } catch (ExpiredJwtException e1) {
             throw e1;
         } catch (Exception e2) {
             logger.error("无效的Token{{}}", token);

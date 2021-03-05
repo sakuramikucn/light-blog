@@ -2,14 +2,11 @@ package cn.sakuramiku.lightblog.shiro;
 
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.util.RedisUtil;
-import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
-import cn.sakuramiku.lightblog.util.JwtUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
@@ -122,34 +119,10 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         String authzHeader = getAuthzHeader(request);
         JwtToken token = new JwtToken(authzHeader);
-        // 校验Token是否需要刷新
-        Boolean isRefresh = false;
-        try {
-            JwtUtil.getClaims(authzHeader);
-        } catch (ExpiredJwtException e) {
-            Claims claims = e.getClaims();
-            String username = (String) claims.get("username");
-            // Token过期了
-            String tokenKey = genTokenKey(username);
-            // 有缓存
-            if (redisUtil.hasKey(tokenKey)) {
-                // 缓存中Token未过期
-                if (!redisUtil.isExpired(tokenKey)) {
-                    // 刷新Token
-                    User user = userService.getUser(username);
-                    String newToken = JwtUtil.genToken(user);
-                    token = new JwtToken(newToken);
-                    redisUtil.delete(tokenKey);
-                    // 刷新缓存
-                    redisUtil.set(tokenKey, newToken, 30 * 60L);
-                    isRefresh = true;
-                    JwtUtil.logger.info("刷新了Token：{}", newToken);
-                }
-            }
-        }
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(token);
-        if (isRefresh) {
+        String newToken = (String) SecurityUtils.getSubject().getPrincipal();
+        if (!StrUtil.equals(authzHeader, newToken)) {
             // 返回新的Token
             HttpServletResponse servletResponse = (HttpServletResponse) response;
             servletResponse.setHeader(AUTHORIZATION_HEADER, (String) token.getPrincipal());
@@ -177,13 +150,4 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         }
     }
 
-    /**
-     * 生成Token缓存key
-     *
-     * @param username
-     * @return
-     */
-    protected String genTokenKey(String username) {
-        return Constant.PREFIX_REFRESH_TOKEN + username;
-    }
 }

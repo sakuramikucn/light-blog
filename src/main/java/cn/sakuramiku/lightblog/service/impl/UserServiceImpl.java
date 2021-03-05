@@ -27,8 +27,8 @@ import java.util.List;
  *
  * @author lyy
  */
-@Service
 @CacheConfig(cacheNames = "light_blog:user", keyGenerator = "simpleKeyGenerator")
+@Service
 public class UserServiceImpl implements UserService {
 
     @Resource

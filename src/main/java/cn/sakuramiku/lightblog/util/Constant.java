@@ -10,7 +10,12 @@ import java.util.Set;
  */
 public class Constant {
 
-    public static final String PREFIX_REFRESH_TOKEN = "light_blog:token:";
+    /** Token可刷新名单 */
+    public static final String PREFIX_REFRESH_TOKEN_REFRESH = "light_blog:token:refresh:";
+    /** Token黑名单 */
+    public static final String PREFIX_REFRESH_TOKEN_BAN = "light_blog:token:ban:";
+    /** Token白名单 */
+    public static final String PREFIX_REFRESH_TOKEN_ALLOW = "light_blog:token:allow:";
 
     /** 请求路径-未授权 */
     public static final String REQUEST_UNAUTHORIZED = "/error/unauthorized";

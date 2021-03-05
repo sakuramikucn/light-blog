@@ -40,8 +40,21 @@ public class RedisUtil {
      * @param timeout 过期时间，秒
      */
     public Boolean set(String key, Object value, Long timeout) {
+        return set(key, value, timeout, TimeUnit.SECONDS);
+    }
+
+    /**
+     * <b>String</b><br/>
+     * 添加到缓存
+     *
+     * @param key     键
+     * @param value   值
+     * @param timeout 过期时间
+     * @param unit    时间单位
+     */
+    public Boolean set(String key, Object value, Long timeout, TimeUnit unit) {
         try {
-            template.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+            template.opsForValue().set(key, value, timeout, unit);
             return true;
         } catch (Exception e) {
             return false;
