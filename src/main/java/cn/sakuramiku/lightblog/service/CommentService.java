@@ -52,7 +52,7 @@ public interface CommentService {
      * @param ref      引用标识
      * @param parentId 父评论ID
      * @param page     第几页
-     * @param pageSize 每页项数
+     * @param pageSize 每页项数 
      * @return 评论列表
      */
     PageInfo<Comment> searchComment(@Nullable Integer state, @Nullable String ref, @Nullable Long parentId, @Nullable Integer page, @Nullable Integer pageSize);

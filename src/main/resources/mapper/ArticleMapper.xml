@@ -45,10 +45,17 @@
     </sql>
 
     <sql id="Simple_Column_list">
-        article.`id` as article_id, article.title as article_title, article.`state` as article_state,
-        article.`desc` as article_desc,article.author as article_author,article.cover_url as article_cover_url,
-        tag.`id` as tag_id, tag.`name` as tag_name,
-        category.`id` as category_id,category.name as category_name
+        article.`id` as article_id,
+        article.title as article_title,
+        article.`state` as article_state,
+        article.`desc` as article_desc,
+        article.author as article_author,
+        article.cover_url as article_cover_url,
+        article.create_time as article_create_time,
+        tag.`id` as tag_id,
+        tag.`name` as tag_name,
+        category.`id` as category_id,
+        category.name as category_name
     </sql>
 
     <select id="get" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -63,18 +70,23 @@
 
     <select id="search" parameterType="cn.sakuramiku.lightblog.vo.SearchArticleParam" resultMap="BaseResultMap">
         select
-        <include refid="Simple_Column_list"/>
+        <include refid="Article_Column_List"/>
         from article
         left join article_tag on article.id = article_tag.article_id
         left join tag on article_tag.tag_id = tag.id
         left join category on article.category = category.id
         <where>
             <if test="null != keyword and ''!=keyword">
-                title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                article.title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                <if test="null != full and full">
+                    or article.content like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                </if>
             </if>
             <if test="null != begin and null != end">
-                article.create_time between and #{begin,jdbcType=TIMESTAMP} and article.create_time &lt;=
-                #{end,jdbcType=TIMESTAMP}
+                and article.create_time between #{begin,jdbcType=TIMESTAMP} and  #{end,jdbcType=TIMESTAMP}
+            </if>
+            <if test="null != state">
+                and article.state = #{state}
             </if>
         </where>
     </select>
@@ -84,11 +96,16 @@
         from article
         <where>
             <if test="null != keyword and ''!=keyword">
-                title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                article.title like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                <if test="null != full and full">
+                    or article.content like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                </if>
             </if>
             <if test="null != begin and null != end">
-                and article.create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and article.create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                and article.create_time between #{begin,jdbcType=TIMESTAMP} and  #{end,jdbcType=TIMESTAMP}
+            </if>
+            <if test="null != state">
+                and article.state = #{state}
             </if>
         </where>
     </select>

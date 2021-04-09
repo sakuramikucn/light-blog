@@ -1,7 +1,9 @@
 package cn.sakuramiku.lightblog.service.impl;
 
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.mapper.CategoryMapper;
 import cn.sakuramiku.lightblog.service.CategoryService;
@@ -21,6 +23,7 @@ import java.util.List;
  *
  * @author lyy
  */
+@LogConfig(reference = "category",name = "分类")
 @CacheConfig(cacheNames = "light_blog:category", keyGenerator = "simpleKeyGenerator")
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -32,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveCategory(String name) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         Category category = new Category();
         category.setId(id);
         category.setName(name);
@@ -55,6 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.delete(id);
     }
 
+    @OnChange
     @Cacheable(unless = "null  == #result || 0 == #result.total")
     @Override
     public PageInfo<Category> search(String keyword, LocalDateTime begin, LocalDateTime end, Integer page, Integer pageSize) {

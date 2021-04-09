@@ -1,10 +1,10 @@
 package cn.sakuramiku.lightblog.shiro;
 
 import cn.hutool.core.util.StrUtil;
-import cn.sakuramiku.lightblog.common.util.RedisUtil;
-import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
+import cn.sakuramiku.lightblog.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -14,10 +14,8 @@ import org.apache.shiro.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -30,13 +28,7 @@ import java.io.IOException;
  *
  * @author lyy
  */
-@Component
 public class JwtFilter extends BasicHttpAuthenticationFilter {
-
-    @Resource
-    private UserService userService;
-    @Resource
-    private RedisUtil redisUtil;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
@@ -121,12 +113,21 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         JwtToken token = new JwtToken(authzHeader);
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(token);
-        String newToken = (String) SecurityUtils.getSubject().getPrincipal();
-        if (!StrUtil.equals(authzHeader, newToken)) {
+        // 登录没有错误 => 1.Token有效 2.Token 过期
+        HttpServletResponse servletResponse = (HttpServletResponse) response;
+        //  cors情况下，自定义请求头是需要设置暴露出来的
+//        servletResponse.addHeader("Access-Control-Expose-Headers","Token-Refresh");
+        servletResponse.setHeader("Access-Control-Expose-Headers ", AUTHORIZATION_HEADER + ",Token-Refresh");
+        try {
+            JwtUtil.getUserName(authzHeader);
+        } catch (ExpiredJwtException e) {
+            // 登录过期了，还能执行到现在只有一个真相 ==> Token刷新了
             // 返回新的Token
-            HttpServletResponse servletResponse = (HttpServletResponse) response;
-            servletResponse.setHeader(AUTHORIZATION_HEADER, (String) token.getPrincipal());
+            servletResponse.setHeader(AUTHORIZATION_HEADER, SecurityUtils.getSubject().getPrincipal().toString());
+            servletResponse.setHeader("Token-Refresh", "true");
+            return true;
         }
+        servletResponse.setHeader("Token-Refresh", "false");
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }

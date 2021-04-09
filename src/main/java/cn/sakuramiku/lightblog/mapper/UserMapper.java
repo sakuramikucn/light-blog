@@ -46,4 +46,6 @@ public interface UserMapper {
      * @return 是否成功
      */
     Boolean update(@NonNull User record);
+
+    Boolean delete(Long id);
 }

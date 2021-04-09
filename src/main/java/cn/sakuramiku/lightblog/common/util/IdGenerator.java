@@ -8,7 +8,7 @@ import java.util.Date;
  *
  * @author lyy
  */
-public class IdUtil {
+public class IdGenerator {
 
     public static final Snowflake SNOWFLAKE = new Snowflake(0,0);
 

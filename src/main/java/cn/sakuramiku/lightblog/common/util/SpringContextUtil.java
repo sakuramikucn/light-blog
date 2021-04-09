@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
@@ -32,13 +32,17 @@ public class SpringContextUtil implements ApplicationContextAware {
             return;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("=========== @Component ==========");
-            for (Map.Entry<String, Object> entry : applicationContext.getBeansWithAnnotation(Component.class).entrySet()) {
-                logger.debug("Register Bean => {}", entry.getKey());
-            }
-            logger.debug("=========== @Bean ==========");
-            for (Map.Entry<String, Object> entry : applicationContext.getBeansWithAnnotation(Bean.class).entrySet()) {
-                logger.debug("Register Bean => {}", entry.getKey());
+//            logger.debug("=========== @Component ==========");
+//            for (Map.Entry<String, Object> entry : applicationContext.getBeansWithAnnotation(Component.class).entrySet()) {
+//                logger.debug("Register Bean => {}", entry.getKey());
+//            }
+//            logger.debug("=========== @Bean ==========");
+//            for (Map.Entry<String, Object> entry : applicationContext.getBeansWithAnnotation(Bean.class).entrySet()) {
+//                logger.debug("Register Bean => {}", entry.getKey());
+//            }
+            logger.debug("=========== @Service ==========");
+            for (Map.Entry<String, Object> entry : applicationContext.getBeansWithAnnotation(Service.class).entrySet()) {
+                logger.debug("Register Service => {}", entry.getKey());
             }
         }
     }
@@ -55,5 +59,9 @@ public class SpringContextUtil implements ApplicationContextAware {
             return null;
         }
         return context.getBean(name, type);
+    }
+
+    public static ApplicationContext getContext(){
+        return context;
     }
 }

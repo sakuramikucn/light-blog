@@ -55,6 +55,13 @@ public interface UserService {
     Boolean updateUser(@NonNull User user);
 
     /**
+     * 删除用户
+     * @param id
+     * @return
+     */
+    Boolean delete(Long id);
+
+    /**
      * 搜索用户
      *
      * @param keyword 用户名/昵称关键字

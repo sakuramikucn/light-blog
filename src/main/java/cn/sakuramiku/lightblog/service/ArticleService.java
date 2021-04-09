@@ -29,12 +29,19 @@ public interface ArticleService {
     Boolean updateArticle(@NonNull Article article);
 
     /**
-     * 删除文章
+     * 标记为删除
      *
      * @param id 文章ID
      * @return 是否成功
      */
     Boolean removeArticle(@NonNull Long id);
+
+    /**
+     * 删除文章
+     * @param id
+     * @return
+     */
+    Boolean deleteArticle(@NonNull Long id);
 
     /**
      * 获取文章

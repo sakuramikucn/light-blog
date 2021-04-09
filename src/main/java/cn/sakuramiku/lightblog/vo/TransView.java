@@ -7,5 +7,11 @@ package cn.sakuramiku.lightblog.vo;
  */
 public interface TransView<S, T> {
 
-    T valueOf(S origin);
+    /**
+     * 数据转换
+     * @param origin
+     * @param params
+     * @return
+     */
+    T valueOf(S origin,Object ...params);
 }

@@ -3,6 +3,8 @@ package cn.sakuramiku.lightblog.vo;
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.entity.Tag;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -17,6 +19,7 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
     /**
      * ID，唯一标识
      */
+    @JsonSerialize(using= ToStringSerializer.class)
     @ApiModelProperty(value = "ID，唯一标识")
     private Long id;
 
@@ -59,8 +62,14 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
     @ApiModelProperty(value = "标签")
     private List<Tag> tags;
 
+    @ApiModelProperty(value = "文章浏览数")
+    private Long views;
+
+    @ApiModelProperty(value = "评论数")
+    private Integer commentNum;
+
     @Override
-    public SimpleArticleView valueOf(Article article) {
+    public SimpleArticleView valueOf(Article article,Object ...params) {
         if (null == article) {
             return null;
         }
@@ -72,6 +81,8 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
         tags = article.getTags();
         coverUrl = article.getCoverUrl();
         createTime = article.getCreateTime();
+        views = (Long)params[0];
+        commentNum = Integer.valueOf(params[1].toString());
         return this;
     }
 
@@ -137,5 +148,21 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public Long getViews() {
+        return views;
+    }
+
+    public void setViews(Long views) {
+        this.views = views;
+    }
+
+    public Integer getCommentNum() {
+        return commentNum;
+    }
+
+    public void setCommentNum(Integer commentNum) {
+        this.commentNum = commentNum;
     }
 }

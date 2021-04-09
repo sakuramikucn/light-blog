@@ -40,12 +40,11 @@
                 reference = #{ref,jdbcType=VARCHAR}
             </if>
             <if test="null != begin and null != end">
-                and create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                and create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>
-    <select id="search_COUNT" resultMap="BaseResultMap">
+    <select id="search_COUNT" resultType="long">
         select count(0)
         from log
         <where>
@@ -53,8 +52,7 @@
                 reference = #{ref,jdbcType=VARCHAR}
             </if>
             <if test="null != begin and null != end">
-                and create_time &gt;= #{begin,jdbcType=TIMESTAMP}
-                and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+                and create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
             </if>
         </where>
     </select>

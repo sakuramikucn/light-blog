@@ -1,6 +1,9 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.FriendLink;
 import cn.sakuramiku.lightblog.mapper.FriendLinkMapper;
 import cn.sakuramiku.lightblog.service.FriendLinkService;
@@ -20,6 +23,7 @@ import java.util.List;
 /**
  * @author lyy
  */
+@LogConfig(reference = "friend_link",name = "友情链接")
 @CacheConfig(cacheNames = "light_blog:friend_link", keyGenerator = "simpleKeyGenerator")
 @Service
 public class FriendLinkServiceImpl implements FriendLinkService {
@@ -27,16 +31,18 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Resource
     private FriendLinkMapper linkMapper;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveLink(@NonNull FriendLink link) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         link.setId(id);
         link.setCreateTime(LocalDateTime.now());
         linkMapper.insert(link);
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @Transactional(rollbackFor = Exception.class)
     @CachePut(key = "#link.id")
     @Override
@@ -44,6 +50,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         return linkMapper.update(link);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
     @Transactional(rollbackFor = Exception.class)
     @CachePut(key = "#id")
     @Override
@@ -57,6 +64,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         return linkMapper.get(id);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<FriendLink> searchLink(String keyword, Integer page, Integer pageSize) {

@@ -8,12 +8,11 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.apache.shiro.ShiroException;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -29,7 +28,6 @@ import java.util.Set;
 public class ApiExceptionAdvice {
 
     @ExceptionHandler(ApiException.class)
-    @ResponseStatus
     public Result<Object> handleApiException(ApiException e) {
         return new RespResult<>(null, e.getCode(), e.getMessage());
     }
@@ -39,8 +37,7 @@ public class ApiExceptionAdvice {
         return RespResult.build().code(RespCode.NOT_LOGIN);
     }
 
-    @ExceptionHandler({ShiroException.class, UnauthorizedException.class})
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler({ShiroException.class, UnauthorizedException.class,AuthorizationException.class})
     public Result<Object> handleShiroException() {
         return RespResult.build().code(RespCode.UNAUTHORIZED);
     }
@@ -56,9 +53,8 @@ public class ApiExceptionAdvice {
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Object> handleNoHandlerException(NoHandlerFoundException e) {
-        return RespResult.fail(e.getMessage());
+        return RespResult.fail("没有该请求："+e.getMessage());
     }
 
     @ExceptionHandler(BindException.class)
@@ -78,7 +74,6 @@ public class ApiExceptionAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus
     public Result<Object> handleAll(Exception e) {
         e.printStackTrace();
         String className = e.getClass().getName();

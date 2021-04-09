@@ -48,7 +48,7 @@ public class Comment implements Serializable {
      * 状态，0=正常，1=屏蔽，3=删除
      */
     @ApiModelProperty(value = "状态，0=正常，1=屏蔽，3=删除", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
-    private Byte state;
+    private Integer state;
 
     /**
      * 评论内容
@@ -108,11 +108,11 @@ public class Comment implements Serializable {
         this.email = email;
     }
 
-    public Byte getState() {
+    public Integer getState() {
         return state;
     }
 
-    public void setState(Byte state) {
+    public void setState(Integer state) {
         this.state = state;
     }
 

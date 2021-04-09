@@ -41,7 +41,7 @@ public class IndexController {
             @ApiImplicitParam(name = "password", dataTypeClass = String.class, value = "登录密码"),
     })
     public @ApiResponse(code = 0, message = "Token")
-    Result<String> login(String username, String password) throws ApiException {
+    Result<String> login( String username, String password) throws ApiException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
         Boolean login = userService.login(username, password);
@@ -49,7 +49,7 @@ public class IndexController {
             User user = userService.getUser(username);
             String token = JwtUtil.genToken(user);
             // 用于Token刷新
-            redisUtil.set(Constant.PREFIX_REFRESH_TOKEN_REFRESH + username, token, 15 * 60L);
+            redisUtil.set(Constant.PREFIX_REFRESH_TOKEN_REFRESH + username, token, 30 * 60L);
             return RespResult.ok(token);
         }
         return RespResult.fail("用户名或密码错误");
@@ -77,7 +77,7 @@ public class IndexController {
 
     @RequiresAuthentication
     @ApiOperation("注销")
-    @GetMapping("logout")
+    @GetMapping("/logout")
     public Result<Object> logout() {
         String token = (String) SecurityUtils.getSubject().getPrincipal();
         Claims claims = JwtUtil.getClaims(token);
@@ -96,5 +96,19 @@ public class IndexController {
     public Result<Boolean> check(@PathVariable("username") String username) {
         User user = userService.getUser(username);
         return RespResult.ok(null == user);
+    }
+
+    @PostMapping("/views/increment/{id}")
+    public RespResult<Long> incrementViews(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id,"参数id为空");
+        Long increment = redisUtil.increment(Constant.PREFIX_ARTICLE_VIEWS + id);
+        return RespResult.ok(increment);
+    }
+
+    @GetMapping("/views/{id}")
+    public RespResult<Long> views(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id,"参数id为空");
+        Long increment = Long.parseLong(redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id).toString());
+        return RespResult.ok(increment);
     }
 }

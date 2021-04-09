@@ -96,6 +96,15 @@ public class RedisUtil {
     }
 
     /**
+     * 计数
+     * @param key
+     * @return
+     */
+    public Long increment(String key){
+        return template.opsForValue().increment(key);
+    }
+
+    /**
      * <b>String</b><br/>
      * 设置缓存获取时间
      *
@@ -147,5 +156,10 @@ public class RedisUtil {
      */
     public Set<String> getKeys(String pattern) {
         return template.keys(pattern);
+    }
+
+    public Long deletekeys(String pattren){
+        Set<String> keys = getKeys(pattren);
+        return template.delete(keys);
     }
 }

@@ -33,6 +33,11 @@
         <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>
     </sql>
 
+
+    <delete id="delete" parameterType="long">
+        delete from user where id = #{id}
+    </delete>
+
     <select id="get" resultMap="BaseResultMap">
         select
         <include refid="User_Column_List"/>
@@ -64,7 +69,7 @@
         left join `right` on role_right.right_id = `right`.id
         <where>
             <if test="null != keyword and '' != keyword ">
-                u.nick_name like CONCAT('%',#{keyword},'%') or u.username like CONCAT('%',#{keyword},'%')
+                nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
             </if>
         </where>
     </select>

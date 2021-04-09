@@ -1,7 +1,10 @@
 package cn.sakuramiku.lightblog.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.mapper.RoleMapper;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author lyy
  */
+@LogConfig(reference = "role",name = "角色")
 @CacheConfig(cacheNames = "light_blog:role", keyGenerator = "simpleKeyGenerator")
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -37,10 +41,11 @@ public class RoleServiceImpl implements RoleService {
     @Resource
     private RightService rightService;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveRole(@NonNull Role role) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         role.setId(id);
         LocalDateTime now = LocalDateTime.now();
         role.setCreateTime(now);
@@ -54,6 +59,7 @@ public class RoleServiceImpl implements RoleService {
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#role.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -61,6 +67,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.update(role);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -81,6 +88,7 @@ public class RoleServiceImpl implements RoleService {
         return searchRole(userId, null, page, pageSize);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.size()")
     @Override
     public PageInfo<Role> searchRole(@Nullable Long userId, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize) {

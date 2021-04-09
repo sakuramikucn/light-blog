@@ -1,5 +1,8 @@
 package cn.sakuramiku.lightblog.entity;
 
+import cn.sakuramiku.lightblog.util.BlogHelper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -18,13 +21,13 @@ public class Article implements Serializable {
     /**
      * ID，唯一标识
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "ID，唯一标识", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
     /**
      * 标题
      */
-    @NotNull
     @ApiModelProperty(value = "标题")
     private String title;
 
@@ -43,7 +46,6 @@ public class Article implements Serializable {
     /**
      * 文章内容
      */
-    @NotNull
     @ApiModelProperty(value = "文章内容")
     private String content;
 
@@ -96,6 +98,14 @@ public class Article implements Serializable {
 
     @ApiModelProperty(value = "标签")
     private List<Tag> tags;
+
+    @ApiModelProperty(value = "是否公开")
+    private Boolean isPublic;
+
+    /**
+     * 标记-是否为公开
+     */
+    public static final int MASK_PUBLIC = 1 << 0;
 
     private static final long serialVersionUID = 1L;
 
@@ -209,5 +219,13 @@ public class Article implements Serializable {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public Boolean getPublic() {
+        return BlogHelper.isMask(mask,MASK_PUBLIC);
+    }
+
+    public void setPublic(Boolean aPublic) {
+        mask = BlogHelper.setMask(mask,aPublic ? MASK_PUBLIC: -MASK_PUBLIC);
     }
 }

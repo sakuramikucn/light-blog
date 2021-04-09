@@ -1,6 +1,10 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
+import cn.sakuramiku.lightblog.common.util.RedisUtil;
 import cn.sakuramiku.lightblog.common.util.SecurityUtil;
 import cn.sakuramiku.lightblog.entity.Account;
 import cn.sakuramiku.lightblog.entity.User;
@@ -27,6 +31,7 @@ import java.util.List;
  *
  * @author lyy
  */
+@LogConfig(reference = "user",name = "用户")
 @CacheConfig(cacheNames = "light_blog:user", keyGenerator = "simpleKeyGenerator")
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,7 +40,10 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Resource
     private AccountMapper accountMapper;
+    @Resource
+    private RedisUtil redisUtil;
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @Override
     public Boolean login(@NonNull String username, @NonNull String password) {
         password = SecurityUtil.md5(password);
@@ -50,10 +58,11 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean register(@NonNull String username, @NonNull String password) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         LocalDateTime now = LocalDateTime.now(ZoneId.ofOffset("GMT", ZoneOffset.ofHours(8)));
         password = SecurityUtil.md5(password);
         Account account = new Account();
@@ -66,15 +75,19 @@ public class UserServiceImpl implements UserService {
             User user = new User();
             user.setId(id);
             user.setUsername(username);
+            user.setNickName(username);
             user.setCreateTime(now);
             return userMapper.insert(user);
         }
         return false;
     }
 
-    @Cacheable(key = "#username", unless = "null == #result")
     @Override
     public User getUser(@NonNull String username) {
+        Object o = redisUtil.get("light_blog:user::" + username);
+        if (null != o){
+            return (User) o;
+        }
         return userMapper.get(null, username);
     }
 
@@ -84,11 +97,19 @@ public class UserServiceImpl implements UserService {
         return userMapper.get(id, null);
     }
 
-    @CachePut(key = "#user.username")
+    @WriteLog(action = WriteLog.Action.UPDATE)
+    @CachePut(key = "#user.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateUser(@NonNull User user) {
         return userMapper.update(user);
+    }
+
+    @WriteLog(action = WriteLog.Action.DELETE)
+    @CachePut(key = "#id")
+    @Override
+    public Boolean delete(Long id) {
+        return userMapper.delete(id) && accountMapper.delete(id,null);
     }
 
     @Override
@@ -96,6 +117,7 @@ public class UserServiceImpl implements UserService {
         return searchUser(keyword, null, null);
     }
 
+    @OnChange
     @Cacheable(unless = "#result==null || 0 == #result.total")
     @Override
     public PageInfo<User> searchUser(String keyword, Integer page, Integer pageSize) {

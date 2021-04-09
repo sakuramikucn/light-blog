@@ -1,7 +1,9 @@
 package cn.sakuramiku.lightblog.service.impl;
 
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Tag;
 import cn.sakuramiku.lightblog.mapper.TagMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
@@ -24,6 +26,7 @@ import java.util.List;
  *
  * @author lyy
  */
+@LogConfig(reference = "tag",name = "标签")
 @CacheConfig(cacheNames = "light_blog:tag", keyGenerator = "simpleKeyGenerator")
 @Service
 public class TagServiceImpl implements TagService {
@@ -35,7 +38,7 @@ public class TagServiceImpl implements TagService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveTag(@NonNull String name) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         Tag tag = new Tag();
         tag.setId(id);
         tag.setCreateTime(LocalDateTime.now());
@@ -44,6 +47,7 @@ public class TagServiceImpl implements TagService {
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -51,6 +55,7 @@ public class TagServiceImpl implements TagService {
         return tagMapper.update(id, name);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -64,6 +69,7 @@ public class TagServiceImpl implements TagService {
         return tagMapper.get(id);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Tag> search(Long articleId, String keyword, Integer page, Integer pageSize) {
@@ -85,6 +91,7 @@ public class TagServiceImpl implements TagService {
         return search(articleId, keyword, null, null);
     }
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Override
     public Boolean batchInsert(List<BatchInsertParam> params) {
         return tagMapper.batchInsert(params);

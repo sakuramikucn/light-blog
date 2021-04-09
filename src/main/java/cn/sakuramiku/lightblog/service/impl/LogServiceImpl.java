@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Log;
 import cn.sakuramiku.lightblog.mapper.LogMapper;
 import cn.sakuramiku.lightblog.service.LogService;
@@ -31,7 +32,7 @@ public class LogServiceImpl implements LogService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long writeLog(@NonNull Log log) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         log.setCreateTime(LocalDateTime.now());
         logMapper.insert(log);
         return id;
@@ -58,6 +59,7 @@ public class LogServiceImpl implements LogService {
         return searchLog(ref, null, null, page, pageSize);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Log> searchLog(String ref, LocalDateTime begin, LocalDateTime end,

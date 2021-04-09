@@ -1,6 +1,9 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.mapper.RightMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
@@ -24,6 +27,7 @@ import java.util.List;
  *
  * @author lyy
  */
+@LogConfig(reference = "right",name = "权限")
 @CacheConfig(cacheNames = "light_blog:right", keyGenerator = "simpleKeyGenerator")
 @Service
 public class RightServiceImpl implements RightService {
@@ -31,21 +35,24 @@ public class RightServiceImpl implements RightService {
     @Resource
     private RightMapper rightMapper;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveRight(@NonNull Right right) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         right.setId(id);
         right.setCreateTime(LocalDateTime.now());
         rightMapper.add(right);
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Override
     public Boolean addRight(List<BatchInsertParam> params) {
         return rightMapper.batchInsert(params);
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#right.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,6 +60,7 @@ public class RightServiceImpl implements RightService {
         return rightMapper.update(right);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -60,6 +68,7 @@ public class RightServiceImpl implements RightService {
         return rightMapper.delete(id);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Right> searchRight(@NonNull Long roleId, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize) {
@@ -70,6 +79,7 @@ public class RightServiceImpl implements RightService {
         return PageInfo.of(rights);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Right> findRight(String keyword, Integer page, Integer pageSize) {

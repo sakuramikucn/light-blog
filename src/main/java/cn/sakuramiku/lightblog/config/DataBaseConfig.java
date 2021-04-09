@@ -3,7 +3,6 @@ package cn.sakuramiku.lightblog.config;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.github.pagehelper.PageInterceptor;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -26,8 +24,6 @@ import java.util.Properties;
  * @author lyy
  */
 @Configuration
-@EnableTransactionManagement
-@MapperScan(basePackages = "cn.sakuramiku.lightblog.mapper")
 @PropertySource("classpath:db-conf.properties")
 public class DataBaseConfig {
 
@@ -176,20 +172,4 @@ public class DataBaseConfig {
         return new DataSourceTransactionManager(dataSource);
     }
 
-//    /**
-//     * 事务拦截器
-//     *
-//     * @return
-//     */
-//    @Bean(name = "transactionInterceptor")
-//    public TransactionInterceptor interceptor(TransactionManager transactionManager) {
-//        TransactionInterceptor interceptor = new TransactionInterceptor();
-//        interceptor.setTransactionManager(transactionManager);
-//
-//        Properties transactionAttributes = new Properties();
-//        transactionAttributes.setProperty("*", "PROPAGATION_REQUIRED");
-//
-//        interceptor.setTransactionAttributes(transactionAttributes);
-//        return interceptor;
-//    }
 }

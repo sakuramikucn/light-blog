@@ -18,6 +18,7 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.context.annotation.Lazy;
 
 import javax.annotation.Resource;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import java.util.Set;
 public class UserRealm extends AuthorizingRealm {
 
     @Resource
+    @Lazy
     private UserService userService;
     @Resource
     private RedisUtil redisUtil;
@@ -51,11 +53,12 @@ public class UserRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         String jwtToken = (String) token.getPrincipal();
-        String userName = JwtUtil.getUserName(jwtToken);
+        String userName = null;
 
         // 校验Token是否需要刷新
         try {
             Claims claims = JwtUtil.getClaims(jwtToken);
+            userName = (String) claims.get("username");
             Boolean hasKey = redisUtil.hasKey(Constant.PREFIX_REFRESH_TOKEN_BAN + claims.getId());
             // 黑名单，Token已注销
             if (hasKey) {
@@ -64,21 +67,23 @@ public class UserRealm extends AuthorizingRealm {
         } catch (ExpiredJwtException e) {
             Claims claims = e.getClaims();
             String username = (String) claims.get("username");
-            // Token过期了
             String tokenKey = genTokenKey(username);
+            Boolean hasKey = redisUtil.hasKey(tokenKey);
+            JwtUtil.logger.info("Token已过期，是否可以刷新{}", hasKey);
             // 有缓存
-            if (redisUtil.hasKey(tokenKey)) {
-                // 缓存中Token未过期
-                if (!redisUtil.isExpired(tokenKey)) {
-                    // 刷新Token
-                    User user = userService.getUser(username);
-                    String newToken = JwtUtil.genToken(user);
-                    token = new JwtToken(newToken);
-                    redisUtil.delete(tokenKey);
-                    // 刷新缓存
-                    redisUtil.set(tokenKey, newToken, 30 * 60L);
-                    JwtUtil.logger.info("刷新了Token：{}", newToken);
-                }
+            if (hasKey) {
+                // 刷新Token
+                User user = userService.getUser(username);
+                String newToken = JwtUtil.genToken(user);
+                jwtToken = newToken;
+                userName = username;
+                redisUtil.delete(tokenKey);
+                // 刷新缓存
+                redisUtil.set(tokenKey, newToken, 30 * 60L);
+                JwtUtil.logger.info("刷新了Token：{}", newToken);
+            }else {
+                // 不可以刷新
+                throw e;
             }
         }
         if (StrUtil.isEmpty(userName)) {
@@ -88,6 +93,7 @@ public class UserRealm extends AuthorizingRealm {
         if (ObjectUtil.isNull(user)) {
             throw new UnknownAccountException("无效的用户");
         }
+
         return new SimpleAuthenticationInfo(jwtToken, jwtToken, getName());
     }
 
@@ -123,6 +129,17 @@ public class UserRealm extends AuthorizingRealm {
         info.setRoles(roles);
         info.setStringPermissions(rights);
         return info;
+    }
+
+    /**
+     * 登录通过后，会进行密码校验，如果刷新了Token，则两者Token会不一致导致匹配失败。所以就不比较了
+     * @param token
+     * @param info
+     * @throws AuthenticationException
+     */
+    @Override
+    protected void assertCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException {
+
     }
 
     /**

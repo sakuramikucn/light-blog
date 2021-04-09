@@ -2,7 +2,10 @@ package cn.sakuramiku.lightblog.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.common.annotation.LogConfig;
+import cn.sakuramiku.lightblog.common.annotation.WriteLog;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Tag;
 import cn.sakuramiku.lightblog.mapper.ArticleMapper;
@@ -35,6 +38,7 @@ import java.util.stream.Collectors;
  *
  * @author lyy
  */
+@LogConfig(reference = "article",name = "文章")
 @CacheConfig(cacheNames = "light_blog:article", keyGenerator = "simpleKeyGenerator")
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -44,10 +48,11 @@ public class ArticleServiceImpl implements ArticleService {
     @Resource
     private TagService tagService;
 
+    @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Long saveArticle(@NonNull Article article) {
-        long id = IdUtil.nextId();
+        long id = IdGenerator.nextId();
         article.setId(id);
         article.setCreateTime(LocalDateTime.now());
         Subject subject = SecurityUtils.getSubject();
@@ -71,6 +76,7 @@ public class ArticleServiceImpl implements ArticleService {
         return id;
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#article.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -78,6 +84,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.update(article);
     }
 
+    @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -89,22 +96,38 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.update(article);
     }
 
+    @WriteLog(action = WriteLog.Action.DELETE)
+    @Override
+    public Boolean deleteArticle(@NonNull Long id) {
+        return articleMapper.delete(id);
+    }
+
     @Cacheable(key = "#id", unless = "null == #result")
     @Override
     public Article getArticle(@NonNull Long id) {
         return articleMapper.get(id);
     }
 
+    @OnChange
     @Cacheable(unless = "null == #result.list || 0 == #result.list.size()")
     @Override
     public PageInfo<Article> searchArticle(@NonNull SearchArticleParam param) {
+
         Page<Article> page = PageHelper.startPage(param.getPage(), param.getPageSize(), true);
-        page.setOrderBy("article.create_time " + param.getOrder());
+        String orderby = "article.create_time " + param.getOrder();
+        Boolean hotOrderBy = param.getHotOrderBy();
+        if (hotOrderBy) {
+            orderby += ",article.page_views DESC";
+        }
+        page.setOrderBy(orderby);
         String keyword = param.getKeyword();
         if (StrUtil.isBlank(keyword)) {
             param.setKeyword(null);
         }
         List<Article> articles = articleMapper.search(param);
+        if (null != param.getPublic()) {
+            articles = articles.parallelStream().filter(val -> param.getPublic().equals(val.getPublic())).collect(Collectors.toList());
+        }
         return new PageInfo<>(articles);
     }
 

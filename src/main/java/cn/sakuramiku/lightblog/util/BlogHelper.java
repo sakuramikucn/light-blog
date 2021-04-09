@@ -61,8 +61,21 @@ public class BlogHelper {
             return null;
         }).collect(Collectors.toList());
 
+        return toPageInfo(origin,views);
+    }
+
+    /**
+     * 包装成pageInfo
+     * @param origin
+     * @param data
+     * @param <S>
+     * @param <T>
+     * @return
+     */
+    public static <S,T> PageInfo<T> toPageInfo(PageInfo<S> origin,List<T> data){
+
         PageInfo<T> info = new PageInfo<>();
-        info.setList(views);
+        info.setList(data);
         info.setPageNum(origin.getPageNum());
         info.setPageSize(origin.getPageSize());
         info.setTotal(origin.getTotal());
@@ -83,4 +96,29 @@ public class BlogHelper {
         return info;
     }
 
+    /**
+     * 是否包含标识
+     *
+     * @param mask
+     * @return
+     */
+    public static boolean isMask(int target,int mask) {
+        return mask == (mask & target);
+    }
+
+    /**
+     * 设置标记，mask为负数时表示去除标识
+     *
+     * @param mask
+     */
+    public static int setMask(int target,int mask) {
+        if (mask > 0) {
+            target |= mask;
+        } else if (mask < 0) {
+            target &= (~(-mask));
+        } else {
+            target = 0;
+        }
+        return target;
+    }
 }

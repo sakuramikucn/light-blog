@@ -31,7 +31,7 @@ public class User implements Serializable {
     /**
      * 状态，0=正常，2=冻结
      */
-    @ApiModelProperty(value = "状态，0=正常，2=冻结")
+    @ApiModelProperty(value = "状态，0=正常，1=冻结，3=删除")
     private Integer state;
 
     @ApiModelProperty(value = "昵称")

@@ -17,6 +17,9 @@ public class Constant {
     /** Token白名单 */
     public static final String PREFIX_REFRESH_TOKEN_ALLOW = "light_blog:token:allow:";
 
+    /** 文章浏览数key前缀 */
+    public static final String PREFIX_ARTICLE_VIEWS = "light_blog:views:";
+
     /** 请求路径-未授权 */
     public static final String REQUEST_UNAUTHORIZED = "/error/unauthorized";
     /** 请求路径-未登录 */
@@ -63,4 +66,11 @@ public class Constant {
     public static final String REF_USER = "User";
     /** 引用标识-分类 */
     public static final String REF_CATEGORY = "Category";
+
+    /** 用户状态-正常 */
+    public static final Integer USER_STATE_NORMAL = 0;
+    /** 用户状态-冻结 */
+    public static final Integer USER_STATE_FREEZ = 1;
+    /** 用户状态 - 已删除 */
+    public static final Integer USER_STATE_DELETE = 2;
 }

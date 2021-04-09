@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.util;
 
-import cn.sakuramiku.lightblog.common.util.IdUtil;
+import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.User;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public class JwtUtil {
         claims.put("id", user.getId());
         claims.put("username", user.getUsername());
         claims.put("nickName", user.getNickName());
-        return genToken(claims, String.valueOf(IdUtil.nextId()));
+        return genToken(claims, String.valueOf(IdGenerator.nextId()));
     }
 
     /**
