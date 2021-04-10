@@ -38,7 +38,7 @@ public class ApiExceptionAdvice {
         return new RespResult<>(null, RespCode.SERVER_INTERNAL_ERROR, e.getMessage());
     }
 
-    @ExceptionHandler({UnauthenticatedException.class, UnknownAccountException.class})
+    @ExceptionHandler({UnauthenticatedException.class})
     public Result<Object> handleUnauthenticatedException() {
         return RespResult.build().code(RespCode.NOT_LOGIN);
     }

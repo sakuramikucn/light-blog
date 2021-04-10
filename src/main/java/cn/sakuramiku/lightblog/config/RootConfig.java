@@ -2,14 +2,15 @@ package cn.sakuramiku.lightblog.config;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * Spring 配置
@@ -23,8 +24,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableCaching
 @EnableAspectJAutoProxy
 @ComponentScan(value = "cn.sakuramiku.lightblog",
-        excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class),
-                            @ComponentScan.Filter(type = FilterType.ANNOTATION,value = RestController.class)
+        excludeFilters = {
 })
 @Configuration
 public class RootConfig {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -24,9 +24,9 @@ import java.util.List;
  *
  * @author lyy
  */
-@ComponentScan("cn.sakuramiku.lightblog.controller")
+@ComponentScan({"cn.sakuramiku.lightblog.controller"})
+@Import(Swagger2Config.class)
 @EnableWebMvc
-@Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
