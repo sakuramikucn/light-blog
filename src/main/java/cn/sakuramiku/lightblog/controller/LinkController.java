@@ -37,9 +37,12 @@ public class LinkController {
     @RequiresAuthentication
     @ApiOperation("添加友链")
     @PostMapping
-    public Result<Long> add(@Validated FriendLink link) {
-        Long id = linkService.saveLink(link);
-        return RespResult.ok(id);
+    public Result<FriendLink> add(@Validated FriendLink link) {
+        FriendLink friendLink = linkService.saveLink(link);
+        if (null == friendLink){
+            return RespResult.fail("添加友链失败");
+        }
+        return RespResult.ok(friendLink);
     }
 
     @ShiroPass

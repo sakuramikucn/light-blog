@@ -29,7 +29,7 @@ public interface UserMapper {
      * @param keyword 用户名/昵称 关键字
      * @return 用户列表
      */
-    List<User> search(@Nullable @Param("keyword") String keyword);
+    List<User> search(@Nullable @Param("keyword") String keyword, @Param("state") Integer state);
 
     /**
      * 添加用户

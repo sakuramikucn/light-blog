@@ -68,6 +68,8 @@ public interface RoleMapper {
      */
     List<Role> search(@Nullable @Param("userId") Long userId, @Nullable @Param("keyword") String keyword);
 
+    Long getUserCount(Long roleId);
+
     /**
      * 修改角色
      *

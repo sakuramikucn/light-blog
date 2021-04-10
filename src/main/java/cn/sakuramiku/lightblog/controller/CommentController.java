@@ -38,9 +38,12 @@ public class CommentController {
     @ShiroPass
     @ApiOperation("添加评论")
     @PostMapping
-    public Result<Long> add(@Validated Comment comment) {
-        Long id = commentService.saveComment(comment);
-        return RespResult.ok(id);
+    public Result<Comment> add(@Validated Comment comment) {
+        Comment comment1 = commentService.saveComment(comment);
+        if (null == comment1){
+            return RespResult.fail("添加评论失败");
+        }
+        return RespResult.ok(comment1);
     }
 
     @ShiroPass
@@ -62,7 +65,7 @@ public class CommentController {
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true)
     })
     @PutMapping("/{id}")
-    public Result<Boolean> remove(@PathVariable("id") Long id) throws ApiException {
+    public Result<Comment> remove(@PathVariable("id") Long id) throws ApiException {
         ValidateUtil.isNull(id, "参数异常，评论ID为空");
         return RespResult.ok(commentService.removeComment(id));
     }
@@ -85,7 +88,7 @@ public class CommentController {
             @ApiImplicitParam(name = "isHidden", dataTypeClass = Boolean.class, value = "true=屏蔽，false=正常", required = true)
     })
     @PutMapping("/status/{id}/{isHidden}")
-    public Result<Boolean> hidden(@PathVariable("id") Long id, @PathVariable("isHidden") Boolean isHidden) throws ApiException {
+    public Result<Comment> hidden(@PathVariable("id") Long id, @PathVariable("isHidden") Boolean isHidden) throws ApiException {
         ValidateUtil.isNull(isHidden, "参数异常[isHidden]为空");
         ValidateUtil.isNull(id, "参数异常，评论ID为空");
         return RespResult.ok(commentService.hiddenComment(id, isHidden));

@@ -82,6 +82,10 @@
         </where>
     </select>
 
+    <select id="getUserCount" parameterType="long" resultType="java.lang.Long">
+        select COUNT(0) from user_role where role_id = #{roleId}
+    </select>
+
     <delete id="delete">
         delete
         from `role`

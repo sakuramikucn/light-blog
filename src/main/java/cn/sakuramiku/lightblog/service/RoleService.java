@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Role;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -18,7 +19,7 @@ public interface RoleService {
      * @param role 角色
      * @return 角色ID
      */
-    Long saveRole(@NonNull Role role);
+    Role saveRole(@NonNull Role role);
 
     /**
      * 修改角色
@@ -26,7 +27,7 @@ public interface RoleService {
      * @param role 参数
      * @return 是否成功
      */
-    Boolean updateRole(@NonNull Role role);
+    Role updateRole(@NonNull Role role);
 
     /**
      * 移除角色
@@ -35,7 +36,7 @@ public interface RoleService {
      * @param ref 引用，一般为用户ID
      * @return 是否成功
      */
-    Boolean removeRole(Long id, String ref);
+    Boolean removeRole(Long id, String ref) throws BusinessException;
 
     /**
      * 获取角色

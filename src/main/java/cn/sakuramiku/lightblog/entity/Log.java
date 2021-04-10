@@ -122,4 +122,18 @@ public class Log implements Serializable {
     public void setModifiedTime(LocalDateTime modifiedTime) {
         this.modifiedTime = modifiedTime;
     }
+
+    @Override
+    public String toString() {
+        return "Log{" +
+                "id=" + id +
+                ", operator='" + operator + '\'' +
+                ", action='" + action + '\'' +
+                ", what='" + what + '\'' +
+                ", note='" + note + '\'' +
+                ", createTime=" + createTime +
+                ", reference='" + reference + '\'' +
+                ", modifiedTime=" + modifiedTime +
+                '}';
+    }
 }

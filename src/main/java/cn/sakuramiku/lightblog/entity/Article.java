@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -227,5 +226,26 @@ public class Article implements Serializable {
 
     public void setPublic(Boolean aPublic) {
         mask = BlogHelper.setMask(mask,aPublic ? MASK_PUBLIC: -MASK_PUBLIC);
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", state=" + state +
+                ", desc='" + desc + '\'' +
+                ", content='" + content + '\'' +
+                ", author='" + author + '\'' +
+                ", category=" + category +
+                ", markDelTime=" + markDelTime +
+                ", createTime=" + createTime +
+                ", pageViews=" + pageViews +
+                ", coverUrl='" + coverUrl + '\'' +
+                ", modifiedTime=" + modifiedTime +
+                ", mask=" + mask +
+                ", tags=" + tags +
+                ", isPublic=" + isPublic +
+                '}';
     }
 }

@@ -4,8 +4,10 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -14,12 +16,16 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  *
  * @author lyy
  */
+@EnableAsync
 @EnableScheduling
 @EnableTransactionManagement
 @MapperScan(basePackages = "cn.sakuramiku.lightblog.mapper")
 @EnableCaching
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@ComponentScan(value = "cn.sakuramiku.lightblog", excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)})
+@EnableAspectJAutoProxy
+@ComponentScan(value = "cn.sakuramiku.lightblog",
+        excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class),
+                            @ComponentScan.Filter(type = FilterType.ANNOTATION,value = RestController.class)
+})
 @Configuration
 public class RootConfig {
 

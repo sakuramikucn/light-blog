@@ -33,6 +33,22 @@ public class RedisUtil {
 
     /**
      * <b>String</b><br/>
+     * 添加到缓存，不过期
+     *
+     * @param key   键
+     * @param value 值
+     */
+    public Boolean push(String key, Object value) {
+        try {
+            template.opsForValue().set(key, value);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * <b>String</b><br/>
      * 添加到缓存
      *
      * @param key     键
@@ -97,10 +113,11 @@ public class RedisUtil {
 
     /**
      * 计数
+     *
      * @param key
      * @return
      */
-    public Long increment(String key){
+    public Long increment(String key) {
         return template.opsForValue().increment(key);
     }
 
@@ -158,7 +175,7 @@ public class RedisUtil {
         return template.keys(pattern);
     }
 
-    public Long deletekeys(String pattren){
+    public Long deletekeys(String pattren) {
         Set<String> keys = getKeys(pattren);
         return template.delete(keys);
     }

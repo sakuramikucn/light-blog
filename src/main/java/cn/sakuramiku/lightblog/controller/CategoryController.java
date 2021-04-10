@@ -54,10 +54,13 @@ public class CategoryController {
             @ApiImplicitParam(name = "name", dataTypeClass = String.class, value = "名称", required = true)
     })
     @PostMapping("/{name}")
-    public Result<Long> add(@PathVariable("name") String name) throws ApiException {
+    public Result<Category> add(@PathVariable("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name, "参数异常，名称为空");
-        Long id = categoryService.saveCategory(name);
-        return RespResult.ok(id);
+        Category category = categoryService.saveCategory(name);
+        if (null != category){
+            RespResult.ok(category);
+        }
+        return RespResult.fail("添加失败");
     }
 
     @RequiresAuthentication
@@ -67,10 +70,14 @@ public class CategoryController {
             @ApiImplicitParam(name = "name", dataTypeClass = String.class, value = "名称", required = true)
     })
     @PutMapping("/{id}/{name}")
-    public Result<Boolean> update(@PathVariable("id") Long id, @PathVariable("name") String name) throws ApiException {
+    public Result<Category> update(@PathVariable("id") Long id, @PathVariable("name") String name) throws ApiException {
         ValidateUtil.isNull(id, "参数异常，分类ID为空");
         ValidateUtil.isEmpty(name, "参数异常，名称为空");
-        return RespResult.ok(categoryService.updateCategory(id, name));
+        Category category = categoryService.updateCategory(id, name);
+        if (null != category){
+            return RespResult.ok(category);
+        }
+        return RespResult.fail("修改失败");
     }
 
     @RequiresRoles(Constant.ROLE_ADMIN)

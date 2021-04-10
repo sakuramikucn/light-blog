@@ -18,7 +18,9 @@ public interface CommentService {
      * @param comment 评论
      * @return 评论ID
      */
-    Long saveComment(@NonNull Comment comment);
+    Comment saveComment(@NonNull Comment comment);
+
+    Comment getComment(Long id);
 
     /**
      * 删除评论（逻辑删除）
@@ -26,7 +28,7 @@ public interface CommentService {
      * @param id 评论ID
      * @return 是否成功
      */
-    Boolean removeComment(@NonNull Long id);
+    Comment removeComment(@NonNull Long id);
 
     /**
      * 删除评论（真实删除）
@@ -43,7 +45,7 @@ public interface CommentService {
      * @param isHidden true=屏蔽，false=恢复
      * @return 是否成功
      */
-    Boolean hiddenComment(@NonNull Long id, @NonNull Boolean isHidden);
+    Comment hiddenComment(@NonNull Long id, @NonNull Boolean isHidden);
 
     /**
      * 搜索评论

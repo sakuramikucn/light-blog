@@ -5,6 +5,7 @@ import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Role;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.RoleService;
 import cn.sakuramiku.lightblog.vo.SearchRoleParam;
 import com.github.pagehelper.PageInfo;
@@ -33,9 +34,12 @@ public class RoleController {
 //    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("添加角色")
     @PostMapping
-    public Result<Long> add(@Validated Role role) {
-        Long id = roleService.saveRole(role);
-        return RespResult.ok(id);
+    public Result<Role> add(@Validated Role role) {
+        Role role1 = roleService.saveRole(role);
+        if (null == role1){
+            return RespResult.fail("添加角色失败");
+        }
+        return RespResult.ok(role1);
     }
 
     @RequiresAuthentication
@@ -61,7 +65,7 @@ public class RoleController {
 
     @ApiOperation("删除角色")
     @DeleteMapping("/{id}")
-    public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException {
+    public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
         ValidateUtil.isNull(id, "参数异常，角色ID为空");
         return RespResult.ok(roleService.removeRole(id, null));
     }

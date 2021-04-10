@@ -99,7 +99,7 @@ public class ArticleController {
     @ApiOperation("修改文章")
     @ApiResponse(code = 0, message = "ok", examples = @Example(@ExampleProperty(mediaType = "文章ID", value = "文章ID")))
     @PutMapping
-    public Result<Boolean> update(@Validated Article article){
+    public Result<Boolean> update(@RequestBody Article article){
         Boolean succ = articleService.updateArticle(article);
         return RespResult.ok(succ);
     }

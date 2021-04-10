@@ -19,7 +19,14 @@ public interface CategoryService {
      * @param name 名称
      * @return 分类ID
      */
-    Long saveCategory(String name);
+    Category saveCategory(String name);
+
+    /**
+     * 获取分类
+     * @param id
+     * @return
+     */
+    Category getCategory(Long id);
 
     /**
      * 修改分类
@@ -28,7 +35,7 @@ public interface CategoryService {
      * @param name 名称
      * @return 是否成功
      */
-    Boolean updateCategory(Long id, String name);
+    Category updateCategory(Long id, String name);
 
     /**
      * 删除分类

@@ -10,6 +10,8 @@ import cn.sakuramiku.lightblog.service.CategoryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,26 +34,42 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryMapper categoryMapper;
 
     @WriteLog(action = WriteLog.Action.INSERT)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveCategory(String name) {
+    public Category saveCategory(String name) {
         long id = IdGenerator.nextId();
         Category category = new Category();
         category.setId(id);
         category.setName(name);
         category.setCreateTime(LocalDateTime.now());
-        categoryMapper.insert(category);
-        return id;
+        Boolean insert = categoryMapper.insert(category);
+        if (null != insert){
+            return this.getCategory(id);
+        }
+        return null;
+    }
+
+    @Cacheable(key = "#id",unless = "null == #result")
+    @Override
+    public Category getCategory(Long id) {
+        return categoryMapper.get(id);
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean updateCategory(Long id, String name) {
-        return categoryMapper.update(id, name);
+    public Category updateCategory(Long id, String name) {
+        Boolean update = categoryMapper.update(id, name);
+        if (update){
+            return this.getCategory(id);
+        }
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
+    @CacheEvict(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean removeCategory(Long id) {

@@ -5,12 +5,14 @@ import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Right;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.mapper.RightMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.RightService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
@@ -36,14 +38,24 @@ public class RightServiceImpl implements RightService {
     private RightMapper rightMapper;
 
     @WriteLog(action = WriteLog.Action.INSERT)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveRight(@NonNull Right right) {
+    public Right saveRight(@NonNull Right right) {
         long id = IdGenerator.nextId();
         right.setId(id);
         right.setCreateTime(LocalDateTime.now());
-        rightMapper.add(right);
-        return id;
+        Boolean add = rightMapper.add(right);
+        if (add){
+            return this.getRight(id);
+        }
+        return null;
+    }
+
+    @Cacheable(key = "#result.id",unless = "null == #result")
+    @Override
+    public Right getRight(Long id) {
+        return rightMapper.get(id);
     }
 
     @WriteLog(action = WriteLog.Action.INSERT)
@@ -53,18 +65,26 @@ public class RightServiceImpl implements RightService {
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#right.id")
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean updateRight(@NonNull Right right) {
-        return rightMapper.update(right);
+    public Right updateRight(@NonNull Right right) {
+        Boolean update = rightMapper.update(right);
+        if (update){
+            return this.getRight(right.getId());
+        }
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
-    @CachePut(key = "#id")
+    @CacheEvict(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean removeRight(Long id) {
+    public Boolean removeRight(Long id) throws BusinessException {
+        Long roleCount = rightMapper.roleCount(id);
+        if (roleCount>0){
+            throw new BusinessException("该权限还有角色在使用哦");
+        }
         return rightMapper.delete(id);
     }
 
@@ -88,5 +108,11 @@ public class RightServiceImpl implements RightService {
         }
         List<Right> rights = rightMapper.find();
         return PageInfo.of(rights);
+    }
+
+    @CacheEvict(key = "#ref")
+    @Override
+    public Boolean deleteForRole(Long ref) {
+        return rightMapper.remove(ref);
     }
 }

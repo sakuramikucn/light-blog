@@ -21,7 +21,7 @@ public interface TagService {
      * @param name 标签名称
      * @return 标签ID
      */
-    Long saveTag(@NonNull String name);
+    Tag saveTag(@NonNull String name);
 
     /**
      * 修改标签
@@ -30,7 +30,7 @@ public interface TagService {
      * @param name 标签名称
      * @return 是否成功
      */
-    Boolean updateTag(@NonNull Long id, @NonNull String name);
+    Tag updateTag(@NonNull Long id, @NonNull String name);
 
     /**
      * 删除标签

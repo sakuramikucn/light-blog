@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author lyy
  */
-@ComponentScan("cn.sakuramiku.lightblog")
+@ComponentScan("cn.sakuramiku.lightblog.controller")
 @EnableWebMvc
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {

@@ -93,7 +93,9 @@ public class UserRealm extends AuthorizingRealm {
         if (ObjectUtil.isNull(user)) {
             throw new UnknownAccountException("无效的用户");
         }
-
+        if (!Constant.USER_STATE_NORMAL.equals(user.getState())){
+            throw new UnknownAccountException("账号异常，请联系管理员");
+        }
         return new SimpleAuthenticationInfo(jwtToken, jwtToken, getName());
     }
 

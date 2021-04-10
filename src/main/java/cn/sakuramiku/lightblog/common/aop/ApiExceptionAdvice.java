@@ -4,6 +4,7 @@ import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespCode;
 import cn.sakuramiku.lightblog.common.util.RespResult;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.apache.shiro.ShiroException;
@@ -32,9 +33,19 @@ public class ApiExceptionAdvice {
         return new RespResult<>(null, e.getCode(), e.getMessage());
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public Result<Object> handleBusinessException(BusinessException e) {
+        return new RespResult<>(null, RespCode.SERVER_INTERNAL_ERROR, e.getMessage());
+    }
+
     @ExceptionHandler({UnauthenticatedException.class, UnknownAccountException.class})
     public Result<Object> handleUnauthenticatedException() {
         return RespResult.build().code(RespCode.NOT_LOGIN);
+    }
+
+    @ExceptionHandler({ UnknownAccountException.class})
+    public Result<Object> handleUnknownAccountException(Exception e) {
+        return RespResult.build().code(RespCode.NOT_LOGIN).msg(e.getMessage());
     }
 
     @ExceptionHandler({ShiroException.class, UnauthorizedException.class,AuthorizationException.class})

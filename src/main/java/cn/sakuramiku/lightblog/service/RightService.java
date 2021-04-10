@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Right;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
@@ -21,7 +22,9 @@ public interface RightService {
      * @param right 权限
      * @return 权限ID
      */
-    Long saveRight(@NonNull Right right);
+    Right saveRight(@NonNull Right right);
+
+    Right getRight(Long id);
 
     /**
      * 为角色添加权限(批量)
@@ -37,7 +40,7 @@ public interface RightService {
      * @param right 参数
      * @return 是否成功
      */
-    Boolean updateRight(@NonNull Right right);
+    Right updateRight(@NonNull Right right);
 
     /**
      * 删除权限
@@ -45,7 +48,7 @@ public interface RightService {
      * @param id 权限ID
      * @return 是否成功
      */
-    Boolean removeRight(Long id);
+    Boolean removeRight(Long id) throws BusinessException;
 
 
     /**
@@ -66,4 +69,11 @@ public interface RightService {
      * @return 权限列表
      */
     PageInfo<Right> findRight(@Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize);
+
+    /**
+     * 删除角色对应权限映射
+     * @param ref
+     * @return
+     */
+    Boolean deleteForRole(Long ref);
 }

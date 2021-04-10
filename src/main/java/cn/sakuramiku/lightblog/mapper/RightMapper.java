@@ -73,4 +73,13 @@ public interface RightMapper {
     List<Right> find();
 
     Boolean batchInsert(List<BatchInsertParam> params);
+
+    /**
+     * 删除角色关联的权限映射
+     * @param ref
+     * @return
+     */
+    Boolean remove(Long ref);
+
+    Long roleCount(Long right);
 }

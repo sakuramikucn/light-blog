@@ -18,7 +18,7 @@ public interface FriendLinkService {
      * @param link 友链
      * @return 友链ID
      */
-    Long saveLink(@NonNull FriendLink link);
+    FriendLink saveLink(@NonNull FriendLink link);
 
     /**
      * 修改友链
@@ -26,7 +26,7 @@ public interface FriendLinkService {
      * @param link 参数
      * @return 是否成功
      */
-    Boolean updateLink(@NonNull FriendLink link);
+    FriendLink updateLink(@NonNull FriendLink link);
 
 
     /**

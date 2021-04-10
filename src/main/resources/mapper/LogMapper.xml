@@ -63,8 +63,7 @@
         where id = #{id,jdbcType=BIGINT}
     </delete>
 
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.sakuramiku.lightblog.entity.Log"
-            useGeneratedKeys="true">
+    <insert id="insert" parameterType="cn.sakuramiku.lightblog.entity.Log">
         insert into log
         <trim prefix="(" suffix=")" suffixOverrides=",">
             id,

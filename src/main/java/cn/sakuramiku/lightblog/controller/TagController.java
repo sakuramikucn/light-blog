@@ -32,10 +32,24 @@ public class TagController {
     @RequiresAuthentication
     @ApiOperation("添加标签")
     @PostMapping
-    public Result<Long> add(String name) throws ApiException {
+    public Result<Tag> add(String name) throws ApiException {
         ValidateUtil.isEmpty(name, "参数错误，标签名称为空");
-        Long id = tagService.saveTag(name);
-        return RespResult.ok(id);
+        Tag tag = tagService.saveTag(name);
+        if (null == tag){
+            return RespResult.fail("添加标签失败");
+        }
+        return RespResult.ok(tag);
+    }
+
+    @PutMapping
+    public Result<Tag> update(Tag tag) throws ApiException {
+        ValidateUtil.isNull(tag.getId(), "参数错误，标签名称为空");
+        ValidateUtil.isEmpty(tag.getName(), "参数错误，标签名称为空");
+        Tag tag1 = tagService.updateTag(tag.getId(),tag.getName());
+        if (null == tag1){
+            return RespResult.fail("修改标签失败");
+        }
+        return RespResult.ok(tag1);
     }
 
     @ShiroPass

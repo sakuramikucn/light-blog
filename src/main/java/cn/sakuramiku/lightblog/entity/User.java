@@ -31,7 +31,7 @@ public class User implements Serializable {
     /**
      * 状态，0=正常，2=冻结
      */
-    @ApiModelProperty(value = "状态，0=正常，1=冻结，3=删除")
+    @ApiModelProperty(value = "状态，0=正常，1=冻结，2=删除")
     private Integer state;
 
     @ApiModelProperty(value = "昵称")
@@ -152,5 +152,21 @@ public class User implements Serializable {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", state=" + state +
+                ", nickName='" + nickName + '\'' +
+                ", email='" + email + '\'' +
+                ", roles=" + roles +
+                ", lastLoginTime=" + lastLoginTime +
+                ", lastLoginIp='" + lastLoginIp + '\'' +
+                ", createTime=" + createTime +
+                ", modifiedTime=" + modifiedTime +
+                '}';
     }
 }

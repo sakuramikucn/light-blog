@@ -60,11 +60,18 @@
         select count(0)
         from `right`
     </select>
+    <select id="roleCount" parameterType="long" resultType="java.lang.Long">
+        select COUNT(0) from role_right where right_id = #{right}
+    </select>
 
     <delete id="delete">
         delete
         from `right`
         where `right`.id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <delete id="remove" parameterType="long">
+        delete from role_right where role_id = #{ref}
     </delete>
 
     <insert id="add" parameterType="cn.sakuramiku.lightblog.entity.Right">

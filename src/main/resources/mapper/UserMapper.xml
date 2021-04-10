@@ -71,6 +71,12 @@
             <if test="null != keyword and '' != keyword ">
                 nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
             </if>
+            <if test="null == state">
+                user.state != 2
+            </if>
+            <if test="null != state">
+                user.state = #{state}
+            </if>
         </where>
     </select>
     <select id="search_COUNT" resultType="long">
@@ -79,6 +85,12 @@
         <where>
             <if test="null != keyword and '' != keyword ">
                 nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
+            </if>
+            <if test="null == state">
+                user.state != 2
+            </if>
+            <if test="null != state">
+                user.state = #{state}
             </if>
         </where>
     </select>

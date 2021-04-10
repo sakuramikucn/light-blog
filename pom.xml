@@ -137,13 +137,6 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- ElasticSearch -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-elasticsearch</artifactId>
-            <version>${spring.data.elasticsearch.version}</version>
-        </dependency>
-
         <!-- 文件上传 -->
         <dependency>
             <groupId>commons-fileupload</groupId>

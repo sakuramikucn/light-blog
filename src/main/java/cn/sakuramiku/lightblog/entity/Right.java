@@ -106,4 +106,16 @@ public class Right implements Serializable {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+
+    @Override
+    public String toString() {
+        return "Right{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", rule=" + rule +
+                ", desc='" + desc + '\'' +
+                ", createTime=" + createTime +
+                ", modifiedTime=" + modifiedTime +
+                '}';
+    }
 }

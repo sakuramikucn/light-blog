@@ -10,10 +10,13 @@ import cn.sakuramiku.lightblog.service.LogService;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,6 +35,10 @@ public class LogAspect {
     @Resource
     protected LogService logService;
 
+    @Resource
+    private SecurityManager securityManager;
+
+    @Async
     @AfterReturning(value = "@annotation(writeLog)", returning = "result", argNames = "joinPoint,result,writeLog")
     public void writeLog(JoinPoint joinPoint, Object result, WriteLog writeLog) {
 
@@ -55,15 +62,24 @@ public class LogAspect {
         String shiroStr = System.getProperty("shiro.enable", "false");
         boolean shiro = Boolean.parseBoolean(shiroStr);
         if (shiro) {
-            Subject subject = SecurityUtils.getSubject();
-            String token = (String) subject.getPrincipal();
-            Claims claims = JwtUtil.getClaims(token);
-            String userName = (String) claims.get("username");
-            String nickname = (String) claims.get("nickName");
-            if (!StrUtil.isBlank(nickname)) {
-                userName += "(" + nickname + ")";
+            try {
+                ThreadContext.bind(securityManager);
+                Subject subject = SecurityUtils.getSubject();
+                String token = (String) subject.getPrincipal();
+                if (StrUtil.isNotBlank(token)){
+                    Claims claims = JwtUtil.getClaims(token);
+                    String userName = (String) claims.get("username");
+                    String nickname = (String) claims.get("nickName");
+                    if (!StrUtil.isBlank(nickname)) {
+                        userName += "(" + nickname + ")";
+                    }
+                    log.setOperator(userName);
+                }else {
+                    log.setOperator("system");
+                }
+            } catch (Exception e) {
+                log.setOperator("system");
             }
-            log.setOperator(userName);
         } else {
             log.setOperator("system");
         }
@@ -71,7 +87,7 @@ public class LogAspect {
         String method = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         Object[] objects = Arrays.asList(args).parallelStream().map(StrUtil::toString).toArray();
-        log.setWhat("执行方法：" + method + "，方法参数: {" + ArrayUtil.join(objects, ",") + "},执行结果：" + null == result ? null : result.toString());
+        log.setWhat("执行方法：" + method + "，方法参数: {" + ArrayUtil.join(objects, ",") + "},执行结果：" + (null == result ? null : result.toString()));
         log.setNote(writeLog.note());
         logService.writeLog(log);
     }

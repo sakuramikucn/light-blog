@@ -11,6 +11,8 @@ import cn.sakuramiku.lightblog.util.Constant;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -34,25 +36,42 @@ public class CommentServiceImpl implements CommentService {
     private CommentMapper commentMapper;
 
     @WriteLog(action = WriteLog.Action.INSERT)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveComment(@NonNull Comment comment) {
+    public Comment saveComment(@NonNull Comment comment) {
         long id = IdGenerator.nextId();
         comment.setId(id);
         comment.setCreateTime(LocalDateTime.now());
         comment.setState(Constant.COMMENT_STATE_NORMAL);
-        commentMapper.insert(comment);
-        return id;
+        Boolean insert = commentMapper.insert(comment);
+        if (insert){
+            return comment;
+        }
+        return null;
+    }
+
+
+    @Cacheable(key = "#result.id",unless = "null == #result")
+    @Override
+    public Comment getComment(Long id) {
+        return commentMapper.get(id);
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean removeComment(@NonNull Long id) {
-        return commentMapper.update(id, Constant.COMMENT_STATE_DELETE);
+    public Comment removeComment(@NonNull Long id) {
+        Boolean update = commentMapper.update(id, Constant.COMMENT_STATE_DELETE);
+        if (update){
+            return this.getComment(id);
+        }
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
+    @CacheEvict(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean deleteComment(@NonNull Long id) {
@@ -60,13 +79,21 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
+    @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean hiddenComment(@NonNull Long id, @NonNull Boolean isHidden) {
+    public Comment hiddenComment(@NonNull Long id, @NonNull Boolean isHidden) {
         if (isHidden) {
-            return commentMapper.update(id, Constant.COMMENT_STATE_HIDDEN);
+            Boolean update = commentMapper.update(id, Constant.COMMENT_STATE_HIDDEN);
+            if (update){
+                return this.getComment(id);
+            }
         }
-        return commentMapper.update(id, Constant.COMMENT_STATE_NORMAL);
+        Boolean update = commentMapper.update(id, Constant.COMMENT_STATE_NORMAL);
+        if (update){
+            return this.getComment(id);
+        }
+        return null;
     }
 
     @OnChange

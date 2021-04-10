@@ -5,7 +5,9 @@ import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RedisUtil;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
+import cn.sakuramiku.lightblog.common.util.WebUtil;
 import cn.sakuramiku.lightblog.entity.User;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
@@ -16,6 +18,7 @@ import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -41,12 +44,12 @@ public class IndexController {
             @ApiImplicitParam(name = "password", dataTypeClass = String.class, value = "登录密码"),
     })
     public @ApiResponse(code = 0, message = "Token")
-    Result<String> login( String username, String password) throws ApiException {
+    Result<String> login(HttpServletRequest request,String username, String password) throws ApiException, BusinessException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
-        Boolean login = userService.login(username, password);
-        if (login) {
-            User user = userService.getUser(username);
+        String ipAddr = WebUtil.getIpAddr(request);
+        User user = userService.login(username, password,ipAddr);
+        if (null != user) {
             String token = JwtUtil.genToken(user);
             // 用于Token刷新
             redisUtil.set(Constant.PREFIX_REFRESH_TOKEN_REFRESH + username, token, 30 * 60L);
@@ -68,8 +71,8 @@ public class IndexController {
         if (null != user) {
             return RespResult.fail("用户名重复");
         }
-        boolean flag = userService.register(username, password);
-        if (!flag) {
+        User user1 = userService.register(username, password);
+        if (null == user1) {
             return RespResult.fail("注册失败");
         }
         return RespResult.ok();
@@ -108,7 +111,11 @@ public class IndexController {
     @GetMapping("/views/{id}")
     public RespResult<Long> views(@PathVariable("id") Long id) throws ApiException {
         ValidateUtil.isNull(id,"参数id为空");
-        Long increment = Long.parseLong(redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id).toString());
+        Object o = redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id);
+        long increment = 0L;
+        if (o != null){
+            increment = Long.parseLong(o.toString());
+        }
         return RespResult.ok(increment);
     }
 }
