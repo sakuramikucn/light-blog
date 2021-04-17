@@ -2,9 +2,12 @@ package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.exception.BusinessException;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * 角色服务接口
@@ -27,16 +30,17 @@ public interface RoleService {
      * @param role 参数
      * @return 是否成功
      */
-    Role updateRole(@NonNull Role role);
+    Role updateRole(@NonNull Role role) throws BusinessException;
 
     /**
      * 移除角色
      *
      * @param id  角色ID
-     * @param ref 引用，一般为用户ID
      * @return 是否成功
      */
-    Boolean removeRole(Long id, String ref) throws BusinessException;
+    Boolean removeRole(Long id) throws BusinessException;
+
+    Boolean removeRoleForUser(Long userId);
 
     /**
      * 获取角色
@@ -45,6 +49,8 @@ public interface RoleService {
      * @return 角色
      */
     Role getRole(@NonNull Long id);
+
+    Role getRoleByName(String name);
 
     /**
      * 获取用户角色
@@ -65,4 +71,7 @@ public interface RoleService {
      */
     PageInfo<Role> searchRole(@Nullable Long userId, @Nullable String keyword,
                               @Nullable Integer page, @Nullable Integer pageSize);
+
+    Boolean addRoles(List<BatchInsertParam> params);
+
 }

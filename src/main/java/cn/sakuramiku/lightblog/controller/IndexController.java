@@ -2,10 +2,7 @@ package cn.sakuramiku.lightblog.controller;
 
 import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
-import cn.sakuramiku.lightblog.common.util.RedisUtil;
-import cn.sakuramiku.lightblog.common.util.RespResult;
-import cn.sakuramiku.lightblog.common.util.ValidateUtil;
-import cn.sakuramiku.lightblog.common.util.WebUtil;
+import cn.sakuramiku.lightblog.common.util.*;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.UserService;
@@ -36,6 +33,8 @@ public class IndexController {
     private UserService userService;
     @Resource
     private RedisUtil redisUtil;
+    @Resource
+    private HttpServletRequest request;
 
     @PostMapping("/login")
     @ApiOperation("登录")
@@ -43,11 +42,11 @@ public class IndexController {
             @ApiImplicitParam(name = "username", dataTypeClass = String.class, value = "用户名"),
             @ApiImplicitParam(name = "password", dataTypeClass = String.class, value = "登录密码"),
     })
-    public @ApiResponse(code = 0, message = "Token")
-    Result<String> login(HttpServletRequest request,String username, String password) throws ApiException, BusinessException {
+    public Result<String> login(String username, String password) throws ApiException, BusinessException {
         ValidateUtil.isEmpty(username, "用户名为空");
         ValidateUtil.isEmpty(password, "登录密码为空");
         String ipAddr = WebUtil.getIpAddr(request);
+        password = SecurityUtil.md5(password);
         User user = userService.login(username, password,ipAddr);
         if (null != user) {
             String token = JwtUtil.genToken(user);

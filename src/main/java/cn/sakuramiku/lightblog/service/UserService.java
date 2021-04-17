@@ -55,7 +55,7 @@ public interface UserService {
      * @param user 参数
      * @return 是否成功
      */
-    User updateUser(@NonNull User user);
+    User updateUser(@NonNull User user) throws BusinessException;
 
     /**
      * 删除用户

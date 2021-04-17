@@ -1,12 +1,13 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.annotation.OnCacheChange;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.mapper.CategoryMapper;
 import cn.sakuramiku.lightblog.service.CategoryService;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
@@ -56,6 +57,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.get(id);
     }
 
+
+    @Override
+    public Category getByName(String name) {
+
+        return categoryMapper.getByName(name);
+    }
+
     @WriteLog(action = WriteLog.Action.UPDATE)
     @CachePut(key = "#result.id",unless = "null == #result")
     @Transactional(rollbackFor = Exception.class)
@@ -76,12 +84,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.delete(id);
     }
 
-    @OnChange
+    @OnCacheChange
     @Cacheable(unless = "null  == #result || 0 == #result.total")
     @Override
     public PageInfo<Category> search(String keyword, LocalDateTime begin, LocalDateTime end, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+            Page<Object> objects = PageHelper.startPage(page, pageSize, true);
+            objects.setOrderBy("modified_time DESC");
         }
         List<Category> categories = categoryMapper.search(keyword, begin, end);
         return PageInfo.of(categories);

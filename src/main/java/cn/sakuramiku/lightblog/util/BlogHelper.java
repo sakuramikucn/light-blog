@@ -4,8 +4,12 @@ import cn.sakuramiku.lightblog.common.ResultPage;
 import cn.sakuramiku.lightblog.common.util.SimpleResultPage;
 import cn.sakuramiku.lightblog.vo.TransView;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -14,6 +18,10 @@ import java.util.stream.Collectors;
  * @author lyy
  */
 public class BlogHelper {
+
+    public static final Logger logger = LoggerFactory.getLogger(BlogHelper.class);
+
+    public static final Map<String,String> CURRENT_USER_IP_TOKEN_MAP = new ConcurrentHashMap<>(16);
 
     public static String genReqUrl(String method, String url) {
         return method + " " + url;

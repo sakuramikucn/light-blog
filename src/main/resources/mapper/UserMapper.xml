@@ -12,9 +12,18 @@
         <result column="user_last_login_ip" jdbcType="VARCHAR" property="lastLoginIp"/>
         <result column="user_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="user_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
-        <collection property="roles" ofType="cn.sakuramiku.lightblog.entity.Role"
-                    resultMap="cn.sakuramiku.lightblog.mapper.RoleMapper.BaseResultMap"/>
+        <collection property="roles" javaType="list" ofType="cn.sakuramiku.lightblog.entity.Role"
+                    column="user_id" select="queryRoles"/>
     </resultMap>
+
+    <select id="queryRoles" parameterType="long" resultType="cn.sakuramiku.lightblog.entity.Role"
+            resultMap="cn.sakuramiku.lightblog.mapper.RoleMapper.BaseResultMap">
+        select
+        <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>
+        from user_role
+        left join `role` on user_role.role_id = `role`.id
+        where user_role.user_id = #{user_id}
+    </select>
 
     <sql id="Base_Column_List">
         `user`.id AS user_id,
@@ -28,54 +37,40 @@
         `user`.modified_time AS user_modified_time
     </sql>
 
-    <sql id="User_Column_List">
-        <include refid="Base_Column_List"/>,
-        <include refid="cn.sakuramiku.lightblog.mapper.RoleMapper.Base_Column_List"/>
-    </sql>
-
-
     <delete id="delete" parameterType="long">
         delete from user where id = #{id}
     </delete>
 
     <select id="get" resultMap="BaseResultMap">
         select
-        <include refid="User_Column_List"/>
+        <include refid="Base_Column_List"/>
         from `user`
-        left join user_role on `user`.id = user_role.user_id
-        left join `role` on user_role.role_id = role.id
-        left join role_right on role.id = role_right.role_id
-        left join `right` on role_right.right_id = `right`.id
         <where>
             <if test="null != id">
                 `user`.id = #{id,jdbcType=BIGINT}
             </if>
             <if test="null != username">
-                username = #{username,jdbcType=BIGINT}
+                and username = #{username,jdbcType=BIGINT}
             </if>
             <if test="null == id and null == username">
-                1 = 2;
+                false
             </if>
         </where>
     </select>
 
     <select id="search" resultMap="BaseResultMap">
         select
-        <include refid="User_Column_List"/>
+        <include refid="Base_Column_List"/>
         from `user`
-        left join user_role on `user`.id = user_role.user_id
-        left join `role` on user_role.role_id = role.id
-        left join role_right on role.id = role_right.role_id
-        left join `right` on role_right.right_id = `right`.id
         <where>
             <if test="null != keyword and '' != keyword ">
                 nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
             </if>
             <if test="null == state">
-                user.state != 2
+                and `user`.state != 2
             </if>
             <if test="null != state">
-                user.state = #{state}
+                and `user`.state = #{state}
             </if>
         </where>
     </select>
@@ -87,10 +82,10 @@
                 nick_name like CONCAT('%',#{keyword},'%') or username like CONCAT('%',#{keyword},'%')
             </if>
             <if test="null == state">
-                user.state != 2
+                and `user`.state != 2
             </if>
             <if test="null != state">
-                user.state = #{state}
+                and `user`.state = #{state}
             </if>
         </where>
     </select>
@@ -140,6 +135,9 @@
         <set>
             <if test="state != null">
                 `state` = #{state,jdbcType=INTEGER},
+            </if>
+            <if test="nickName != null">
+                nick_name = #{nickName,jdbcType=VARCHAR},
             </if>
             <if test="email != null">
                 email = #{email,jdbcType=VARCHAR},

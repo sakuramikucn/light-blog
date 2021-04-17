@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.annotation.OnCacheChange;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -96,7 +96,7 @@ public class CommentServiceImpl implements CommentService {
         return null;
     }
 
-    @OnChange
+    @OnCacheChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Comment> searchComment(Integer state, String ref, Long parentId, Integer page, Integer pageSize) {

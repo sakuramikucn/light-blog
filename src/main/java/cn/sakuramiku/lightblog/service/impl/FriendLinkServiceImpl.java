@@ -1,12 +1,13 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.annotation.OnCacheChange;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.FriendLink;
 import cn.sakuramiku.lightblog.mapper.FriendLinkMapper;
 import cn.sakuramiku.lightblog.service.FriendLinkService;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.cache.annotation.CacheConfig;
@@ -73,12 +74,13 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         return linkMapper.get(id);
     }
 
-    @OnChange
+    @OnCacheChange
     @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<FriendLink> searchLink(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+            Page<Object> objects = PageHelper.startPage(page, pageSize, true);
+            objects.setOrderBy("modified_time DESC");
         }
         List<FriendLink> links = linkMapper.search(keyword);
         return PageInfo.of(links);

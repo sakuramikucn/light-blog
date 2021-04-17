@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.config;
 
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -14,7 +15,6 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -98,8 +98,8 @@ public class RedisConfig {
      * @param rediscacheManager
      * @return
      */
-    @Bean
-    @Primary
+//    @Bean
+//    @Primary
     public CompositeCacheManager cacheManager(RedisCacheManager rediscacheManager) {
         CompositeCacheManager manager = new CompositeCacheManager();
         manager.setCacheManagers(Collections.singletonList(rediscacheManager));
@@ -115,7 +115,7 @@ public class RedisConfig {
      * @param stringRedisSerializer
      * @return
      */
-    @Bean
+//    @Bean
     public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory, RedisSerializer<Object> objectRedisSerializer, RedisSerializer<String> stringRedisSerializer) {
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
         RedisSerializationContext.SerializationPair<String> keyPair = RedisSerializationContext.SerializationPair.fromSerializer(stringRedisSerializer);
@@ -125,12 +125,15 @@ public class RedisConfig {
         return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
     }
 
-    @Bean
+//    @Bean
     public KeyGenerator simpleKeyGenerator() {
         return (Object o, Method method, Object... objects) -> {
             StringBuilder sb = new StringBuilder();
             for (Object param : objects) {
                 if (null == param) {
+                    continue;
+                }
+                if (StrUtil.isBlank(param.toString())){
                     continue;
                 }
                 sb.append(param).append(":");
@@ -232,6 +235,5 @@ public class RedisConfig {
 
         return new JedisConnectionFactory(standaloneConfiguration, clientConfiguration);
     }
-
 
 }

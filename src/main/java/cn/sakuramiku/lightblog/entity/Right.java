@@ -1,10 +1,13 @@
 package cn.sakuramiku.lightblog.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 权限实体类
@@ -30,6 +33,7 @@ public class Right implements Serializable {
     /**
      * 唯一标识
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "唯一标识")
     private Long id;
 
@@ -105,6 +109,23 @@ public class Right implements Serializable {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Right right = (Right) o;
+        return id.equals(right.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override

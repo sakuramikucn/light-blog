@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Article;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
@@ -18,7 +19,7 @@ public interface ArticleService {
      * @param article 文章
      * @return 文章ID
      */
-    Long saveArticle(@NonNull Article article);
+    Article saveArticle(@NonNull Article article) throws BusinessException;
 
     /**
      * 修改文章
@@ -26,7 +27,7 @@ public interface ArticleService {
      * @param article 参数
      * @return 是否成功
      */
-    Boolean updateArticle(@NonNull Article article);
+    Article updateArticle(@NonNull Article article) throws BusinessException;
 
     /**
      * 标记为删除
@@ -34,7 +35,7 @@ public interface ArticleService {
      * @param id 文章ID
      * @return 是否成功
      */
-    Boolean removeArticle(@NonNull Long id);
+    Article removeArticle(@NonNull Long id);
 
     /**
      * 删除文章

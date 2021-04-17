@@ -58,7 +58,7 @@ public class CategoryController {
         ValidateUtil.isEmpty(name, "参数异常，名称为空");
         Category category = categoryService.saveCategory(name);
         if (null != category){
-            RespResult.ok(category);
+            return RespResult.ok(category);
         }
         return RespResult.fail("添加失败");
     }
@@ -91,4 +91,13 @@ public class CategoryController {
         return RespResult.ok(categoryService.removeCategory(id));
     }
 
+    @GetMapping("/check/{name}")
+    public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
+        ValidateUtil.isEmpty(name,"名称不能为空");
+        Category byName = categoryService.getByName(name);
+        if (null == byName){
+            return RespResult.ok(true);
+        }
+        return RespResult.ok(false);
+    }
 }

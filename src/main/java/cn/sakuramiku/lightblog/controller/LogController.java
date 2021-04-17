@@ -9,11 +9,7 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -34,8 +30,8 @@ public class LogController {
 
     @RequiresAuthentication
     @ApiOperation("搜索日志")
-    @GetMapping
-    public Result<PageInfo<Log>> logs(@Validated SearchLogParam param) {
+    @PostMapping("/search")
+    public Result<PageInfo<Log>> logs(@RequestBody SearchLogParam param) {
         String ref = param.getRef();
         LocalDateTime begin = param.getBegin();
         LocalDateTime end = param.getEnd();

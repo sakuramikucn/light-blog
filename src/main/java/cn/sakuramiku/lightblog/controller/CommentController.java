@@ -38,7 +38,7 @@ public class CommentController {
     @ShiroPass
     @ApiOperation("添加评论")
     @PostMapping
-    public Result<Comment> add(@Validated Comment comment) {
+    public Result<Comment> add(@Validated @RequestBody Comment comment) {
         Comment comment1 = commentService.saveComment(comment);
         if (null == comment1){
             return RespResult.fail("添加评论失败");
@@ -49,7 +49,7 @@ public class CommentController {
     @ShiroPass
     @ApiOperation("搜索评论")
     @PostMapping("/search")
-    public Result<PageInfo<Comment>> search(SearchCommentParam param) {
+    public Result<PageInfo<Comment>> search(@RequestBody SearchCommentParam param) {
         String ref = param.getRef();
         Long parentId = param.getParentId();
         Integer state = param.getState();

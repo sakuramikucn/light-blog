@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -11,14 +12,13 @@ import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.mapper.AccountMapper;
 import cn.sakuramiku.lightblog.mapper.UserMapper;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
+import cn.sakuramiku.lightblog.service.RoleService;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务
@@ -35,7 +36,7 @@ import java.util.List;
  * @author lyy
  */
 @LogConfig(reference = "user", name = "用户")
-@CacheConfig(cacheNames = "light_blog:user", keyGenerator = "simpleKeyGenerator")
+@RedisCacheConfig(cacheName = "light_blog:user")
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -45,19 +46,20 @@ public class UserServiceImpl implements UserService {
     private AccountMapper accountMapper;
     @Resource
     private RedisUtil redisUtil;
+    @Resource
+    private RoleService roleService;
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#result.id", unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Override
-    public User login(@NonNull String username, @NonNull String password,String ipAddr) throws BusinessException {
-        password = SecurityUtil.md5(password);
+    public User login(@NonNull String username, @NonNull String password, String ipAddr) throws BusinessException {
         Account account = accountMapper.checkLogin(username, password);
         if (null != account) {
-            User old = this.getUser(username);
-            if (Constant.USER_STATE_FREEZ.equals(old.getState())){
+            User old = userMapper.get(null,username);
+            if (Constant.USER_STATE_FREEZ.equals(old.getState())) {
                 throw new BusinessException("账号已冻结，请联系管理员");
             }
-            if (Constant.USER_STATE_DELETE.equals(old.getState())){
+            if (Constant.USER_STATE_DELETE.equals(old.getState())) {
                 throw new BusinessException("账号已删除，请联系管理员");
             }
             User user = new User();
@@ -65,14 +67,14 @@ public class UserServiceImpl implements UserService {
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(ipAddr);
             userMapper.update(user);
-            return userMapper.get(account.getId(), null);
+            return userMapper.get(account.getId(),null);
         }
         return null;
     }
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
-    @CachePut(key = "#result.id", unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Override
     public User register(@NonNull String username, @NonNull String password) {
         long id = IdGenerator.nextId();
@@ -92,8 +94,7 @@ public class UserServiceImpl implements UserService {
             user.setCreateTime(now);
             Boolean insert1 = userMapper.insert(user);
             if (insert1) {
-                // 更新缓存
-                return userMapper.get(id, null);
+                return userMapper.get(account.getId(),null);
             }
         }
         return null;
@@ -108,7 +109,12 @@ public class UserServiceImpl implements UserService {
             User old = (User) o;
             Long id = old.getId();
             // 用id才拿的到最新缓存
-            return (User) redisUtil.get("light_blog:user::" + id);
+            User user = (User) redisUtil.get("light_blog:user::" + id);
+            if (null == user) {
+                return old;
+            } else {
+                return user;
+            }
         }
         // 只会执行一次
         User user = userMapper.get(null, username);
@@ -116,26 +122,38 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Cacheable(key = "#id", unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public User getUser(@NonNull Long id) {
         return userMapper.get(id, null);
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#user.id", unless = "null  == #result")
+    @RedisCachePut(key = "#user.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User updateUser(@NonNull User user) {
+    public User updateUser(@NonNull User user) throws BusinessException {
         Boolean update = userMapper.update(user);
         if (update) {
-            return this.getUser(user.getId());
+            roleService.removeRoleForUser(user.getId());
+            List<BatchInsertParam> insertParams = user.getRoles().parallelStream()
+                    .map(role -> BatchInsertParam.valueOf(user.getId(), role.getId())).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(insertParams)) {
+                Boolean aBoolean = roleService.addRoles(insertParams);
+                if (aBoolean) {
+                    return userMapper.get(user.getId(),null);
+                } else {
+                    throw new BusinessException("更新失败");
+                }
+            } else {
+                return userMapper.get(user.getId(),null);
+            }
         }
         return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
-    @CacheEvict(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Override
     public Boolean delete(Long id) {
         return userMapper.delete(id) && accountMapper.delete(id, null);
@@ -146,14 +164,15 @@ public class UserServiceImpl implements UserService {
         return searchUser(keyword, state, null, null);
     }
 
-    @OnChange
-    @Cacheable(unless = "#result==null || 0 == #result.total")
+    @OnCacheChange
+    @RedisCache
     @Override
     public PageInfo<User> searchUser(String keyword, Integer state, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+            Page<Object> objects = PageHelper.startPage(page, pageSize, true);
+            objects.setOrderBy("`user`.modified_time DESC");
         }
         List<User> users = userMapper.search(keyword, state);
-        return PageInfo.of(users);
+        return new PageInfo<>(users);
     }
 }

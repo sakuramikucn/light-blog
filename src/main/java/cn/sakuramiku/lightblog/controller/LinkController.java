@@ -37,7 +37,7 @@ public class LinkController {
     @RequiresAuthentication
     @ApiOperation("添加友链")
     @PostMapping
-    public Result<FriendLink> add(@Validated FriendLink link) {
+    public Result<FriendLink> add(@Validated @RequestBody FriendLink link) {
         FriendLink friendLink = linkService.saveLink(link);
         if (null == friendLink){
             return RespResult.fail("添加友链失败");

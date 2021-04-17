@@ -15,12 +15,24 @@
         <result column="article_cover_url" jdbcType="VARCHAR" property="coverUrl"/>
         <result column="article_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
         <result column="article_mask" jdbcType="INTEGER" property="mask"/>
+
         <association property="category" column="article_category" javaType="cn.sakuramiku.lightblog.entity.Category">
             <id column="category_id" property="id"/>
             <result column="category_name" property="name"/>
         </association>
-        <collection property="tags" resultMap="cn.sakuramiku.lightblog.mapper.TagMapper.BaseResultMap"/>
+
+        <collection property="tags" javaType="list" ofType="cn.sakuramiku.lightblog.entity.Tag"
+        column="article_id" select="queryTags"/>
     </resultMap>
+
+    <select id="queryTags" parameterType="long" resultType="cn.sakuramiku.lightblog.entity.Tag"
+            resultMap="cn.sakuramiku.lightblog.mapper.TagMapper.BaseResultMap">
+        select
+        <include refid="cn.sakuramiku.lightblog.mapper.TagMapper.Base_Column_List"/>
+        from article_tag
+        left join tag on article_tag.tag_id = tag.id
+        where article_tag.article_id = #{article_id}
+    </select>
 
     <sql id="Base_Column_List">
         article.`id` as article_id,
@@ -40,7 +52,6 @@
 
     <sql id="Article_Column_List">
         <include refid="Base_Column_List"/>,
-        <include refid="cn.sakuramiku.lightblog.mapper.TagMapper.Base_Column_List"/>,
         <include refid="cn.sakuramiku.lightblog.mapper.CategoryMapper.Base_Column_List"/>
     </sql>
 
@@ -52,8 +63,6 @@
         article.author as article_author,
         article.cover_url as article_cover_url,
         article.create_time as article_create_time,
-        tag.`id` as tag_id,
-        tag.`name` as tag_name,
         category.`id` as category_id,
         category.name as category_name
     </sql>
@@ -62,8 +71,6 @@
         select
         <include refid="Article_Column_List"/>
         from article
-        left join article_tag on article.id = article_tag.article_id
-        left join tag on article_tag.tag_id = tag.id
         left join category on article.category = category.id
         where article.id = #{id,jdbcType=BIGINT}
     </select>
@@ -72,8 +79,6 @@
         select
         <include refid="Article_Column_List"/>
         from article
-        left join article_tag on article.id = article_tag.article_id
-        left join tag on article_tag.tag_id = tag.id
         left join category on article.category = category.id
         <where>
             <if test="null != keyword and ''!=keyword">
@@ -217,7 +222,7 @@
                 author = #{author,jdbcType=VARCHAR},
             </if>
             <if test="category != null">
-                category = #{category,jdbcType=VARCHAR},
+                category = #{category.id,jdbcType=VARCHAR},
             </if>
             <if test="markDelTime != null">
                 mark_del_time = #{markDelTime,jdbcType=TIMESTAMP},

@@ -2,6 +2,7 @@ package cn.sakuramiku.lightblog.mapper;
 
 import cn.sakuramiku.lightblog.entity.Category;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -38,6 +39,9 @@ public interface CategoryMapper {
      * @return 分类
      */
     Category get(@NonNull Long id);
+
+    @Select("select * from category where name = #{name}")
+    Category getByName(String name);
 
     /**
      * 搜索分类

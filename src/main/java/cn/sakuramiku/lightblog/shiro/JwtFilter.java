@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.shiro;
 
 import cn.hutool.core.util.StrUtil;
+import cn.sakuramiku.lightblog.common.util.WebUtil;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
@@ -116,18 +117,28 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         // 登录没有错误 => 1.Token有效 2.Token 过期
         HttpServletResponse servletResponse = (HttpServletResponse) response;
         //  cors情况下，自定义请求头是需要设置暴露出来的
-//        servletResponse.addHeader("Access-Control-Expose-Headers","Token-Refresh");
         servletResponse.setHeader("Access-Control-Expose-Headers ", AUTHORIZATION_HEADER + ",Token-Refresh");
         try {
             JwtUtil.getUserName(authzHeader);
         } catch (ExpiredJwtException e) {
             // 登录过期了，还能执行到现在只有一个真相 ==> Token刷新了
             // 返回新的Token
-            servletResponse.setHeader(AUTHORIZATION_HEADER, SecurityUtils.getSubject().getPrincipal().toString());
+            authzHeader =  SecurityUtils.getSubject().getPrincipal().toString();
+            servletResponse.setHeader(AUTHORIZATION_HEADER, authzHeader);
             servletResponse.setHeader("Token-Refresh", "true");
+
+            // 记录登录用户
+            String ipAddr = WebUtil.getIpAddr((HttpServletRequest) request);
+            BlogHelper.CURRENT_USER_IP_TOKEN_MAP.put(ipAddr,authzHeader);
+
             return true;
         }
         servletResponse.setHeader("Token-Refresh", "false");
+
+        // 记录登录用户
+        String ipAddr = WebUtil.getIpAddr((HttpServletRequest) request);
+        BlogHelper.CURRENT_USER_IP_TOKEN_MAP.put(ipAddr,authzHeader);
+
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }

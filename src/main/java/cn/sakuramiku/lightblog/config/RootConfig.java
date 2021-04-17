@@ -1,7 +1,6 @@
 package cn.sakuramiku.lightblog.config;
 
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +20,11 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 @EnableScheduling
 @EnableTransactionManagement
 @MapperScan(basePackages = "cn.sakuramiku.lightblog.mapper")
-@EnableCaching
-@EnableAspectJAutoProxy
+//@EnableCaching
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 @ComponentScan(value = "cn.sakuramiku.lightblog",
         excludeFilters = {
-})
+        })
 @Configuration
 public class RootConfig {
 

@@ -2,7 +2,6 @@ package cn.sakuramiku.lightblog.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +9,6 @@ import java.time.LocalDateTime;
  */
 public class SearchLogParam extends PageParam {
 
-    @NotBlank
     @ApiModelProperty(value = "引用标识", required = true)
     protected String ref;
     @ApiModelProperty(value = "开始时间")

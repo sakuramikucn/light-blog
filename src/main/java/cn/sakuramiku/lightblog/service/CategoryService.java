@@ -28,6 +28,8 @@ public interface CategoryService {
      */
     Category getCategory(Long id);
 
+    Category getByName(String name);
+
     /**
      * 修改分类
      *

@@ -85,6 +85,11 @@
             <version>${pagehelper.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>3.2</version>
+        </dependency>
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
             <version>${druid.version}</version>
@@ -224,7 +229,30 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <profile.type>dev</profile.type>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <profile.type>prod</profile.type>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
+
+        <filters>
+            <filter>src/main/resources/profile/conf-${profile.type}.properties</filter>
+        </filters>
+
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -234,13 +262,14 @@
                 </includes>
                 <filtering>false</filtering>
             </resource>
+
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.properties</include>
+                    <include>**/*-conf.properties</include>
                     <include>**/*.xml</include>
                 </includes>
-                <filtering>false</filtering>
+                <filtering>true</filtering>
             </resource>
         </resources>
     </build>

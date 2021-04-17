@@ -3,5 +3,6 @@
 *.iml
 target/
 out/
-/tomcat.8888/
+/tomcat.*/
 /web/
+/src/main/resources/profile

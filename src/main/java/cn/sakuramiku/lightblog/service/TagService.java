@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Tag;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
@@ -38,7 +39,7 @@ public interface TagService {
      * @param id 标签ID
      * @return 是否成功
      */
-    Boolean removeTag(@NonNull Long id);
+    Boolean removeTag(@NonNull Long id) throws BusinessException;
 
     /**
      * 获取标签
@@ -47,6 +48,8 @@ public interface TagService {
      * @return 标签
      */
     Tag getTag(@NonNull Long id);
+
+    Tag getTagByName(String name);
 
     /**
      * 搜索标签
@@ -75,4 +78,6 @@ public interface TagService {
      * @return
      */
     Boolean batchInsert(List<BatchInsertParam> params);
+
+    Boolean deleteForArticle(Long articleId);
 }

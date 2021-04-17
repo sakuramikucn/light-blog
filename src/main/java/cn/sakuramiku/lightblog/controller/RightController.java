@@ -31,10 +31,10 @@ public class RightController {
     @Resource
     private RightService rightService;
 
-//    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("添加权限")
     @PostMapping
-    public Result<Right> add(Right right) {
+    public Result<Right> add(@RequestBody Right right) {
         Right right1 = rightService.saveRight(right);
         if (null == right1){
             return RespResult.fail("添加权限失败");
@@ -61,5 +61,27 @@ public class RightController {
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
         ValidateUtil.isNull(id, "参数异常，ID为空");
         return RespResult.ok(rightService.removeRight(id));
+    }
+
+    @RequiresRoles(Constant.ROLE_ADMIN)
+    @ApiOperation("修改权限")
+    @PutMapping
+    public Result<Right> update(@RequestBody Right right){
+        Right right1 = rightService.updateRight(right);
+        if (null == right1){
+            return RespResult.fail("修改权限失败");
+        }
+        return RespResult.ok(right1);
+    }
+
+    @ApiOperation("检查权限名称")
+    @GetMapping("/check")
+    public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
+        ValidateUtil.isEmpty(name,"名称不能为空");
+        Right right1 = rightService.getRightByName(name.trim());
+        if (null != right1){
+            return RespResult.ok(false);
+        }
+        return RespResult.ok(true);
     }
 }

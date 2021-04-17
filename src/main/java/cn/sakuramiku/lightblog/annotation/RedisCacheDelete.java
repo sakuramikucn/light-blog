@@ -3,12 +3,12 @@ package cn.sakuramiku.lightblog.annotation;
 import java.lang.annotation.*;
 
 /**
- * 标记缓存更改后清除缓存
- *
- * @author lyy
+ * @author LYY
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface OnChange {
+public @interface RedisCacheDelete {
+
+    String key();
 }

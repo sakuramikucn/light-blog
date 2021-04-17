@@ -1,5 +1,7 @@
 package cn.sakuramiku.lightblog.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -16,6 +18,7 @@ public class Log implements Serializable {
     /**
      * 唯一标识
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "唯一标识")
     private Long id;
 

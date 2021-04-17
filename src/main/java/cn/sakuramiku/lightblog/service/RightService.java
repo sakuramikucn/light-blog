@@ -26,6 +26,8 @@ public interface RightService {
 
     Right getRight(Long id);
 
+    Right getRightByName(String name);
+
     /**
      * 为角色添加权限(批量)
      *

@@ -4,6 +4,7 @@ package cn.sakuramiku.lightblog.mapper;
 import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -48,6 +49,15 @@ public interface RightMapper {
      * @return 权限
      */
     Right get(@NonNull @Param("id") Long id);
+
+    /**
+     * 获取权限
+     *
+     * @param name 权限名称
+     * @return 权限
+     */
+    @Select("select * from `right` where name = #{name}")
+    Right getByName(@NonNull @Param("name") String name);
 
     /**
      * 修改权限

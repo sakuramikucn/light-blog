@@ -6,6 +6,7 @@ import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.User;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
@@ -49,7 +50,7 @@ public class UserController {
     @RequiresAuthentication
     @ApiOperation("通过Token获取用户")
     @ApiImplicitParam(name = "id", dataTypeClass = Long.class, required = true, value = "用户ID")
-    @GetMapping("")
+    @GetMapping
     public Result<User> userInfo() throws ApiException {
         Subject subject = SecurityUtils.getSubject();
         String token = (String) subject.getPrincipal();
@@ -87,7 +88,7 @@ public class UserController {
     }
 
     @PutMapping
-    public Result<User> update(User user) throws ApiException {
+    public Result<User> update(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
         ValidateUtil.isNull(user.getId(),"参数错误，用户ID为空");
         user.setState(null);
@@ -99,21 +100,27 @@ public class UserController {
     }
 
     @PostMapping
-    public Result<User> add(User user) throws ApiException {
+    public Result<User> add(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
         String username = user.getUsername();
         ValidateUtil.isEmpty(username,"参数错误，用户名不能为空");
         User register = userService.register(username, DEFAULT_PASSWORD);
         if (null != register){
             user.setId(register.getId());
-            User user1 = userService.updateUser(user);
-            return RespResult.ok(user1);
+            try {
+                User user1 = userService.updateUser(user);
+                if (null != user1){
+                    return RespResult.ok(user1);
+                }
+            }catch (BusinessException e){
+                return RespResult.fail("添加失败");
+            }
         }
         return RespResult.fail("添加失败");
     }
 
     @PutMapping("/freez/{id}")
-    public Result<User> freez(@PathVariable("id") Long id){
+    public Result<User> freez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
         user.setId(id);
         user.setState(Constant.USER_STATE_FREEZ);
@@ -122,7 +129,7 @@ public class UserController {
     }
 
     @PutMapping("/unfreez/{id}")
-    public Result<User> unfreez(@PathVariable("id") Long id){
+    public Result<User> unfreez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
         user.setId(id);
         user.setState(Constant.USER_STATE_NORMAL);
@@ -131,7 +138,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public Result<User> remove(@PathVariable("id") Long id){
+    public Result<User> remove(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
         user.setId(id);
         user.setState(Constant.USER_STATE_DELETE);

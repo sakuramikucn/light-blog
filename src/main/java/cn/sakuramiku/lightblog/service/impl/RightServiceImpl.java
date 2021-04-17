@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -9,12 +9,10 @@ import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.mapper.RightMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.RightService;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -30,15 +28,18 @@ import java.util.List;
  * @author lyy
  */
 @LogConfig(reference = "right",name = "权限")
-@CacheConfig(cacheNames = "light_blog:right", keyGenerator = "simpleKeyGenerator")
+@RedisCacheConfig(cacheName = "light_blog:right")
 @Service
 public class RightServiceImpl implements RightService {
 
     @Resource
     private RightMapper rightMapper;
+    @Lazy
+    @Resource
+    private RightService rightService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Right saveRight(@NonNull Right right) {
@@ -47,15 +48,21 @@ public class RightServiceImpl implements RightService {
         right.setCreateTime(LocalDateTime.now());
         Boolean add = rightMapper.add(right);
         if (add){
-            return this.getRight(id);
+            return rightService.getRight(id);
         }
         return null;
     }
 
-    @Cacheable(key = "#result.id",unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public Right getRight(Long id) {
         return rightMapper.get(id);
+    }
+
+    @RedisCache(key = "#name")
+    @Override
+    public Right getRightByName(String name) {
+        return rightMapper.getByName(name);
     }
 
     @WriteLog(action = WriteLog.Action.INSERT)
@@ -65,19 +72,19 @@ public class RightServiceImpl implements RightService {
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Right updateRight(@NonNull Right right) {
         Boolean update = rightMapper.update(right);
         if (update){
-            return this.getRight(right.getId());
+            return rightService.getRight(right.getId());
         }
         return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
-    @CacheEvict(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean removeRight(Long id) throws BusinessException {
@@ -88,31 +95,33 @@ public class RightServiceImpl implements RightService {
         return rightMapper.delete(id);
     }
 
-    @OnChange
-    @Cacheable(unless = "null == #result || 0 == #result.total")
+    @OnCacheChange
+    @RedisCache
     @Override
     public PageInfo<Right> searchRight(@NonNull Long roleId, @Nullable String keyword, @Nullable Integer page, @Nullable Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+           PageHelper.startPage(page, pageSize, true);
         }
         List<Right> rights = rightMapper.search(roleId);
         return PageInfo.of(rights);
     }
 
-    @OnChange
-    @Cacheable(unless = "null == #result || 0 == #result.total")
+    @OnCacheChange
+    @RedisCache
     @Override
     public PageInfo<Right> findRight(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+            Page<Object> objects = PageHelper.startPage(page, pageSize, true);
+            objects.setOrderBy("modified_time DESC");
         }
         List<Right> rights = rightMapper.find();
         return PageInfo.of(rights);
     }
 
-    @CacheEvict(key = "#ref")
+    @RedisCacheDelete(key = "#ref")
     @Override
     public Boolean deleteForRole(Long ref) {
         return rightMapper.remove(ref);
     }
+
 }

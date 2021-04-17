@@ -2,7 +2,9 @@ package cn.sakuramiku.lightblog.mapper;
 
 
 import cn.sakuramiku.lightblog.entity.Role;
+import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -19,10 +21,9 @@ public interface RoleMapper {
      * 删除角色
      *
      * @param id  角色ID
-     * @param ref 用户ID
      * @return 是否成功
      */
-    Boolean delete(@Param("id") Long id, @Param("ref") String ref);
+    Boolean delete(@Param("id") Long id);
 
     /**
      * 添加角色
@@ -51,6 +52,9 @@ public interface RoleMapper {
      */
     Role get(@NonNull @Param("id") Long id);
 
+    @Select("select * from `role` where name = #{name}")
+    Role getByName(@Param("name") String name);
+
     /**
      * 搜索角色
      *
@@ -78,4 +82,7 @@ public interface RoleMapper {
      */
     Boolean update(@NonNull Role record);
 
+    Boolean batchInsert(List<BatchInsertParam> params);
+
+    Boolean deleteForUser(Long userId);
 }

@@ -8,6 +8,7 @@ import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Comment;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.CommentService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
@@ -50,7 +51,7 @@ public class ArticleController {
     @GetMapping("/{id}")
     public Result<Article> get(@PathVariable(value = "id") Long id) throws ApiException {
         ValidateUtil.isNull(id, "参数异常，文章ID为空");
-        Article article =articleService.getArticle(id);
+        Article article = articleService.getArticle(id);
         ValidateUtil.isNull(article, "参数异常，文章ID无效");
         return RespResult.ok(article);
     }
@@ -69,61 +70,70 @@ public class ArticleController {
             SimpleArticleView view = new SimpleArticleView();
             return view.valueOf(article, pageViews, comments.getTotal());
         }).collect(Collectors.toList());
-        return RespResult.ok(BlogHelper.toPageInfo(articles,views));
+        return RespResult.ok(BlogHelper.toPageInfo(articles, views));
     }
 
     @RequiresAuthentication
     @ApiOperation("搜索文章")
     @PostMapping("/list")
-    public Result<PageInfo<ArticleView>> list(SearchArticleParam param) {
+    public Result<PageInfo<ArticleView>> list(@RequestBody SearchArticleParam param) {
         PageInfo<Article> articles = articleService.searchArticle(param);
         List<ArticleView> views = articles.getList().parallelStream().map(article -> {
             Long id = article.getId();
             PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(), null, null, null);
             Object o = redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id);
             Long pageViews = null == o ? 0L : Long.parseLong(o.toString());
-            return ArticleView.valueOf(article,pageViews,comments.getTotal());
+            return ArticleView.valueOf(article, pageViews, comments.getTotal());
         }).collect(Collectors.toList());
-        return RespResult.ok(BlogHelper.toPageInfo(articles,views));
+        return RespResult.ok(BlogHelper.toPageInfo(articles, views));
     }
 
     @RequiresAuthentication
     @ApiOperation("添加文章")
     @PostMapping
-    public Result<Long> create(@Validated Article article){
-        Long id = articleService.saveArticle(article);
-        return RespResult.ok(id);
+    public Result<Article> create(@Validated @RequestBody Article article) throws BusinessException {
+        Article article1 = articleService.saveArticle(article);
+        if (null == article1){
+            return RespResult.fail("添加失败");
+        }
+        return RespResult.ok(article1);
     }
 
     @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("修改文章")
     @ApiResponse(code = 0, message = "ok", examples = @Example(@ExampleProperty(mediaType = "文章ID", value = "文章ID")))
     @PutMapping
-    public Result<Boolean> update(@RequestBody Article article){
-        Boolean succ = articleService.updateArticle(article);
-        return RespResult.ok(succ);
+    public Result<Article> update(@RequestBody Article article) throws BusinessException {
+        Article article1 = articleService.updateArticle(article);
+        if (null == article1){
+            return RespResult.fail("修改失败");
+        }
+        return RespResult.ok(article1);
     }
 
     @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("移动到回收站")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id",dataTypeClass = Long.class,value = "文章ID",required = true)
+            @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
     })
     @PutMapping("/{id}")
-    public Result<Boolean> remove(@PathVariable("id") Long id) throws ApiException {
-        ValidateUtil.isNull(id,"参数异常，文章ID为空");
-        Boolean succ = articleService.removeArticle(id);
-        return RespResult.ok(succ);
+    public Result<Article> remove(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id, "参数异常，文章ID为空");
+        Article article1 = articleService.removeArticle(id);
+        if (null == article1){
+            return RespResult.fail("删除失败");
+        }
+        return RespResult.ok(article1);
     }
 
     @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("删除文章")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id",dataTypeClass = Long.class,value = "文章ID",required = true)
+            @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
     })
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException {
-        ValidateUtil.isNull(id,"参数异常，文章ID为空");
+        ValidateUtil.isNull(id, "参数异常，文章ID为空");
         Boolean succ = articleService.deleteArticle(id);
         return RespResult.ok(succ);
     }

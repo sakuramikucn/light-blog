@@ -2,29 +2,27 @@ package cn.sakuramiku.lightblog.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.sakuramiku.lightblog.annotation.OnChange;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Tag;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.mapper.ArticleMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.TagService;
+import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageInterceptor;
 import io.jsonwebtoken.Claims;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,7 @@ import java.util.stream.Collectors;
  * @author lyy
  */
 @LogConfig(reference = "article",name = "文章")
-@CacheConfig(cacheNames = "light_blog:article", keyGenerator = "simpleKeyGenerator")
+@RedisCacheConfig(cacheName = "light_blog:article")
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -48,13 +46,11 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleMapper articleMapper;
     @Resource
     private TagService tagService;
-    @Resource
-    private PageInterceptor pageInterceptor;
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long saveArticle(@NonNull Article article) {
+    public Article saveArticle(@NonNull Article article) throws BusinessException {
         long id = IdGenerator.nextId();
         article.setId(id);
         article.setCreateTime(LocalDateTime.now());
@@ -74,29 +70,58 @@ public class ArticleServiceImpl implements ArticleService {
         // 添加标签
         if (succ && !CollectionUtil.isEmpty(tags)) {
             List<BatchInsertParam> insertParams = tags.parallelStream().map(tag -> BatchInsertParam.valueOf(id, tag.getId())).collect(Collectors.toList());
-            tagService.batchInsert(insertParams);
+            Boolean aBoolean = tagService.batchInsert(insertParams);
+            if (aBoolean){
+                return articleMapper.get(id);
+            }else {
+                throw new BusinessException("添加文章失败");
+            }
         }
-        return id;
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#article.id")
+    @RedisCachePut(key = "#article.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean updateArticle(@NonNull Article article) {
-        return articleMapper.update(article);
+    public Article updateArticle(@NonNull Article article) throws BusinessException {
+        // 更新mask
+        Boolean aPublic = article.getPublic();
+        Article old = articleMapper.get(article.getId());
+        int mask = BlogHelper.setMask(old.getMask(),aPublic ? Article.MASK_PUBLIC: -Article.MASK_PUBLIC);
+        article.setMask(mask);
+        //
+        Boolean update = articleMapper.update(article);
+        if (update){
+            // 更新标签
+            tagService.deleteForArticle(article.getId());
+            List<BatchInsertParam> insertParams = article.getTags().parallelStream()
+                    .map(tag -> BatchInsertParam.valueOf(article.getId(), tag.getId())).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(insertParams)){
+                Boolean aBoolean = tagService.batchInsert(insertParams);
+                if (!aBoolean){
+                    throw new BusinessException("修改失败");
+                }
+            }
+            return articleMapper.get(article.getId());
+        }
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean removeArticle(@NonNull Long id) {
+    public Article removeArticle(@NonNull Long id) {
         Article article = new Article();
         article.setId(id);
         article.setState(Constant.ARTICLE_STATE_DELETE);
         article.setMarkDelTime(LocalDateTime.now());
-        return articleMapper.update(article);
+        Boolean update = articleMapper.update(article);
+        if (update){
+            return articleMapper.get(id);
+        }
+        return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
@@ -105,14 +130,14 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.delete(id);
     }
 
-    @Cacheable(key = "#id", unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public Article getArticle(@NonNull Long id) {
         return articleMapper.get(id);
     }
 
-    @OnChange
-    @Cacheable(unless = "null == #result.list || 0 == #result.list.size()")
+    @OnCacheChange
+    @RedisCache
     @Override
     public PageInfo<Article> searchArticle(@NonNull SearchArticleParam param) {
 

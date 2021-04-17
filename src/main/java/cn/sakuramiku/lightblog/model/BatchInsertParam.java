@@ -42,4 +42,12 @@ public class BatchInsertParam {
     public void setTargetId(Long targetId) {
         this.targetId = targetId;
     }
+
+    @Override
+    public String toString() {
+        return "BatchInsertParam{" +
+                "originId=" + originId +
+                ", targetId=" + targetId +
+                '}';
+    }
 }

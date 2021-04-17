@@ -13,6 +13,7 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -36,6 +37,11 @@ public class ApiExceptionAdvice {
     @ExceptionHandler(BusinessException.class)
     public Result<Object> handleBusinessException(BusinessException e) {
         return new RespResult<>(null, RespCode.SERVER_INTERNAL_ERROR, e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
+        return new RespResult<>(null, RespCode.BAD_REQUEST_PARAMETER, e.getMessage());
     }
 
     @ExceptionHandler({UnauthenticatedException.class})

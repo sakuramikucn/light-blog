@@ -4,6 +4,7 @@ package cn.sakuramiku.lightblog.mapper;
 import cn.sakuramiku.lightblog.entity.Tag;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -35,6 +36,9 @@ public interface TagMapper {
 
     Boolean batchInsert(List<BatchInsertParam> params);
 
+    @Select("delete from article_tag where article_id = #{articleId}")
+    Boolean deleteForArticle(Long articleId);
+
     /**
      * 获取标签
      *
@@ -42,6 +46,9 @@ public interface TagMapper {
      * @return
      */
     Tag get(@NonNull Long id);
+
+    @Select("select * from tag where name = #{name}")
+    Tag getTagByName(String name);
 
     /**
      * 修改标签
@@ -79,5 +86,8 @@ public interface TagMapper {
             @Nullable @Param("begin") LocalDateTime begin,
             @Nullable @Param("end") LocalDateTime end
     );
+
+    @Select("select count(0) from article_tag where tag_id = #{id}")
+    int articleCount(Long id);
 
 }

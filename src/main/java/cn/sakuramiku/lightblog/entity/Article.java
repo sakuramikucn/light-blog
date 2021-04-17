@@ -93,7 +93,7 @@ public class Article implements Serializable {
     /**
      * 布尔类型标记
      */
-    private Integer mask;
+    private Integer mask = 1;
 
     @ApiModelProperty(value = "标签")
     private List<Tag> tags;
@@ -225,7 +225,7 @@ public class Article implements Serializable {
     }
 
     public void setPublic(Boolean aPublic) {
-        mask = BlogHelper.setMask(mask,aPublic ? MASK_PUBLIC: -MASK_PUBLIC);
+        isPublic = aPublic;
     }
 
     @Override

@@ -31,8 +31,8 @@ public class TagController {
 
     @RequiresAuthentication
     @ApiOperation("添加标签")
-    @PostMapping
-    public Result<Tag> add(String name) throws ApiException {
+    @PostMapping("/{name}")
+    public Result<Tag> add(@PathVariable("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name, "参数错误，标签名称为空");
         Tag tag = tagService.saveTag(name);
         if (null == tag){
@@ -42,7 +42,7 @@ public class TagController {
     }
 
     @PutMapping
-    public Result<Tag> update(Tag tag) throws ApiException {
+    public Result<Tag> update(@RequestBody Tag tag) throws ApiException {
         ValidateUtil.isNull(tag.getId(), "参数错误，标签名称为空");
         ValidateUtil.isEmpty(tag.getName(), "参数错误，标签名称为空");
         Tag tag1 = tagService.updateTag(tag.getId(),tag.getName());
@@ -58,5 +58,15 @@ public class TagController {
     public Result<PageInfo<Tag>> search(Long articleId, String keyword, Integer page, Integer pageSize) {
         PageInfo<Tag> tags = tagService.search(articleId, keyword, page, pageSize);
         return RespResult.ok(tags);
+    }
+
+    @GetMapping("/check/{name}")
+    public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
+        ValidateUtil.isEmpty(name,"名称不能为空");
+        Tag tagByName = tagService.getTagByName(name);
+        if (null == tagByName){
+            return RespResult.ok(true);
+        }
+        return RespResult.ok(false);
     }
 }

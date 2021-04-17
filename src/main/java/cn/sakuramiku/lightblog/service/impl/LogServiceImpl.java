@@ -1,14 +1,12 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnChange;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
 import cn.sakuramiku.lightblog.entity.Log;
 import cn.sakuramiku.lightblog.mapper.LogMapper;
 import cn.sakuramiku.lightblog.service.LogService;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +20,6 @@ import java.util.List;
  *
  * @author lyy
  */
-@CacheConfig(cacheNames = "light_blog:log", keyGenerator = "simpleKeyGenerator")
 @Service
 public class LogServiceImpl implements LogService {
 
@@ -59,13 +56,12 @@ public class LogServiceImpl implements LogService {
         return searchLog(ref, null, null, page, pageSize);
     }
 
-    @OnChange
-    @Cacheable(unless = "null == #result || 0 == #result.total")
     @Override
     public PageInfo<Log> searchLog(String ref, LocalDateTime begin, LocalDateTime end,
                                    Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
-            PageHelper.startPage(page, pageSize, true);
+            Page<Object> objects = PageHelper.startPage(page, pageSize, true);
+            objects.setOrderBy("modified_time DESC");
         }
         List<Log> logs = logMapper.search(ref, begin, end);
         return PageInfo.of(logs);

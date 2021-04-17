@@ -1,5 +1,7 @@
 package cn.sakuramiku.lightblog.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,6 +21,7 @@ public class Role implements Serializable {
     /**
      * 唯一标识
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "唯一标识",accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private Long id;
 
@@ -99,6 +102,25 @@ public class Role implements Serializable {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Role)) {
+            return false;
+        }
+
+        Role role = (Role) o;
+
+        return getId().equals(role.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
     }
 
     @Override
