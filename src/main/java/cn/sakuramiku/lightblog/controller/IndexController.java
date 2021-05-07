@@ -1,21 +1,30 @@
 package cn.sakuramiku.lightblog.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.*;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.exception.BusinessException;
+import cn.sakuramiku.lightblog.service.CommonService;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +44,8 @@ public class IndexController {
     private RedisUtil redisUtil;
     @Resource
     private HttpServletRequest request;
+    @Resource
+    private CommonService commonService;
 
     @PostMapping("/login")
     @ApiOperation("登录")
@@ -116,5 +127,16 @@ public class IndexController {
             increment = Long.parseLong(o.toString());
         }
         return RespResult.ok(increment);
+    }
+
+    @RequiresAuthentication
+    @PostMapping("/upload")
+    public Result<String> upload(@RequestParam("file") MultipartFile file) throws IOException {
+        InputStream inputStream = file.getInputStream();
+        String url = commonService.upload(new BufferedInputStream(inputStream), file.getContentType());
+        if (StrUtil.isBlank(url)){
+            return RespResult.fail("上传失败");
+        }
+        return RespResult.ok(url);
     }
 }

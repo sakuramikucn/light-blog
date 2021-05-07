@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +30,10 @@ public interface UserMapper {
      * @param keyword 用户名/昵称 关键字
      * @return 用户列表
      */
-    List<User> search(@Nullable @Param("keyword") String keyword, @Param("state") Integer state);
+    List<User> search(@Nullable @Param("keyword") String keyword,
+                      @Param("state") Integer state,
+                      @Param("start") Date start,
+                      @Param("end") Date end);
 
     /**
      * 添加用户
@@ -48,4 +52,5 @@ public interface UserMapper {
     Boolean update(@NonNull User record);
 
     Boolean delete(Long id);
+
 }

@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnCacheChange;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -12,10 +12,6 @@ import cn.sakuramiku.lightblog.service.TagService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -30,8 +26,8 @@ import java.util.List;
  *
  * @author lyy
  */
-@LogConfig(reference = "tag",name = "标签")
-@CacheConfig(cacheNames = "light_blog:tag", keyGenerator = "simpleKeyGenerator")
+@LogConfig(reference = "#result.id",category = "tag",name = "标签")
+@RedisCacheConfig(cacheName = "light_blog:tag")
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -42,7 +38,7 @@ public class TagServiceImpl implements TagService {
     private TagService tagService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
-    @CachePut(key = "#result.id",unless = "null  == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Tag saveTag(@NonNull String name) {
@@ -59,7 +55,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#result.id",unless = "null  == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Tag updateTag(@NonNull Long id, @NonNull String name) {
@@ -71,7 +67,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
-    @CacheEvict(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean removeTag(@NonNull Long id) throws BusinessException {
@@ -82,7 +78,7 @@ public class TagServiceImpl implements TagService {
         return tagMapper.delete(id);
     }
 
-    @Cacheable(key = "#id", unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public Tag getTag(@NonNull Long id) {
         return tagMapper.get(id);
@@ -94,7 +90,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @OnCacheChange
-    @Cacheable(unless = "null == #result || 0 == #result.total")
+    @RedisCache
     @Override
     public PageInfo<Tag> search(Long articleId, String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
@@ -111,13 +107,12 @@ public class TagServiceImpl implements TagService {
         return PageInfo.of(tags);
     }
 
+    @RedisCache
     @Override
     public PageInfo<Tag> search(Long articleId, String keyword) {
         return search(articleId, keyword, null, null);
     }
 
-    @CachePut
-    @WriteLog(action = WriteLog.Action.INSERT)
     @Override
     public Boolean batchInsert(List<BatchInsertParam> params) {
         return tagMapper.batchInsert(params);

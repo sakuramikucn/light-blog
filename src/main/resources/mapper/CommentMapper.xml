@@ -6,9 +6,13 @@
         <id column="comment_id" jdbcType="BIGINT" property="id"/>
         <result column="comment_parent_id" jdbcType="BIGINT" property="parentId"/>
         <result column="comment_reference" jdbcType="VARCHAR" property="reference"/>
+        <result column="comment_sub_reference" jdbcType="VARCHAR" property="subReference"/>
+        <result column="comment_type" jdbcType="INTEGER" property="type"/>
         <result column="comment_nick_name" jdbcType="VARCHAR" property="nickName"/>
+        <result column="comment_username" jdbcType="VARCHAR" property="username"/>
+        <result column="comment_role_type" jdbcType="INTEGER" property="roleType"/>
         <result column="comment_email" jdbcType="VARCHAR" property="email"/>
-        <result column="comment_state" jdbcType="BOOLEAN" property="state"/>
+        <result column="comment_state" jdbcType="INTEGER" property="state"/>
         <result column="comment_content" jdbcType="VARCHAR" property="content"/>
         <result column="comment_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="comment_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
@@ -18,9 +22,13 @@
         comment.id as comment_id,
         comment.parent_id as comment_parent_id,
         comment.reference as comment_reference,
+        comment.sub_reference as comment_sub_reference,
+        comment.type as comment_type,
         comment.nick_name as comment_nick_name,
+        comment.username as comment_username,
+        comment.role_type as comment_role_type,
         comment.email as comment_email,
-        comment.`state` as `comment_state`,
+        comment.`state` as comment_state,
         comment.content as comment_content,
         comment.create_time as comment_create_time,
         comment.modified_time as comment_modified_time
@@ -41,27 +49,47 @@
             <if test="null != state">
                 comment.state = #{state,jdbcType=TINYINT}
             </if>
+            <if test="null == state">
+                comment.state != 2
+            </if>
             <if test="null != ref and '' != ref">
                 and comment.reference = #{ref,jdbcType=VARCHAR}
             </if>
+            <if test="null != type">
+                and comment.type = #{type}
+            </if>
             <if test="null != parentId">
-                and comment.parentId = #{parentId,jdbcType=BIGINT}
+                and comment.parent_id = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="null != keyword and '' != keyword">
+                and comment.content like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                or comment.nick_name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
         </where>
         order by create_time DESC
     </select>
-    <select id="search_COUNT" resultMap="BaseResultMap">
+    <select id="search_COUNT" resultType="long">
         select count(0)
         from comment
         <where>
             <if test="null != state">
                 comment.state = #{state,jdbcType=TINYINT}
             </if>
+            <if test="null == state">
+                comment.state != 2
+            </if>
             <if test="null != ref and '' != ref">
                 and comment.reference = #{ref,jdbcType=VARCHAR}
             </if>
+            <if test="null != type">
+                and comment.type = #{type}
+            </if>
             <if test="null != parentId">
-                and comment.parentId = #{parentId,jdbcType=BIGINT}
+                and comment.parent_id = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="null != keyword and '' != keyword">
+                and comment.content like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                or comment.nick_name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
         </where>
     </select>
@@ -82,8 +110,20 @@
             <if test="reference != null">
                 `reference`,
             </if>
+            <if test="subReference != null">
+                `sub_reference`,
+            </if>
+            <if test="type != null">
+                `type`,
+            </if>
             <if test="nickName != null">
                 nick_name,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="roleType != null">
+                role_type,
             </if>
             <if test="email != null">
                 email,
@@ -109,8 +149,20 @@
             <if test="reference != null">
                 #{reference,jdbcType=VARCHAR},
             </if>
+            <if test="subReference != null">
+                #{subReference},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
             <if test="nickName != null">
                 #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="roleType != null">
+                #{role_type},
             </if>
             <if test="email != null">
                 #{email,jdbcType=VARCHAR},
@@ -131,7 +183,7 @@
         update comment
         <set>
             <if test="state != null">
-                `state` = #{state,jdbcType=TINYINT},
+                `state` = #{state},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

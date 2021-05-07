@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
  *
  * @author lyy
  */
-@LogConfig(reference = "article",name = "文章")
+@LogConfig(reference = "#result.id",category = "article",name = "文章")
 @RedisCacheConfig(cacheName = "light_blog:article")
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -60,7 +61,10 @@ public class ArticleServiceImpl implements ArticleService {
         assert claims != null;
         String username = String.valueOf(claims.get("username"));
         String nickName = String.valueOf(claims.get("nickName"));
+        String authorId = String.valueOf(claims.get("id"));
         article.setAuthor(username);
+        article.setAuthorId(authorId);
+        article.setState(Constant.ARTICLE_STATE_NORMAL);
         if (!StrUtil.isBlank(nickName)) {
             article.setAuthor(nickName);
         }
@@ -92,7 +96,8 @@ public class ArticleServiceImpl implements ArticleService {
         article.setMask(mask);
         //
         Boolean update = articleMapper.update(article);
-        if (update){
+        List<Tag> tags = article.getTags();
+        if (update && null != tags){
             // 更新标签
             tagService.deleteForArticle(article.getId());
             List<BatchInsertParam> insertParams = article.getTags().parallelStream()
@@ -141,13 +146,15 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public PageInfo<Article> searchArticle(@NonNull SearchArticleParam param) {
 
-        Page<Article> page = PageHelper.startPage(param.getPage(), param.getPageSize(), true);
-        String orderby = "article.create_time " + param.getOrder();
-        Boolean hotOrderBy = param.getHotOrderBy();
-        if (hotOrderBy) {
-            orderby += ",article.page_views DESC";
+        if (param.getPage() != null && param.getPageSize() != null){
+            Page<Article> page = PageHelper.startPage(param.getPage(), param.getPageSize(), true);
+            String orderby = "article.create_time " + param.getOrder();
+            Boolean hotOrderBy = param.getHotOrderBy();
+            if (hotOrderBy) {
+                orderby += ",article.page_views DESC";
+            }
+            page.setOrderBy(orderby);
         }
-        page.setOrderBy(orderby);
         String keyword = param.getKeyword();
         if (StrUtil.isBlank(keyword)) {
             param.setKeyword(null);
@@ -157,6 +164,23 @@ public class ArticleServiceImpl implements ArticleService {
             articles = articles.parallelStream().filter(val -> param.getPublic().equals(val.getPublic())).collect(Collectors.toList());
         }
         return new PageInfo<>(articles);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @RedisCleanQuery
+    @WriteLog(action = WriteLog.Action.DELETE,result = true)
+    @Override
+    public Long deleteForRecycle(Integer status, Date start) {
+        return articleMapper.deleteForRecycle(status,start);
+    }
+
+    @RedisCachePut(key = "id")
+    @Override
+    public Boolean restoreForRecycle(Long id) {
+        Article article = new Article();
+        article.setId(id);
+        article.setState(Constant.ARTICLE_STATE_NORMAL);
+        return articleMapper.update(article);
     }
 
 }

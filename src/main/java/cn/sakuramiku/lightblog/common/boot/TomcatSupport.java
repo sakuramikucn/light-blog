@@ -1,6 +1,5 @@
 package cn.sakuramiku.lightblog.common.boot;
 
-import cn.sakuramiku.lightblog.LightBlogApplication;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TomcatSupport extends AbstractBootSupport {
 
-    protected static final Logger logger = LoggerFactory.getLogger(LightBlogApplication.class);
+    protected static final Logger logger = LoggerFactory.getLogger(TomcatSupport.class);
 
     protected int port;
     protected String contextPath;

@@ -32,12 +32,13 @@ public class LogController {
     @ApiOperation("搜索日志")
     @PostMapping("/search")
     public Result<PageInfo<Log>> logs(@RequestBody SearchLogParam param) {
+        String category = param.getCategory();
         String ref = param.getRef();
         LocalDateTime begin = param.getBegin();
         LocalDateTime end = param.getEnd();
         Integer page = param.getPage();
         Integer pageSize = param.getPageSize();
-        PageInfo<Log> logs = logService.searchLog(ref, begin, end, page, pageSize);
+        PageInfo<Log> logs = logService.searchLog(category, ref, begin, end, page, pageSize);
         return RespResult.ok(logs);
     }
 }

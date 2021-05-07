@@ -63,8 +63,13 @@ public class ArticleController {
         param.setState(1);
         PageInfo<Article> articles = articleService.searchArticle(param);
         List<SimpleArticleView> views = articles.getList().parallelStream().map(article -> {
+            Boolean simple = param.getSimple();
+            if (simple){
+                SimpleArticleView view = new SimpleArticleView();
+                return view.valueOf(article, 0L, 0);
+            }
             Long id = article.getId();
-            PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(), null, null, null);
+            PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(), null,null, Constant.COMMENT_TYPE_ARTICLE, null, null);
             Object o = redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id);
             Long pageViews = null == o ? 0L : Long.parseLong(o.toString());
             SimpleArticleView view = new SimpleArticleView();
@@ -79,8 +84,12 @@ public class ArticleController {
     public Result<PageInfo<ArticleView>> list(@RequestBody SearchArticleParam param) {
         PageInfo<Article> articles = articleService.searchArticle(param);
         List<ArticleView> views = articles.getList().parallelStream().map(article -> {
+            Boolean simple = param.getSimple();
+            if (simple){
+                return ArticleView.valueOf(article, 0L, 0L);
+            }
             Long id = article.getId();
-            PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(), null, null, null);
+            PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(), null, null, Constant.COMMENT_TYPE_ARTICLE , null, null);
             Object o = redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id);
             Long pageViews = null == o ? 0L : Long.parseLong(o.toString());
             return ArticleView.valueOf(article, pageViews, comments.getTotal());
@@ -138,6 +147,16 @@ public class ArticleController {
         return RespResult.ok(succ);
     }
 
-
+    @RequiresRoles(Constant.ROLE_ADMIN)
+    @ApiOperation("恢复文章")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
+    })
+    @PutMapping("/restore/{id}")
+    public Result<Boolean> restore(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id, "参数异常，文章ID为空");
+        Boolean succ = articleService.restoreForRecycle(id);
+        return RespResult.ok(succ);
+    }
 }
 

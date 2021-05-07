@@ -13,6 +13,10 @@ public class SearchCommentParam extends PageParam {
     public Long parentId;
     @ApiModelProperty(value = "状态（1=正常，2=屏蔽，3=删除）")
     public Integer state;
+    @ApiModelProperty("关键字")
+    public String keyword;
+    @ApiModelProperty("类型，1=文章，2=留言板")
+    public Integer type = 0;
 
     public String getRef() {
         return ref;
@@ -37,4 +41,21 @@ public class SearchCommentParam extends PageParam {
     public void setState(Integer state) {
         this.state = state;
     }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
 }

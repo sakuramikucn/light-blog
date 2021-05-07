@@ -2,8 +2,11 @@ package cn.sakuramiku.lightblog.mapper;
 
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,4 +55,7 @@ public interface ArticleMapper {
      * @return 是否成功
      */
     Boolean update(@NonNull Article record);
+
+    @Delete("delete from article where state = #{state} and mark_del_time <= #{start}")
+    Long deleteForRecycle(@Param("state") Integer status, @Param("start") Date start);
 }

@@ -43,11 +43,13 @@ public interface LogMapper {
      * 搜索日志
      *
      * @param ref   引用，一般为被记录对象的ID
+     * @param category 分类
      * @param begin 开始时间
      * @param end   截止时间
      * @return 日志列表
      */
     List<Log> search(@Nullable @Param("ref") String ref,
+                     @Param("category") String category,
                      @Nullable @Param("begin") LocalDateTime begin,
                      @Nullable @Param("end") LocalDateTime end);
 }

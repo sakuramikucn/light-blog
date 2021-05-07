@@ -29,7 +29,7 @@
         from tag
         <where>
             <if test="null != keyword and '' != keyword">
-                and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
                 and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
@@ -37,12 +37,12 @@
         </where>
         order by create_time DESC
     </select>
-    <select id="search_COUNT" resultMap="BaseResultMap">
+    <select id="search_COUNT" resultType="long">
         select count(0)
         from tag
         <where>
             <if test="null != keyword and '' != keyword">
-                and tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
+                tag.name like concat('%',#{keyword,jdbcType=VARCHAR},'%')
             </if>
             <if test="null != begin and null != end">
                 and tag.create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}

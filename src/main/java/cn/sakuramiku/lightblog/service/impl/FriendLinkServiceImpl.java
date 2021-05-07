@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnCacheChange;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -10,10 +10,6 @@ import cn.sakuramiku.lightblog.service.FriendLinkService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +21,8 @@ import java.util.List;
 /**
  * @author lyy
  */
-@LogConfig(reference = "friend_link",name = "友情链接")
-@CacheConfig(cacheNames = "light_blog:friend_link", keyGenerator = "simpleKeyGenerator")
+@LogConfig(reference = "#result.id",category = "friend_link",name = "友情链接")
+@RedisCacheConfig(cacheName = "light_blog:friend_link")
 @Service
 public class FriendLinkServiceImpl implements FriendLinkService {
 
@@ -34,7 +30,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     private FriendLinkMapper linkMapper;
 
     @WriteLog(action = WriteLog.Action.INSERT)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public FriendLink saveLink(@NonNull FriendLink link) {
@@ -50,7 +46,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
     @WriteLog(action = WriteLog.Action.UPDATE)
     @Transactional(rollbackFor = Exception.class)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Override
     public FriendLink updateLink(@NonNull FriendLink link) {
         Boolean update = linkMapper.update(link);
@@ -62,20 +58,20 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
     @WriteLog(action = WriteLog.Action.DELETE)
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Override
     public Boolean removeLink(@NonNull Long id) {
         return linkMapper.delete(id);
     }
 
-    @Cacheable(key = "#id", unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public FriendLink getLink(@NonNull Long id) {
         return linkMapper.get(id);
     }
 
     @OnCacheChange
-    @Cacheable(unless = "null == #result || 0 == #result.total")
+    @RedisCache
     @Override
     public PageInfo<FriendLink> searchLink(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {

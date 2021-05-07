@@ -12,7 +12,6 @@ import cn.sakuramiku.lightblog.service.RightService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -27,16 +26,13 @@ import java.util.List;
  *
  * @author lyy
  */
-@LogConfig(reference = "right",name = "权限")
+@LogConfig(reference = "#result.id",category = "right",name = "权限")
 @RedisCacheConfig(cacheName = "light_blog:right")
 @Service
 public class RightServiceImpl implements RightService {
 
     @Resource
     private RightMapper rightMapper;
-    @Lazy
-    @Resource
-    private RightService rightService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @RedisCachePut(key = "#result.id")
@@ -48,7 +44,7 @@ public class RightServiceImpl implements RightService {
         right.setCreateTime(LocalDateTime.now());
         Boolean add = rightMapper.add(right);
         if (add){
-            return rightService.getRight(id);
+            return right;
         }
         return null;
     }
@@ -78,7 +74,7 @@ public class RightServiceImpl implements RightService {
     public Right updateRight(@NonNull Right right) {
         Boolean update = rightMapper.update(right);
         if (update){
-            return rightService.getRight(right.getId());
+            return right;
         }
         return null;
     }
@@ -118,7 +114,6 @@ public class RightServiceImpl implements RightService {
         return PageInfo.of(rights);
     }
 
-    @RedisCacheDelete(key = "#ref")
     @Override
     public Boolean deleteForRole(Long ref) {
         return rightMapper.remove(ref);

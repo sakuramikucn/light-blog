@@ -2,13 +2,14 @@ package cn.sakuramiku.lightblog.aop;
 
 import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.annotation.*;
+import cn.sakuramiku.lightblog.common.util.AspectUtil;
 import cn.sakuramiku.lightblog.common.util.RedisUtil;
+import com.github.pagehelper.PageSerializable;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -17,9 +18,9 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * 缓存操作切面
@@ -35,6 +36,8 @@ public class CacheAspect {
     @Resource
     private RedisUtil redisUtil;
 
+    private final Boolean openCache = Boolean.parseBoolean(System.getProperty("cache.customize.enable","false"));
+
     /**
      * 更新缓存
      *
@@ -45,6 +48,9 @@ public class CacheAspect {
     @Order(1)
     @AfterReturning(value = "@annotation(redisCachePut)", returning = "result", argNames = "joinPoint,result,redisCachePut")
     public void removeCacheByCachePut(JoinPoint joinPoint, Object result, RedisCachePut redisCachePut) {
+        if (!openCache){
+            return;
+        }
         if (result instanceof Boolean) {
             if (!Boolean.parseBoolean(result.toString())) {
                 return;
@@ -57,14 +63,7 @@ public class CacheAspect {
         // 处理查询方法的缓存
         if (null != declaredAnnotation) {
             prefix = declaredAnnotation.cacheName();
-            Method[] methods = aClass.getMethods();
-            for (Method method : methods) {
-                if (null != method.getDeclaredAnnotation(OnCacheChange.class)) {
-                    String name = method.getName();
-                    Long deletekeys = redisUtil.deletekeys(prefix + ":" + name + ":*");
-                    logger.info("移除搜索缓存，生成key：{}，结果：{}", prefix + ":" + name + ":*",deletekeys);
-                }
-            }
+            cleanQueryCache(joinPoint);
         }
 
         if (null != result) {
@@ -88,6 +87,9 @@ public class CacheAspect {
     @Order(1)
     @AfterReturning(value = "@annotation(redisCacheDelete)", returning = "result", argNames = "joinPoint,result,redisCacheDelete")
     public void removeCacheByCacheEvict(JoinPoint joinPoint, Object result, RedisCacheDelete redisCacheDelete) {
+        if (!openCache){
+            return;
+        }
         if (result instanceof Boolean) {
             if (!Boolean.parseBoolean(result.toString())) {
                 return;
@@ -100,14 +102,7 @@ public class CacheAspect {
         // 处理查询方法的缓存
         if (null != declaredAnnotation) {
             prefix = declaredAnnotation.cacheName();
-            Method[] methods = aClass.getMethods();
-            for (Method method : methods) {
-                if (null != method.getDeclaredAnnotation(OnCacheChange.class)) {
-                    String name = method.getName();
-                    Long deletekeys = redisUtil.deletekeys(prefix + ":" + name + ":*");
-                    logger.info("移除搜索缓存，生成key：{}，结果：{}", prefix + ":" + name + ":*",deletekeys);
-                }
-            }
+            cleanQueryCache(joinPoint);
         }
 
         // 删除缓存
@@ -143,8 +138,8 @@ public class CacheAspect {
         if (null != declaredAnnotation) {
             prefix = declaredAnnotation.cacheName();
         }
-        Map<String, Object> paramsMap = paramsMap(point);
-        Object o = paramsMap.get(toParamName(redisCache.key()));
+        Map<String, Object> paramsMap = AspectUtil.paramsMap(point);
+        Object o = paramsMap.get(AspectUtil.toParamName(redisCache.key()));
         String suffix = null == o ? "" : o.toString();
         String key = "";
         if (!StringUtils.isEmpty(suffix)) {
@@ -167,14 +162,82 @@ public class CacheAspect {
         Object result = point.proceed();
 
         if (null != result) {
-            if (result instanceof Collection){
-                if (((Collection) result).size() == 0){
+            if (result instanceof Collection) {
+                if (((Collection) result).size() == 0) {
+                    return result;
+                }
+            }
+            if (result instanceof PageSerializable) {
+                if (((PageSerializable) result).getTotal() == 0) {
                     return result;
                 }
             }
             redisUtil.push(key, result);
         }
         return result;
+    }
+
+
+    @Order(4)
+    @AfterReturning(value = "@annotation(redisCleanQuery)", returning = "result", argNames = "joinPoint,result,redisCleanQuery")
+    public void cleanQuery(JoinPoint joinPoint, Object result, RedisCleanQuery redisCleanQuery) {
+        // 删除指定key的缓存
+        String key = redisCleanQuery.key();
+        if (!StringUtils.isEmpty(key)) {
+            Class<?> aClass = joinPoint.getTarget().getClass();
+            RedisCacheConfig declaredAnnotation = aClass.getDeclaredAnnotation(RedisCacheConfig.class);
+            if (null != declaredAnnotation) {
+                String prefix = declaredAnnotation.cacheName();
+                Long deletekeys = redisUtil.deletekeys(prefix + ":" + key);
+                logger.info("移除搜索缓存，生成key：{}，结果：{}", prefix + ":" + key, deletekeys);
+                return;
+            }
+        }
+
+        cleanQueryCache(joinPoint);
+    }
+
+    /**
+     * 清除 @OnCacheChange 标记方法的缓存
+     *
+     * @param joinPoint
+     */
+    protected void cleanQueryCache(JoinPoint joinPoint) {
+        Class<?> aClass = joinPoint.getTarget().getClass();
+        RedisCacheConfig declaredAnnotation = aClass.getDeclaredAnnotation(RedisCacheConfig.class);
+        // 处理查询方法的缓存
+        if (null != declaredAnnotation) {
+            String prefix = declaredAnnotation.cacheName();
+            Method[] methods = aClass.getMethods();
+            for (Method method : methods) {
+                if (null != method.getDeclaredAnnotation(OnCacheChange.class)) {
+                    String name = method.getName();
+                    Long deletekeys = redisUtil.deletekeys(prefix + ":" + name + ":*");
+                    logger.info("移除搜索缓存，生成key：{}，结果：{}", prefix + ":" + name + ":*", deletekeys);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 获取更新缓存的Key 值
+     *
+     * @return
+     */
+    protected String getCacheUpdateKeyValue(Annotation annotation, JoinPoint point, Object result) {
+        String el = "";
+        if (annotation instanceof RedisCachePut) {
+            el = ((RedisCachePut) annotation).key();
+        } else if (annotation instanceof RedisCacheDelete) {
+            el = ((RedisCacheDelete) annotation).key();
+        }
+
+        if (StringUtils.isEmpty(el)) {
+            throw new NullPointerException("更新缓存必须指定Key");
+        }
+
+        return AspectUtil.parseElValueString(el, point, result);
     }
 
     /**
@@ -202,89 +265,4 @@ public class CacheAspect {
         return methodName + ":" + params;
     }
 
-    protected Map<String, Object> paramsMap(JoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Map<String, Object> params = new HashMap<>();
-        String[] names = signature.getParameterNames();
-        Object[] args = joinPoint.getArgs();
-        if (null == names) {
-            return params;
-        }
-        for (int i = 0; i < names.length; i++) {
-            params.put(names[i], args[i]);
-        }
-        return params;
-    }
-
-    protected String toParamName(String el) {
-        int lastIndexOf = el.lastIndexOf(".");
-        if (lastIndexOf > 0) {
-            return el.substring(lastIndexOf + 1);
-        }
-        if (el.startsWith("#")) {
-            return el.replace("#", "");
-        }
-        return el;
-    }
-
-    /**
-     * 获取更新缓存的Key 值
-     *
-     * @return
-     */
-    protected String getCacheUpdateKeyValue(Annotation annotation, JoinPoint point, Object result) {
-        String el = "";
-        if (annotation instanceof RedisCachePut) {
-            el = ((RedisCachePut) annotation).key();
-        } else if (annotation instanceof RedisCacheDelete) {
-            el = ((RedisCacheDelete) annotation).key();
-        }
-
-        if (StringUtils.isEmpty(el)) {
-            throw new NullPointerException("更新缓存必须指定Key");
-        }
-
-        boolean isResultEl = el.startsWith("#result");
-        // 具体属性名称
-        String paramName = toParamName(el);
-        if (!isResultEl) {
-            // 从参数上取
-            // 属性间隔 ，user.id => user id
-            String[] split = el.replace("#", "").split("\\.");
-            Map<String, Object> paramsMap = paramsMap(point);
-
-            // 最外层的值
-            Object o = paramsMap.get(split[0]);
-            if (split.length > 1) {
-                for (int i = 1; i < split.length; i++) {
-                    o = getFieldValue(o, split[i]);
-                }
-            }
-            return null == o ? null : o.toString();
-        } else {
-            // 看看值本身是不是key
-            if ("result".equalsIgnoreCase(paramName)) {
-                return result.toString();
-            }
-            Object fieldValue = getFieldValue(result, paramName);
-            return fieldValue == null ? null : fieldValue.toString();
-        }
-    }
-
-    protected Object getFieldValue(Object target, String fieldName) {
-        // 从返回值取
-        try {
-            for (Field field : target.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                String name = field.getName();
-                if (name.equals(fieldName)) {
-                    Object o = field.get(target);
-                    return null == o ? null : o.toString();
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("缓存错误，生成key失败");
-        }
-        return null;
-    }
 }

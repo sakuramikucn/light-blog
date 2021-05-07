@@ -9,6 +9,7 @@
         <result column="article_desc" jdbcType="VARCHAR" property="desc"/>
         <result column="article_content" jdbcType="VARCHAR" property="content"/>
         <result column="article_author" jdbcType="VARCHAR" property="author"/>
+        <result column="article_author_id" jdbcType="BIGINT" property="authorId"/>
         <result column="article_mark_del_time" jdbcType="TIMESTAMP" property="markDelTime"/>
         <result column="article_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="article_views" jdbcType="INTEGER" property="pageViews"/>
@@ -42,6 +43,7 @@
         article.content as article_content,
         article.category as article_category,
         article.author as article_author,
+        article.author_id as article_author_id,
         article.mark_del_time as article_mark_del_time,
         article.page_views as article_views,
         article.cover_url as article_cover_url,
@@ -61,6 +63,7 @@
         article.`state` as article_state,
         article.`desc` as article_desc,
         article.author as article_author,
+        article.author_id as article_author_id,
         article.cover_url as article_cover_url,
         article.create_time as article_create_time,
         category.`id` as category_id,
@@ -140,6 +143,9 @@
             <if test="author != null">
                 author,
             </if>
+            <if test="authorId != null">
+                author_id,
+            </if>
             <if test="category != null">
                 category,
             </if>
@@ -174,13 +180,16 @@
                 #{desc,jdbcType=VARCHAR},
             </if>
             <if test="content != null">
-                #{content,jdbcType=VARCHAR},
+                #{content},
             </if>
             <if test="author != null">
                 #{author,jdbcType=VARCHAR},
             </if>
+            <if test="authorId != null">
+                #{authorId},
+            </if>
             <if test="category != null">
-                #{category.getId(),jdbcType=VARCHAR},
+                #{category.id,jdbcType=VARCHAR},
             </if>
             <if test="markDelTime != null">
                 #{markDelTime,jdbcType=TIMESTAMP},
@@ -210,16 +219,19 @@
                 title = #{title,jdbcType=VARCHAR},
             </if>
             <if test="state != null">
-                `state` = #{state,jdbcType=TINYINT},
+                `state` = #{state},
             </if>
             <if test="desc != null">
                 `desc` = #{desc,jdbcType=VARCHAR},
             </if>
             <if test="content != null">
-                content = #{content,jdbcType=VARCHAR},
+                content = #{content},
             </if>
             <if test="author != null">
                 author = #{author,jdbcType=VARCHAR},
+            </if>
+            <if test="authorId != null">
+                author_id = #{authorId},
             </if>
             <if test="category != null">
                 category = #{category.id,jdbcType=VARCHAR},

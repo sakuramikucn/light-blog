@@ -6,6 +6,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.Date;
+
 /**
  * 用户服务接口
  *
@@ -83,4 +85,8 @@ public interface UserService {
      * @return 用户列表
      */
     PageInfo<User> searchUser(@Nullable String keyword,Integer state, @Nullable Integer page, @Nullable Integer pageSize);
+
+    Integer deleteForRecycle(Integer status, Date start);
+
+    Boolean restoreForRecycle(Long id);
 }

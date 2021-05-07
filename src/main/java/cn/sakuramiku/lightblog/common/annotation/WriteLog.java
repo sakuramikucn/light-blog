@@ -14,6 +14,12 @@ import java.lang.annotation.*;
 public @interface WriteLog {
 
     /**
+     * 具体引用
+     * @return
+     */
+    String reference() default "";
+
+    /**
      * 日志记录的行为
      *
      * @return
@@ -21,6 +27,8 @@ public @interface WriteLog {
     Action action() default Action.OTHER;
 
     String note() default "";
+
+    boolean result() default false;
 
     enum Action {
         /**
@@ -39,6 +47,10 @@ public @interface WriteLog {
          * 查询
          */
         QUERY("查询"),
+        /**
+         * 定时任务
+         */
+        Job("定时任务"),
         /**
          * 其他
          */

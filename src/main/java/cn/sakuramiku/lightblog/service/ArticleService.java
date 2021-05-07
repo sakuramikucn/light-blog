@@ -6,6 +6,8 @@ import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
 
+import java.util.Date;
+
 /**
  * 文章服务接口
  *
@@ -59,4 +61,8 @@ public interface ArticleService {
      * @return 文章列表
      */
     PageInfo<Article> searchArticle(@NonNull SearchArticleParam param);
+
+    Long deleteForRecycle(Integer status, Date start);
+
+    Boolean restoreForRecycle(Long id);
 }

@@ -37,6 +37,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Locale;
 
 /**
  * redis配置类
@@ -92,59 +93,7 @@ public class RedisConfig {
     @Value("${redis.ttl:1800}")
     private Long ttl;
 
-    /**
-     * 管理缓存管理器
-     *
-     * @param rediscacheManager
-     * @return
-     */
-//    @Bean
-//    @Primary
-    public CompositeCacheManager cacheManager(RedisCacheManager rediscacheManager) {
-        CompositeCacheManager manager = new CompositeCacheManager();
-        manager.setCacheManagers(Collections.singletonList(rediscacheManager));
-        manager.setFallbackToNoOpCache(useCache);
-        return manager;
-    }
 
-    /**
-     * Redis缓存管理器
-     *
-     * @param connectionFactory
-     * @param objectRedisSerializer
-     * @param stringRedisSerializer
-     * @return
-     */
-//    @Bean
-    public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory, RedisSerializer<Object> objectRedisSerializer, RedisSerializer<String> stringRedisSerializer) {
-        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
-        RedisSerializationContext.SerializationPair<String> keyPair = RedisSerializationContext.SerializationPair.fromSerializer(stringRedisSerializer);
-        RedisSerializationContext.SerializationPair<Object> valuePair = RedisSerializationContext.SerializationPair.fromSerializer(objectRedisSerializer);
-        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig().serializeKeysWith(keyPair).serializeValuesWith(valuePair);
-        defaultCacheConfig.entryTtl(Duration.ofSeconds(ttl));
-        return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
-    }
-
-//    @Bean
-    public KeyGenerator simpleKeyGenerator() {
-        return (Object o, Method method, Object... objects) -> {
-            StringBuilder sb = new StringBuilder();
-            for (Object param : objects) {
-                if (null == param) {
-                    continue;
-                }
-                if (StrUtil.isBlank(param.toString())){
-                    continue;
-                }
-                sb.append(param).append(":");
-            }
-            String params = sb.toString();
-            if (!StringUtils.isEmpty(params) && ':' == sb.charAt(params.length() - 1)) {
-                params = sb.deleteCharAt(sb.lastIndexOf(":")).toString();
-            }
-            return method.getName() + ":" + params;
-        };
-    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory, RedisSerializer<Object> objectSerializer, RedisSerializer<String> stringSerializer) {
@@ -175,12 +124,13 @@ public class RedisConfig {
 
         // datetime 序列化、反序列化
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        LocalDateTimeSerializer localDateTimeSerializer = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        LocalDateTimeDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTimeSerializer localDateTimeSerializer = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA));
+        LocalDateTimeDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss",Locale.CHINA));
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(localDateTimeSerializer);
         javaTimeModule.addDeserializer(LocalDateTime.class, localDateTimeDeserializer);
-
+        // 过滤null的属性
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.registerModule(javaTimeModule);
         serializer.setObjectMapper(objectMapper);
         return serializer;
@@ -235,5 +185,61 @@ public class RedisConfig {
 
         return new JedisConnectionFactory(standaloneConfiguration, clientConfiguration);
     }
+
+    /**
+     * 管理缓存管理器
+     *
+     * @param rediscacheManager
+     * @return
+     */
+//    @Bean
+//    @Primary
+    public CompositeCacheManager cacheManager(RedisCacheManager rediscacheManager) {
+        CompositeCacheManager manager = new CompositeCacheManager();
+        manager.setCacheManagers(Collections.singletonList(rediscacheManager));
+        manager.setFallbackToNoOpCache(useCache);
+        return manager;
+    }
+
+    /**
+     * Redis缓存管理器
+     *
+     * @param connectionFactory
+     * @param objectRedisSerializer
+     * @param stringRedisSerializer
+     * @return
+     */
+//    @Bean
+    public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory, RedisSerializer<Object> objectRedisSerializer, RedisSerializer<String> stringRedisSerializer) {
+        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
+        RedisSerializationContext.SerializationPair<String> keyPair = RedisSerializationContext.SerializationPair.fromSerializer(stringRedisSerializer);
+        RedisSerializationContext.SerializationPair<Object> valuePair = RedisSerializationContext.SerializationPair.fromSerializer(objectRedisSerializer);
+        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig().serializeKeysWith(keyPair).serializeValuesWith(valuePair);
+        defaultCacheConfig.entryTtl(Duration.ofSeconds(ttl));
+        return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
+    }
+
+//    @Bean
+    public KeyGenerator simpleKeyGenerator() {
+        return (Object o, Method method, Object... objects) -> {
+            StringBuilder sb = new StringBuilder();
+            for (Object param : objects) {
+                if (null == param) {
+                    continue;
+                }
+                if (StrUtil.isBlank(param.toString())){
+                    continue;
+                }
+                sb.append(param).append(":");
+            }
+            String params = sb.toString();
+            if (!StringUtils.isEmpty(params) && ':' == sb.charAt(params.length() - 1)) {
+                params = sb.deleteCharAt(sb.lastIndexOf(":")).toString();
+            }
+            return method.getName() + ":" + params;
+        };
+    }
+
+
 
 }

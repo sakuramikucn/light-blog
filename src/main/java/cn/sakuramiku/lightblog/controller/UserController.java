@@ -91,7 +91,6 @@ public class UserController {
     public Result<User> update(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
         ValidateUtil.isNull(user.getId(),"参数错误，用户ID为空");
-        user.setState(null);
         User user1 = userService.updateUser(user);
         if (null == user1){
             return RespResult.fail("修改失败");
@@ -149,6 +148,12 @@ public class UserController {
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id){
         Boolean aBoolean = userService.delete(id);
+        return RespResult.ok(aBoolean);
+    }
+
+    @PutMapping("/restore/{id}")
+    public Result<Boolean> restore(@PathVariable("id") Long id){
+        Boolean aBoolean = userService.restoreForRecycle(id);
         return RespResult.ok(aBoolean);
     }
 }

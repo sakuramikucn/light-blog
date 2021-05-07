@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * 文章实体类
@@ -53,6 +54,12 @@ public class Article implements Serializable {
      */
     @ApiModelProperty(value = "作者", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     private String author;
+
+    /**
+     * 作者
+     */
+    @ApiModelProperty(value = "作者ID", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
+    private String authorId;
 
     /**
      * 类别
@@ -228,24 +235,33 @@ public class Article implements Serializable {
         isPublic = aPublic;
     }
 
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+    }
+
     @Override
     public String toString() {
-        return "Article{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", state=" + state +
-                ", desc='" + desc + '\'' +
-                ", content='" + content + '\'' +
-                ", author='" + author + '\'' +
-                ", category=" + category +
-                ", markDelTime=" + markDelTime +
-                ", createTime=" + createTime +
-                ", pageViews=" + pageViews +
-                ", coverUrl='" + coverUrl + '\'' +
-                ", modifiedTime=" + modifiedTime +
-                ", mask=" + mask +
-                ", tags=" + tags +
-                ", isPublic=" + isPublic +
-                '}';
+        return new StringJoiner(", ", Article.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("title='" + title + "'")
+                .add("state=" + state)
+                .add("desc='" + desc + "'")
+                .add("content='" + content + "'")
+                .add("author='" + author + "'")
+                .add("authorId='" + authorId + "'")
+                .add("category=" + category)
+                .add("markDelTime=" + markDelTime)
+                .add("createTime=" + createTime)
+                .add("pageViews=" + pageViews)
+                .add("coverUrl='" + coverUrl + "'")
+                .add("modifiedTime=" + modifiedTime)
+                .add("mask=" + mask)
+                .add("tags=" + tags)
+                .add("isPublic=" + isPublic)
+                .toString();
     }
 }

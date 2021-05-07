@@ -1,6 +1,6 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.sakuramiku.lightblog.annotation.OnCacheChange;
+import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
@@ -10,10 +10,6 @@ import cn.sakuramiku.lightblog.service.CategoryService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +22,8 @@ import java.util.List;
  *
  * @author lyy
  */
-@LogConfig(reference = "category",name = "分类")
-@CacheConfig(cacheNames = "light_blog:category", keyGenerator = "simpleKeyGenerator")
+@LogConfig(reference = "#result.id", category = "category", name = "分类")
+@RedisCacheConfig(cacheName = "light_blog:category")
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -35,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryMapper categoryMapper;
 
     @WriteLog(action = WriteLog.Action.INSERT)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Category saveCategory(String name) {
@@ -45,13 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(name);
         category.setCreateTime(LocalDateTime.now());
         Boolean insert = categoryMapper.insert(category);
-        if (null != insert){
+        if (null != insert) {
             return this.getCategory(id);
         }
         return null;
     }
 
-    @Cacheable(key = "#id",unless = "null == #result")
+    @RedisCache(key = "#id")
     @Override
     public Category getCategory(Long id) {
         return categoryMapper.get(id);
@@ -65,19 +61,19 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @WriteLog(action = WriteLog.Action.UPDATE)
-    @CachePut(key = "#result.id",unless = "null == #result")
+    @RedisCachePut(key = "#result.id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Category updateCategory(Long id, String name) {
         Boolean update = categoryMapper.update(id, name);
-        if (update){
+        if (update) {
             return this.getCategory(id);
         }
         return null;
     }
 
     @WriteLog(action = WriteLog.Action.DELETE)
-    @CacheEvict(key = "#id")
+    @RedisCacheDelete(key = "#id")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean removeCategory(Long id) {
@@ -85,7 +81,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @OnCacheChange
-    @Cacheable(unless = "null  == #result || 0 == #result.total")
+    @RedisCache
     @Override
     public PageInfo<Category> search(String keyword, LocalDateTime begin, LocalDateTime end, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {

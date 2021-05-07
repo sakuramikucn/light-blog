@@ -50,7 +50,7 @@ public class LinkController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "keyword", dataTypeClass = String.class, value = "关键字")
     })
-    @GetMapping("/search")
+    @PostMapping("/search")
     public Result<PageInfo<FriendLink>> search(String keyword, Integer page, Integer pageSize) {
         PageInfo<FriendLink> links = linkService.searchLink(keyword, page, pageSize);
         return RespResult.ok(links);
@@ -67,4 +67,13 @@ public class LinkController {
         return RespResult.ok(linkService.removeLink(id));
     }
 
+    @PutMapping
+    public Result<FriendLink> update(@RequestBody FriendLink link) throws ApiException {
+        ValidateUtil.isNull(link.getId(),"参数异常，ID为空");
+        FriendLink friendLink = linkService.updateLink(link);
+        if (null == friendLink){
+            return RespResult.fail("修改友链失败");
+        }
+        return RespResult.ok(friendLink);
+    }
 }

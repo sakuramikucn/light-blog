@@ -31,6 +31,7 @@ public class ArticleView extends Article {
         view.setTags(article.getTags());
         view.setMask(article.getMask());
         view.setPublic(article.getPublic());
+        view.setAuthorId(article.getAuthorId());
         return view;
     }
 

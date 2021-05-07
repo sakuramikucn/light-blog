@@ -10,6 +10,7 @@
         <result column="log_note" jdbcType="VARCHAR" property="note"/>
         <result column="log_create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="log_reference" jdbcType="VARCHAR" property="reference"/>
+        <result column="log_category" jdbcType="VARCHAR" property="category"/>
         <result column="log_modified_time" jdbcType="TIMESTAMP" property="modifiedTime"/>
     </resultMap>
 
@@ -21,6 +22,7 @@
         log.note as log_note,
         log.create_time as log_create_time,
         log.reference as log_reference,
+        log.category as log_category,
         log.modified_time as log_modified_time
     </sql>
 
@@ -39,6 +41,9 @@
             <if test="null != ref and '' != ref">
                 reference = #{ref,jdbcType=VARCHAR}
             </if>
+            <if test="null != category and '' != category">
+                and category = #{category}
+            </if>
             <if test="null != begin and null != end">
                 and create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
             </if>
@@ -50,6 +55,9 @@
         <where>
             <if test="null != ref and '' != ref">
                 reference = #{ref,jdbcType=VARCHAR}
+            </if>
+            <if test="null != category and '' != category">
+                and category = #{category}
             </if>
             <if test="null != begin and null != end">
                 and create_time between #{begin,jdbcType=TIMESTAMP} and #{end,jdbcType=TIMESTAMP}
@@ -83,7 +91,10 @@
                 create_time,
             </if>
             <if test="reference != null">
-                reference,
+                `reference`,
+            </if>
+            <if test="category != null">
+                `category`,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -105,6 +116,9 @@
             </if>
             <if test="reference != null">
                 #{reference,jdbcType=VARCHAR},
+            </if>
+            <if test="category != null">
+                #{category,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>

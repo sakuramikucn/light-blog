@@ -42,6 +42,12 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
     private String author;
 
     /**
+     * 作者
+     */
+    @ApiModelProperty(value = "作者", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
+    private String authorId;
+
+    /**
      * 类别
      */
     @ApiModelProperty(value = "类别")
@@ -75,6 +81,7 @@ public class SimpleArticleView implements TransView<Article,SimpleArticleView> {
         }
         id = article.getId();
         author = article.getAuthor();
+        authorId = article.getAuthorId();
         title = article.getTitle();
         category = article.getCategory();
         desc = article.getDesc();

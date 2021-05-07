@@ -12,20 +12,21 @@ import java.lang.annotation.*;
 public @interface LogConfig {
 
     /**
-     * 引用
+     * 具体引用
      * @return
      */
     String reference() default "";
 
     /**
-     * 子引用
+     * 分类
      * @return
      */
-    String subReference() default "";
+    String category() default "";
 
     /**
-     * 模块名称
+     * 分类名称
      * @return
      */
     String name() default "";
+
 }

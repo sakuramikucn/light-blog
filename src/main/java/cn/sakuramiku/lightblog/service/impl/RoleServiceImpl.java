@@ -15,7 +15,6 @@ import cn.sakuramiku.lightblog.service.RoleService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author lyy
  */
-@LogConfig(reference = "role", name = "角色")
+@LogConfig(reference = "#result.id",category = "role", name = "角色")
 @RedisCacheConfig(cacheName = "light_blog:role")
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -40,9 +39,6 @@ public class RoleServiceImpl implements RoleService {
     private RoleMapper roleMapper;
     @Resource
     private RightService rightService;
-    @Lazy
-    @Resource
-    private RoleService roleService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @RedisCachePut(key = "#result.id")
@@ -61,7 +57,7 @@ public class RoleServiceImpl implements RoleService {
             rightService.addRight(params);
         }
         if (succ) {
-            return roleService.getRole(id);
+            return role;
         }
         return null;
     }
@@ -83,7 +79,7 @@ public class RoleServiceImpl implements RoleService {
                     throw new BusinessException("添加失败");
                 }
             }
-            return roleService.getRole(role.getId());
+            return role;
         }
         return null;
     }

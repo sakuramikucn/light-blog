@@ -25,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author lyy
  */
-@LogConfig(reference = "user", name = "用户")
+@LogConfig(reference = "#result.id", category = "user", name = "用户")
 @RedisCacheConfig(cacheName = "light_blog:user")
 @Service
 public class UserServiceImpl implements UserService {
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     public User login(@NonNull String username, @NonNull String password, String ipAddr) throws BusinessException {
         Account account = accountMapper.checkLogin(username, password);
         if (null != account) {
-            User old = userMapper.get(null,username);
+            User old = userMapper.get(null, username);
             if (Constant.USER_STATE_FREEZ.equals(old.getState())) {
                 throw new BusinessException("账号已冻结，请联系管理员");
             }
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(ipAddr);
             userMapper.update(user);
-            return userMapper.get(account.getId(),null);
+            return userMapper.get(account.getId(), null);
         }
         return null;
     }
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(@NonNull String username, @NonNull String password) {
         long id = IdGenerator.nextId();
-        LocalDateTime now = LocalDateTime.now(ZoneId.ofOffset("GMT", ZoneOffset.ofHours(8)));
+        LocalDateTime now = LocalDateTime.now();
         password = SecurityUtil.md5(password);
         Account account = new Account();
         account.setId(id);
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
             user.setCreateTime(now);
             Boolean insert1 = userMapper.insert(user);
             if (insert1) {
-                return userMapper.get(account.getId(),null);
+                return userMapper.get(account.getId(), null);
             }
         }
         return null;
@@ -141,12 +141,12 @@ public class UserServiceImpl implements UserService {
             if (CollectionUtil.isNotEmpty(insertParams)) {
                 Boolean aBoolean = roleService.addRoles(insertParams);
                 if (aBoolean) {
-                    return userMapper.get(user.getId(),null);
+                    return userMapper.get(user.getId(), null);
                 } else {
                     throw new BusinessException("更新失败");
                 }
             } else {
-                return userMapper.get(user.getId(),null);
+                return userMapper.get(user.getId(), null);
             }
         }
         return null;
@@ -172,7 +172,37 @@ public class UserServiceImpl implements UserService {
             Page<Object> objects = PageHelper.startPage(page, pageSize, true);
             objects.setOrderBy("`user`.modified_time DESC");
         }
-        List<User> users = userMapper.search(keyword, state);
+        List<User> users = userMapper.search(keyword, state,null,null);
         return new PageInfo<>(users);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @RedisCleanQuery
+    @WriteLog(action = WriteLog.Action.DELETE, result = true)
+    @Override
+    public Integer deleteForRecycle(Integer status, Date start) {
+        List<User> list = userMapper.search(null, Constant.USER_STATE_DELETE, null, null);
+        List<Long> ids = list.parallelStream().filter(user -> start.getTime() >= user.getModifiedTime()
+                .toInstant(ZoneOffset.of("+8")).toEpochMilli()).map(User::getId).collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(ids)){
+            return 0;
+        }
+        for(Long id:ids){
+            // 删account
+            accountMapper.delete(id,null);
+            // 删user
+            delete(id);
+        }
+
+        return  ids.size();
+    }
+
+    @RedisCachePut(key = "id")
+    @Override
+    public Boolean restoreForRecycle(Long id) {
+        User user = new User();
+        user.setId(id);
+        user.setState(Constant.USER_STATE_NORMAL);
+        return userMapper.update(user);
     }
 }

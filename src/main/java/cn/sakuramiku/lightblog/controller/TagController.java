@@ -54,7 +54,7 @@ public class TagController {
 
     @ShiroPass
     @ApiOperation("搜索标签")
-    @GetMapping("/search")
+    @PostMapping("/search")
     public Result<PageInfo<Tag>> search(Long articleId, String keyword, Integer page, Integer pageSize) {
         PageInfo<Tag> tags = tagService.search(articleId, keyword, page, pageSize);
         return RespResult.ok(tags);

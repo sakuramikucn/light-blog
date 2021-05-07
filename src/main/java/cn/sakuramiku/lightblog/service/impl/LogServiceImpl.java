@@ -53,17 +53,17 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public PageInfo<Log> getLogs(@NonNull String ref, Integer page, Integer pageSize) {
-        return searchLog(ref, null, null, page, pageSize);
+        return searchLog(null, ref, null, null, page, pageSize);
     }
 
     @Override
-    public PageInfo<Log> searchLog(String ref, LocalDateTime begin, LocalDateTime end,
+    public PageInfo<Log> searchLog(String category, String ref, LocalDateTime begin, LocalDateTime end,
                                    Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
             Page<Object> objects = PageHelper.startPage(page, pageSize, true);
             objects.setOrderBy("modified_time DESC");
         }
-        List<Log> logs = logMapper.search(ref, begin, end);
+        List<Log> logs = logMapper.search(ref,category, begin, end);
         return PageInfo.of(logs);
     }
 }

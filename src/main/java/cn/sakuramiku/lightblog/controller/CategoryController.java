@@ -37,8 +37,8 @@ public class CategoryController {
 
     @ShiroPass
     @ApiOperation("搜索分类")
-    @GetMapping("/search")
-    public Result<PageInfo<Category>> search(SearchCategoryParam param) {
+    @PostMapping("/search")
+    public Result<PageInfo<Category>> search(@RequestBody SearchCategoryParam param) {
         String keyword = param.getKeyword();
         LocalDateTime begin = param.getBegin();
         LocalDateTime end = param.getEnd();

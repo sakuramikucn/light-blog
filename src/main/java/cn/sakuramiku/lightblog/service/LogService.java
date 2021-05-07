@@ -58,6 +58,8 @@ public interface LogService {
     /**
      * 搜索日志
      *
+     *
+     * @param category
      * @param ref      关联标识
      * @param begin    开始时间
      * @param end      结束时间
@@ -65,6 +67,9 @@ public interface LogService {
      * @param pageSize 每页项数
      * @return 日志列表
      */
-    PageInfo<Log> searchLog(@Nullable String ref, @Nullable LocalDateTime begin, @Nullable LocalDateTime end,
+    PageInfo<Log> searchLog(String category,
+                            @Nullable String ref,
+                            @Nullable LocalDateTime begin,
+                            @Nullable LocalDateTime end,
                             @Nullable Integer page, @Nullable Integer pageSize);
 }

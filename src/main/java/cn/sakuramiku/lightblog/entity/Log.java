@@ -58,6 +58,9 @@ public class Log implements Serializable {
     @ApiModelProperty(value = "引用标识（用于找回日志），对象ID、标识字符串等")
     private String reference;
 
+    @ApiModelProperty(value = "分类（子引用）")
+    private String category;
+
     private LocalDateTime modifiedTime;
 
     private static final long serialVersionUID = 1L;
@@ -126,6 +129,14 @@ public class Log implements Serializable {
         this.modifiedTime = modifiedTime;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Log{" +
@@ -136,6 +147,7 @@ public class Log implements Serializable {
                 ", note='" + note + '\'' +
                 ", createTime=" + createTime +
                 ", reference='" + reference + '\'' +
+                ", category='" + category + '\'' +
                 ", modifiedTime=" + modifiedTime +
                 '}';
     }

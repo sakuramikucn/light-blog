@@ -72,6 +72,9 @@
             <if test="null != state">
                 and `user`.state = #{state}
             </if>
+            <if test="null != start and null != end">
+                and `user`.create_time between #{start} and #{end}
+            </if>
         </where>
     </select>
     <select id="search_COUNT" resultType="long">
@@ -86,6 +89,9 @@
             </if>
             <if test="null != state">
                 and `user`.state = #{state}
+            </if>
+            <if test="null != start and null != end">
+                and `user`.create_time between #{start} and #{end}
             </if>
         </where>
     </select>

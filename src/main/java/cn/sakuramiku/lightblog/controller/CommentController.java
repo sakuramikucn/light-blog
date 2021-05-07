@@ -8,6 +8,7 @@ import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Comment;
 import cn.sakuramiku.lightblog.service.CommentService;
 import cn.sakuramiku.lightblog.util.Constant;
+import cn.sakuramiku.lightblog.vo.CommentWrapView;
 import cn.sakuramiku.lightblog.vo.SearchCommentParam;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -49,13 +50,18 @@ public class CommentController {
     @ShiroPass
     @ApiOperation("搜索评论")
     @PostMapping("/search")
-    public Result<PageInfo<Comment>> search(@RequestBody SearchCommentParam param) {
+    public Result<PageInfo<CommentWrapView>> search(@RequestBody SearchCommentParam param) {
         String ref = param.getRef();
         Long parentId = param.getParentId();
         Integer state = param.getState();
+        String keyword = param.getKeyword();
+        Integer type = param.getType();
         Integer page = param.getPage();
         Integer pageSize = param.getPageSize();
-        PageInfo<Comment> comments = commentService.searchComment(state, ref, parentId, page, pageSize);
+        PageInfo<CommentWrapView> comments = commentService.searchCommentWrap(state, ref, parentId, keyword, type, page, pageSize);
+        if (comments.getTotal() == 0){
+            return RespResult.ok(new PageInfo<>());
+        }
         return RespResult.ok(comments);
     }
 
@@ -94,4 +100,15 @@ public class CommentController {
         return RespResult.ok(commentService.hiddenComment(id, isHidden));
     }
 
+    @RequiresAuthentication
+    @ApiOperation("评论屏蔽操作")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true),
+            @ApiImplicitParam(name = "isHidden", dataTypeClass = Boolean.class, value = "true=屏蔽，false=正常", required = true)
+    })
+    @PutMapping("/restore/{id}")
+    public Result<Boolean> restore(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id, "参数异常，评论ID为空");
+        return RespResult.ok(commentService.restoreForRecycle(id));
+    }
 }

@@ -49,6 +49,16 @@ public class Constant {
     public static final Integer COMMENT_STATE_HIDDEN = 1;
     /** 评论状态-删除 */
     public static final Integer COMMENT_STATE_DELETE = 2;
+    /** 文章评论 */
+    public static final Integer COMMENT_TYPE_ARTICLE = 1;
+    /** 留言板评论 */
+    public static final Integer COMMENT_TYPE_BOARD = 2;
+    /** 评论角色-游客 */
+    public static final Integer COMMENT_ROLE_TYPE_GUEST = 2;
+    /** 评论角色-管理员 */
+    public static final Integer COMMENT_ROLE_TYPE_MANAGER = 2;
+    /** 评论角色-作者 */
+    public static final Integer COMMENT_ROLE_TYPE_AUTHOR = 2;
 
     /** 引用标识-标签 */
     public static final String REF_TAG = "Tag";

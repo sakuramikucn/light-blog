@@ -1,12 +1,11 @@
 package cn.sakuramiku.lightblog.vo;
 
 import cn.sakuramiku.lightblog.util.Constant;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.StringJoiner;
 
 /**
  * 搜索文章参数
@@ -21,12 +20,8 @@ public class SearchArticleParam extends PageParam {
     @ApiModelProperty("文章关键字")
     protected String keyword;
     @ApiModelProperty(value = "开始时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     protected Date begin;
     @ApiModelProperty(value = "截止时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     protected Date end;
     @ApiModelProperty("排序方式，创键时间（ASC=升序,DESC=降序）")
     protected String order = "DESC";
@@ -36,6 +31,8 @@ public class SearchArticleParam extends PageParam {
     protected Boolean isHotOrderBy = false;
     @ApiModelProperty(value = "是否公开")
     protected Boolean isPublic ;
+    @ApiModelProperty(value = "是否简单搜索，不查浏览数和评论数")
+    protected Boolean isSimple = false;
 
     public String getKeyword() {
         return keyword;
@@ -101,19 +98,28 @@ public class SearchArticleParam extends PageParam {
         isPublic = aPublic;
     }
 
+    public Boolean getSimple() {
+        return isSimple;
+    }
+
+    public void setSimple(Boolean simple) {
+        isSimple = simple;
+    }
+
     @Override
     public String toString() {
-        return "SearchArticleParam{" +
-                "state=" + state +
-                ", keyword='" + keyword + '\'' +
-                ", begin=" + begin +
-                ", end=" + end +
-                ", order='" + order + '\'' +
-                ", isFull=" + isFull +
-                ", isHotOrderBy=" + isHotOrderBy +
-                ", isPublic=" + isPublic +
-                ", page=" + page +
-                ", pageSize=" + pageSize +
-                '}';
+        return new StringJoiner(", ", SearchArticleParam.class.getSimpleName() + "[", "]")
+                .add("page=" + page)
+                .add("pageSize=" + pageSize)
+                .add("state=" + state)
+                .add("keyword='" + keyword + "'")
+                .add("begin=" + begin)
+                .add("end=" + end)
+                .add("order='" + order + "'")
+                .add("isFull=" + isFull)
+                .add("isHotOrderBy=" + isHotOrderBy)
+                .add("isPublic=" + isPublic)
+                .add("isSimple=" + isSimple)
+                .toString();
     }
 }
