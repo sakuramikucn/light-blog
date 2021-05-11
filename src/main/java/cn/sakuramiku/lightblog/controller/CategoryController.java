@@ -35,6 +35,20 @@ public class CategoryController {
     @Resource
     private CategoryService categoryService;
 
+
+    @ShiroPass
+    @ApiOperation("获取分类")
+    @GetMapping("/{id}")
+    public Result<Category> get(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id, "参数异常，ID为空");
+        Category category = categoryService.getCategory(id);
+        if (null != category){
+            return RespResult.ok(category);
+        }
+        return RespResult.fail("没有该分类");
+    }
+
+
     @ShiroPass
     @ApiOperation("搜索分类")
     @PostMapping("/search")

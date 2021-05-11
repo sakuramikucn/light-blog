@@ -58,6 +58,32 @@ public class SpringContextUtil implements ApplicationContextAware {
         return context.getBean(name, type);
     }
 
+    /**
+     * 获取一个bean对象
+     *
+     * @param type 类型
+     * @return bean对象
+     */
+    public static <T> T getBean(Class<T> type) {
+        if (null == context) {
+            return null;
+        }
+        return context.getBean(type);
+    }
+
+    /**
+     * 获取一个bean对象
+     *
+     * @param name 名称
+     * @return bean对象
+     */
+    public static <T> T getBean(String name) {
+        if (null == context) {
+            return null;
+        }
+        return (T)context.getBean(name);
+    }
+
     public static ApplicationContext getContext(){
         return context;
     }

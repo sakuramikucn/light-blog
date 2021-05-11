@@ -118,7 +118,10 @@ public class UserServiceImpl implements UserService {
         }
         // 只会执行一次
         User user = userMapper.get(null, username);
-        redisUtil.push("light_blog:user::" + username, user);
+        if (null != user){
+            redisUtil.push("light_blog:user::" + username, user);
+            redisUtil.push("light_blog:user::" + user.getId(), user);
+        }
         return user;
     }
 

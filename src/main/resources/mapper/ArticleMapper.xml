@@ -96,6 +96,9 @@
             <if test="null != state">
                 and article.state = #{state}
             </if>
+            <if test="null != category">
+                and article.category = #{category}
+            </if>
         </where>
     </select>
     <select id="search_COUNT" parameterType="cn.sakuramiku.lightblog.vo.SearchArticleParam" resultType="long">
@@ -114,6 +117,9 @@
             </if>
             <if test="null != state">
                 and article.state = #{state}
+            </if>
+            <if test="null != category">
+                and article.category = #{category}
             </if>
         </where>
     </select>

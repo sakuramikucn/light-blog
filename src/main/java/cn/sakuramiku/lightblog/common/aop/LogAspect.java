@@ -6,6 +6,7 @@ import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.AspectUtil;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
+import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Log;
 import cn.sakuramiku.lightblog.service.LogService;
 import cn.sakuramiku.lightblog.util.JwtUtil;
@@ -91,6 +92,7 @@ public class LogAspect {
         }
         log.setCategory(category);
         log.setReference(reference);
+        log.setWhat("");
 
         // 获取操作人
         try {
@@ -118,11 +120,28 @@ public class LogAspect {
 
         }
         try {
+            // 过滤参数
+            for (Object obj:args){
+                if (obj instanceof Article){
+                    String content = ((Article) obj).getContent();
+                    // 超过 1000 字符不展示
+                    if (content.length() >= 1000){
+                        ((Article) obj).setContent("**内容过长，不展示**");
+                    }
+                }
+            }
             StrBuilder builder = new StrBuilder();
             builder.append("<b>执行方法：</b>").append(method).append("，<br>");
             builder.append("<b>方法参数:</b> ").append(objectMapper.writeValueAsString(args)).append("，<br>");
             if (writeLog.result() && null != result){
                 builder.append("<b>执行结果：</b>");
+                if (result instanceof Article){
+                    String content = ((Article) result).getContent();
+                    // 超过 1000 字符不展示
+                    if (content.length() >= 1000){
+                        ((Article) result).setContent("**内容过长，不展示**");
+                    }
+                }
                 builder.append(objectMapper.writeValueAsString(result));
             }
             log.setWhat( builder.toString());

@@ -33,6 +33,8 @@ public class SearchArticleParam extends PageParam {
     protected Boolean isPublic ;
     @ApiModelProperty(value = "是否简单搜索，不查浏览数和评论数")
     protected Boolean isSimple = false;
+    @ApiModelProperty(value = "分类")
+    protected String category;
 
     public String getKeyword() {
         return keyword;
@@ -106,6 +108,14 @@ public class SearchArticleParam extends PageParam {
         isSimple = simple;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SearchArticleParam.class.getSimpleName() + "[", "]")
@@ -120,6 +130,7 @@ public class SearchArticleParam extends PageParam {
                 .add("isHotOrderBy=" + isHotOrderBy)
                 .add("isPublic=" + isPublic)
                 .add("isSimple=" + isSimple)
+                .add("category='" + category + "'")
                 .toString();
     }
 }

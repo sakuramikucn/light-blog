@@ -27,6 +27,7 @@ public class Comment implements Serializable {
     /**
      * 父评论ID，为0则表示没有父评论
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "父评论ID，为0则表示没有父评论")
     private Long parentId;
 

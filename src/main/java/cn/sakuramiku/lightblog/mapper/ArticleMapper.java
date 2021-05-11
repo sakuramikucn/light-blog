@@ -4,6 +4,7 @@ import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.NonNull;
 
 import java.util.Date;
@@ -58,4 +59,7 @@ public interface ArticleMapper {
 
     @Delete("delete from article where state = #{state} and mark_del_time <= #{start}")
     Long deleteForRecycle(@Param("state") Integer status, @Param("start") Date start);
+
+    @Select("select distinct article_id from article_tag where tag_id = #{tagId}")
+    List<Long> queryByTag(Long tagId);
 }

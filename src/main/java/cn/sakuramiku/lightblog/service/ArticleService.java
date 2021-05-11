@@ -2,6 +2,7 @@ package cn.sakuramiku.lightblog.service;
 
 import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.exception.BusinessException;
+import cn.sakuramiku.lightblog.vo.QueryArticleByTag;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.PageInfo;
 import org.springframework.lang.NonNull;
@@ -65,4 +66,6 @@ public interface ArticleService {
     Long deleteForRecycle(Integer status, Date start);
 
     Boolean restoreForRecycle(Long id);
+
+    PageInfo<Article> queryByTag(QueryArticleByTag param);
 }

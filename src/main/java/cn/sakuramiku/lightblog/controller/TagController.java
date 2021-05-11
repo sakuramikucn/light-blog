@@ -29,6 +29,19 @@ public class TagController {
     @Resource
     private TagService tagService;
 
+
+    @ShiroPass
+    @ApiOperation("获取分类")
+    @GetMapping("/{id}")
+    public Result<Tag> get(@PathVariable("id") Long id) throws ApiException {
+        ValidateUtil.isNull(id, "参数异常，ID为空");
+        Tag tag = tagService.getTag(id);
+        if (null != tag){
+            return RespResult.ok(tag);
+        }
+        return RespResult.fail("没有该标签");
+    }
+
     @RequiresAuthentication
     @ApiOperation("添加标签")
     @PostMapping("/{name}")

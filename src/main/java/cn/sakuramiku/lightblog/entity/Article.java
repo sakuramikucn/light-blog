@@ -230,6 +230,9 @@ public class Article implements Serializable {
     public Boolean getPublic() {
         return BlogHelper.isMask(mask,MASK_PUBLIC);
     }
+    public Boolean isPublic() {
+        return isPublic;
+    }
 
     public void setPublic(Boolean aPublic) {
         isPublic = aPublic;

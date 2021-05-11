@@ -1,9 +1,8 @@
 package cn.sakuramiku.lightblog.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.log.StaticLog;
 import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
@@ -14,11 +13,13 @@ import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.mapper.CommentMapper;
 import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.CommentService;
+import cn.sakuramiku.lightblog.service.CommonService;
 import cn.sakuramiku.lightblog.service.UserService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.vo.CommentWrapView;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,8 @@ public class CommentServiceImpl implements CommentService {
     private ArticleService articleService;
     @Resource
     private UserService userService;
+    @Resource
+    private CommonService commonService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @RedisCachePut(key = "#result.id")
@@ -58,14 +61,15 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreateTime(LocalDateTime.now());
         comment.setState(Constant.COMMENT_STATE_NORMAL);
 
+        // 判断评论用户角色类型
         String username = comment.getUsername();
+        Article article = null;
         if (!StringUtils.isEmpty(username)) {
             User user = userService.getUser(username);
-            if (NumberUtil.isNumber(comment.getReference())) {
-                Article article = articleService.getArticle(Long.parseLong(comment.getSubReference()));
+            if (Constant.COMMENT_TYPE_ARTICLE.equals(comment.getType())) {
+                article = articleService.getArticle(Long.parseLong(comment.getSubReference()));
                 if (null != article) {
                     String authorId = article.getAuthorId();
-
                     if (null != user) {
                         if (user.getId().toString().equals(authorId)) {
                             comment.setRoleType(Constant.COMMENT_ROLE_TYPE_AUTHOR);
@@ -85,9 +89,81 @@ public class CommentServiceImpl implements CommentService {
 
         Boolean insert = commentMapper.insert(comment);
         if (insert) {
+            // 邮件通知，暂时只通知目标评论
+            Long parentId = comment.getParentId();
+            if (null != parentId && !parentId.equals(0L)) {
+                Comment parentComment = getComment(parentId);
+                String email = parentComment.getEmail();
+                if (StrUtil.isNotBlank(email)) {
+                    try {
+                        String content = templateContent(parentComment);
+                        commonService.sendEmail(email, "Light Blog - 评论/留言回复通知", content);
+                    } catch (Exception e) {
+                        StaticLog.error("发送评论/留言回复通知 失败", e);
+                    }
+                }
+            }
+            // 通知文章作者
+            if (Constant.COMMENT_TYPE_ARTICLE.equals(comment.getType())) {
+                if (null == article) {
+                    article = articleService.getArticle(Long.parseLong(comment.getReference()));
+                }
+                if (article != null) {
+                    String authorId = article.getAuthorId();
+                    User user = userService.getUser(Long.parseLong(authorId));
+                    if (null != user) {
+                        String email = user.getEmail();
+                        if (StrUtil.isNotBlank(email)) {
+                            try {
+                                String content = templateContent2(comment);
+                                commonService.sendEmail(email, "Light Blog - 文章评论通知", content);
+                            } catch (Exception e) {
+                                StaticLog.error("文章评论通知 失败", e);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // 发给我自己
+                String email = "1519381662@qq.com";
+                commonService.sendEmail(email, "Light Blog - 留言板留言通知", templateContent2(comment));
+            }
             return comment;
         }
         return null;
+    }
+
+
+    protected String templateContent(Comment comment) {
+        String baseUrl = System.getProperty("server.base.url", "https://blog.sakuramicn.cn");
+        StringBuilder builder = new StringBuilder();
+        // 文章评论
+        if (Constant.COMMENT_TYPE_ARTICLE.equals(comment.getType())) {
+            builder.append("您好，您在文章 ").append(baseUrl).append("/article/").append(comment.getReference());
+        }
+        // 留言板
+        else if (Constant.COMMENT_TYPE_BOARD.equals(comment.getType())) {
+            builder.append("您好，您在留言板 ").append(baseUrl).append("/message").append(comment.getReference());
+        }
+        builder.append(" 的留言：[ ").append(comment.getContent()).append(" ]").append("得到了回复，快去看看吧！");
+        return builder.toString();
+    }
+
+    protected String templateContent2(Comment comment) {
+        String baseUrl = System.getProperty("server.base.url", "https://blog.sakuramicn.cn");
+        StringBuilder builder = new StringBuilder();
+        // 文章评论
+        if (Constant.COMMENT_TYPE_ARTICLE.equals(comment.getType())) {
+            builder.append("您好，您的文章 ").append(baseUrl).append("article/").append(comment.getReference());
+            builder.append(" 有新的评论，快去看看吧！");
+        }
+        // 留言板
+        else if (Constant.COMMENT_TYPE_BOARD.equals(comment.getType())) {
+            builder.append("留言板 ").append(baseUrl).append("/message");
+            builder.append(" 有新的留言了，快去看看吧！");
+        }
+
+        return builder.toString();
     }
 
 
@@ -106,8 +182,8 @@ public class CommentServiceImpl implements CommentService {
         if (update) {
             Comment comment = commentMapper.get(id);
             List<Comment> commentList = commentMapper.search(null, comment.getReference(), null, null, comment.getId());
-            for (Comment c:commentList){
-                commentMapper.update(c.getId(),Constant.COMMENT_STATE_DELETE);
+            for (Comment c : commentList) {
+                commentMapper.update(c.getId(), Constant.COMMENT_STATE_DELETE);
             }
             return this.getComment(id);
         }
@@ -153,7 +229,7 @@ public class CommentServiceImpl implements CommentService {
     @RedisCachePut(key = "id")
     @Override
     public Boolean restoreForRecycle(Long id) {
-        return commentMapper.update(id,Constant.COMMENT_STATE_NORMAL);
+        return commentMapper.update(id, Constant.COMMENT_STATE_NORMAL);
     }
 
     @OnCacheChange
@@ -178,30 +254,35 @@ public class CommentServiceImpl implements CommentService {
         // id == 评论
         Map<Long, Comment> commentMap = comments.parallelStream().collect(Collectors.toMap(Comment::getId, Function.identity()));
 
-        // 顶级评论
-        List<Comment> topList = comments.parallelStream().filter(c -> c.getParentId() == null || c.getParentId().equals(0L))
-                .sorted(Comparator.comparing(Comment::getCreateTime)).collect(Collectors.toList());
+        // 一级评论
+        List<Comment> topList = comments.parallelStream().filter(c -> c.getParentId() == null || c.getParentId().equals(0L)).collect(Collectors.toList());
+
 
         // 剩余的评论
         List<Comment> otherList = new ArrayList<>(comments);
 
-        //顶级评论的子评论，id ==> 子评论
+        List<Comment> copy = new ArrayList<>(comments);
+
+        //一级评论ID ==> 二级评论，父ID直接为 一级评论ID
         Map<Long, List<Comment>> parentMap = comments.parallelStream()
-                .filter(c -> c.getParentId() != null && !c.getParentId().equals(0L))
+                .filter(c -> c.getParentId() != null && !c.getParentId().equals(0L) && hasKey(topList,c.getParentId()))
+                .peek(copy::remove)
                 .collect(Collectors.groupingBy(Comment::getParentId));
 
-        //顶级评论的子评论，id ==> 子评论
-        Map<Long, List<Comment>> subRefMap = comments.parallelStream()
-                .filter(comment -> !StrUtil.isBlank(comment.getSubReference()))
+
+        //一级评论ID ==> 三级评论，子引用为一级评论ID
+        Map<Long, List<Comment>> subRefMap = copy.parallelStream()
+                .filter(comment -> StrUtil.isNotBlank(comment.getSubReference()) && hasKey(topList,Long.parseLong(comment.getSubReference())))
                 .collect(Collectors.groupingBy(comment -> Long.parseLong(comment.getSubReference())));
+
         // 合并
         Map<Long, List<Comment>> fullMap = Stream.of(parentMap, subRefMap).flatMap(map -> map.entrySet().parallelStream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> {
                     v1.addAll(v2);
-                    return v1.parallelStream().distinct().sorted(Comparator.comparing(Comment::getCreateTime)).collect(Collectors.toList());
+                    return v1.parallelStream().distinct().collect(Collectors.toList());
                 }));
 
-        // 包装
+        // 一级包装
         List<CommentWrapView> list = new ArrayList<>();
         for (Comment top : topList) {
             otherList.remove(top);
@@ -223,18 +304,20 @@ public class CommentServiceImpl implements CommentService {
             // 子评论包装
             List<Comment> commentList = fullMap.get(key);
             if (!CollectionUtil.isEmpty(commentList)) {
-                List<CommentWrapView> wrapViewList = commentList.parallelStream().map(c -> {
-                    otherList.remove(c);
+                List<CommentWrapView> wrapViewList = commentList.parallelStream()
+                        .sorted(Comparator.comparing(Comment::getCreateTime))
+                        .map(c -> {
+                            otherList.remove(c);
 
-                    CommentWrapView commentWrapView = new CommentWrapView();
-                    commentWrapView.setComment(c);
-                    Long parentId2 = c.getParentId();
-                    if (null != parentId2 && !parentId2.equals(0L)) {
-                        Comment par = commentMap.get(parentId2);
-                        commentWrapView.setParent(par);
-                    }
-                    return commentWrapView;
-                }).collect(Collectors.toList());
+                            CommentWrapView commentWrapView = new CommentWrapView();
+                            commentWrapView.setComment(c);
+                            Long parentId2 = c.getParentId();
+                            if (null != parentId2 && !parentId2.equals(0L)) {
+                                Comment par = commentMap.get(parentId2);
+                                commentWrapView.setParent(par);
+                            }
+                            return commentWrapView;
+                        }).collect(Collectors.toList());
                 wrapView.setChildList(wrapViewList);
             }
 
@@ -258,10 +341,15 @@ public class CommentServiceImpl implements CommentService {
             list.addAll(collect);
         }
         list.sort(Comparator.comparing(o -> o.getComment().getCreateTime()));
-        PageInfo<CommentWrapView> pageInfo = BeanUtil.copyProperties(comments, PageInfo.class);
-        pageInfo.setList(list);
-        return pageInfo;
+        PageInfo<Comment> of = PageInfo.of(comments);
+        PageInfo<CommentWrapView> wrapList = new PageInfo<>();
+        BeanUtils.copyProperties(of, wrapList);
+        wrapList.setList(list);
+        return wrapList;
     }
 
-
+    private boolean hasKey(List<Comment> comments,Long key){
+        Optional<Comment> first = comments.parallelStream().filter(comment -> comment.getId().equals(key)).findFirst();
+        return first.isPresent();
+    }
 }

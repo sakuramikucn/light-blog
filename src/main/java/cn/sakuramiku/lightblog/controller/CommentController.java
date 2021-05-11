@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 /**
  * 评论模块方法集
@@ -60,7 +61,9 @@ public class CommentController {
         Integer pageSize = param.getPageSize();
         PageInfo<CommentWrapView> comments = commentService.searchCommentWrap(state, ref, parentId, keyword, type, page, pageSize);
         if (comments.getTotal() == 0){
-            return RespResult.ok(new PageInfo<>());
+            PageInfo<CommentWrapView> info = new PageInfo<>();
+            info.setList(new ArrayList<>());
+            return RespResult.ok(info);
         }
         return RespResult.ok(comments);
     }
