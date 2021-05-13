@@ -44,6 +44,11 @@ import java.util.Set;
 public class ShiroConfig {
 
     @Bean
+    public UserRealm userRealm() {
+        return new UserRealm();
+    }
+
+    @Bean
     public SecurityManager securityManager(UserRealm shiroRealm) {
         DefaultWebSecurityManager defaultSecurityManager = new DefaultWebSecurityManager();
         defaultSecurityManager.setRealm(shiroRealm);
@@ -55,6 +60,11 @@ public class ShiroConfig {
         defaultSecurityManager.setSubjectDAO(subjectDAO);
         defaultSecurityManager.setCacheManager(new CustomCacheManager());
         return defaultSecurityManager;
+    }
+
+    @Bean
+    public AuthenticatingFilter jwtFilter() {
+        return new JwtFilter();
     }
 
     @Bean
@@ -75,7 +85,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/link/**", "jwt");
         filterChainDefinitionMap.put("/category/**", "jwt");
         filterChainDefinitionMap.put("/logout", "jwt");
-        if (Boolean.parseBoolean(System.getProperty("shiro.enable","true"))){
+        if (Boolean.parseBoolean(System.getProperty("shiro.enable", "true"))) {
             filterChainDefinitionMap.putAll(getPassUrls());
         }
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
@@ -84,47 +94,34 @@ public class ShiroConfig {
     }
 
     @Bean
-    public UserRealm userRealm() {
-        return new UserRealm();
-    }
-
-    @Bean
-    public AuthenticatingFilter jwtFilter() {
-        return new JwtFilter();
-    }
-
-    @Bean
-    public static LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        return new LifecycleBeanPostProcessor();
-    }
-
-    @Bean
-    @DependsOn({"lifecycleBeanPostProcessor"})
-    public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
-        DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
-        advisorAutoProxyCreator.setProxyTargetClass(true);
-        return advisorAutoProxyCreator;
-    }
-
-    /**
-     * 注解支持
-     *
-     * @param securityManager
-     * @return
-     */
-    @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
+
     }
+
+    @Bean
+    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor(){
+        return new LifecycleBeanPostProcessor();
+    }
+
+    @Bean
+    @DependsOn("lifecycleBeanPostProcessor")
+    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator(){
+        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+        defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
+        return defaultAdvisorAutoProxyCreator;
+    }
+
+
 
     /**
      * 获取标记为不校验权限的url集合
      *
      * @return
      */
-    protected Map<String, String> getPassUrls() throws Exception {
+    protected static Map<String, String> getPassUrls() throws Exception {
 
         String contextPath = System.getProperty("tomcat.contextPath", "/");
         Set<Class<?>> classesList = getControllerClass("cn.sakuramiku.lightblog.controller");
@@ -146,28 +143,28 @@ public class ShiroConfig {
                             methodUrl = method.getAnnotation(PostMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
-                        baseUrl = BlogHelper.genReqUrl("POST",baseUrl);
+                        baseUrl = BlogHelper.genReqUrl("POST", baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(GetMapping.class))) {
                         methodUrl = method.getAnnotation(GetMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(GetMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
-                        baseUrl = BlogHelper.genReqUrl("GET",baseUrl);
+                        baseUrl = BlogHelper.genReqUrl("GET", baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(DeleteMapping.class))) {
                         methodUrl = method.getAnnotation(DeleteMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(DeleteMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
-                        baseUrl = BlogHelper.genReqUrl("DELETE",baseUrl);
+                        baseUrl = BlogHelper.genReqUrl("DELETE", baseUrl);
                     } else if (!ObjectUtil.isNull(method.getAnnotation(PutMapping.class))) {
                         methodUrl = method.getAnnotation(PutMapping.class).value();
                         if (ArrayUtil.isEmpty(methodUrl)) {
                             methodUrl = method.getAnnotation(PutMapping.class).path();
                         }
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
-                        baseUrl = BlogHelper.genReqUrl("PUT",baseUrl);
+                        baseUrl = BlogHelper.genReqUrl("PUT", baseUrl);
                     } else {
                         methodUrl = method.getAnnotation(RequestMapping.class).value();
                         baseUrl = getRequestUrl(classUrl, methodUrl, sb, contextPath);
@@ -186,7 +183,7 @@ public class ShiroConfig {
         return filterRuleMap;
     }
 
-    private String getRequestUrl(String[] classUrl, String[] methodUrl, StringBuilder sb, String contextPath) {
+    private static String getRequestUrl(String[] classUrl, String[] methodUrl, StringBuilder sb, String contextPath) {
         if (!StrUtil.isEmpty(contextPath)) {
             sb.append(contextPath);
         }

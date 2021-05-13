@@ -19,6 +19,7 @@ import cn.sakuramiku.lightblog.util.Constant;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     @Resource
     private AccountMapper accountMapper;
     @Resource
+    @Lazy
     private RedisUtil redisUtil;
     @Resource
     private RoleService roleService;

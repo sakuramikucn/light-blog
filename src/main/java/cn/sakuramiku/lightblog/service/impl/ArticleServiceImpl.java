@@ -100,15 +100,17 @@ public class ArticleServiceImpl implements ArticleService {
         //
         Boolean update = articleMapper.update(article);
         List<Tag> tags = article.getTags();
-        if (update && null != tags) {
-            // 更新标签
-            tagService.deleteForArticle(article.getId());
-            List<BatchInsertParam> insertParams = article.getTags().parallelStream()
-                    .map(tag -> BatchInsertParam.valueOf(article.getId(), tag.getId())).collect(Collectors.toList());
-            if (CollectionUtil.isNotEmpty(insertParams)) {
-                Boolean aBoolean = tagService.batchInsert(insertParams);
-                if (!aBoolean) {
-                    throw new BusinessException("修改失败");
+        if (update) {
+            if (null != tags) {
+                // 更新标签
+                tagService.deleteForArticle(article.getId());
+                List<BatchInsertParam> insertParams = article.getTags().parallelStream()
+                        .map(tag -> BatchInsertParam.valueOf(article.getId(), tag.getId())).collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(insertParams)) {
+                    Boolean aBoolean = tagService.batchInsert(insertParams);
+                    if (!aBoolean) {
+                        throw new BusinessException("修改失败");
+                    }
                 }
             }
             return articleMapper.get(article.getId());

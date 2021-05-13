@@ -147,6 +147,7 @@ public class LogAspect {
             log.setWhat( builder.toString());
         } catch (Exception e) {
             logger.warn("记录日志失败，日志ID{}", id);
+            return;
         }
         log.setNote(writeLog.note());
         logService.writeLog(log);

@@ -18,9 +18,9 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
-import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,11 +32,13 @@ import java.util.Set;
  */
 public class UserRealm extends AuthorizingRealm {
 
-    @Resource
+    @Autowired
     @Lazy
     private UserService userService;
-    @Resource
+    @Autowired
+    @Lazy
     private RedisUtil redisUtil;
+
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -81,7 +83,7 @@ public class UserRealm extends AuthorizingRealm {
                 // 刷新缓存
                 redisUtil.set(tokenKey, newToken, 30 * 60L);
                 JwtUtil.logger.info("刷新了Token：{}", newToken);
-            }else {
+            } else {
                 // 不可以刷新
                 throw e;
             }
@@ -93,7 +95,7 @@ public class UserRealm extends AuthorizingRealm {
         if (ObjectUtil.isNull(user)) {
             throw new UnknownAccountException("无效的用户");
         }
-        if (!Constant.USER_STATE_NORMAL.equals(user.getState())){
+        if (!Constant.USER_STATE_NORMAL.equals(user.getState())) {
             throw new UnknownAccountException("账号异常，请联系管理员");
         }
         return new SimpleAuthenticationInfo(jwtToken, jwtToken, getName());
@@ -135,6 +137,7 @@ public class UserRealm extends AuthorizingRealm {
 
     /**
      * 登录通过后，会进行密码校验，如果刷新了Token，则两者Token会不一致导致匹配失败。所以就不比较了
+     *
      * @param token
      * @param info
      * @throws AuthenticationException

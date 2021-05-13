@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.util.AspectUtil;
 import cn.sakuramiku.lightblog.common.util.RedisUtil;
-import com.github.pagehelper.PageSerializable;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -19,7 +18,6 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -162,16 +160,17 @@ public class CacheAspect {
         Object result = point.proceed();
 
         if (null != result) {
-            if (result instanceof Collection) {
-                if (((Collection) result).size() == 0) {
-                    return result;
-                }
-            }
-            if (result instanceof PageSerializable) {
-                if (((PageSerializable) result).getTotal() == 0) {
-                    return result;
-                }
-            }
+            // 空也缓存吧，提升速度
+//            if (result instanceof Collection) {
+//                if (((Collection) result).size() == 0) {
+//                    return result;
+//                }
+//            }
+//            if (result instanceof PageSerializable) {
+//                if (((PageSerializable) result).getTotal() == 0) {
+//                    return result;
+//                }
+//            }
             redisUtil.push(key, result);
         }
         return result;

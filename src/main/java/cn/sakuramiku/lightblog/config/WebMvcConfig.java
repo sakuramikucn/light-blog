@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -33,9 +32,9 @@ import java.util.Locale;
  *
  * @author lyy
  */
-@ComponentScan({"cn.sakuramiku.lightblog.controller"})
-@Import(Swagger2Config.class)
 @EnableWebMvc
+@ComponentScan("cn.sakuramiku.lightblog.controller")
+//@Import(Swagger2Config.class)
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
@@ -89,5 +88,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         resolver.setDefaultEncoding("UTF-8");
         return resolver;
     }
+
+
 
 }

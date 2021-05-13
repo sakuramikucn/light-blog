@@ -7,7 +7,7 @@ public class QueryArticleByTag extends PageParam {
 
     protected Long tagId;
     protected Boolean isPublic;
-    protected Boolean isSimple;
+    protected Boolean isSimple = false;
 
     public Long getTagId() {
         return tagId;

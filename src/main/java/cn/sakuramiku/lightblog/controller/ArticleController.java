@@ -13,19 +13,23 @@ import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.CommentService;
 import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
-import cn.sakuramiku.lightblog.vo.ArticleView;
-import cn.sakuramiku.lightblog.vo.QueryArticleByTag;
-import cn.sakuramiku.lightblog.vo.SearchArticleParam;
-import cn.sakuramiku.lightblog.vo.SimpleArticleView;
+import cn.sakuramiku.lightblog.vo.*;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -133,7 +137,6 @@ public class ArticleController {
 
     @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("修改文章")
-    @ApiResponse(code = 0, message = "ok", examples = @Example(@ExampleProperty(mediaType = "文章ID", value = "文章ID")))
     @PutMapping
     public Result<Article> update(@RequestBody Article article) throws BusinessException {
         Article article1 = articleService.updateArticle(article);
@@ -180,6 +183,37 @@ public class ArticleController {
         ValidateUtil.isNull(id, "参数异常，文章ID为空");
         Boolean succ = articleService.restoreForRecycle(id);
         return RespResult.ok(succ);
+    }
+
+    @GetMapping("/archives")
+    public Result<List<ArticleArchivesView>> archives(){
+        SearchArticleParam param = new SearchArticleParam();
+        param.setState(Constant.ARTICLE_STATE_NORMAL);
+        param.setPublic(true);
+        PageInfo<Article> searchArticle = articleService.searchArticle(param);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+        Map<String, List<SimpleArticleView>> collect = searchArticle.getList().parallelStream().map(article -> {
+            Long id = article.getId();
+            PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(),
+                    null, null, Constant.COMMENT_TYPE_ARTICLE, null, null);
+            Object o = redisUtil.get(Constant.PREFIX_ARTICLE_VIEWS + id);
+            Long pageViews = null == o ? 0L : Long.parseLong(o.toString());
+            SimpleArticleView view = new SimpleArticleView();
+            return view.valueOf(article, pageViews, comments.getTotal());
+        }).collect(Collectors.groupingBy(o -> formatter.format(o.getCreateTime())));
+
+        List<ArticleArchivesView> articleArchivesViewList = collect.entrySet().parallelStream().map(entry -> {
+            ArticleArchivesView view = new ArticleArchivesView();
+            view.setArticles(entry.getValue());
+            view.setKey(entry.getKey());
+            TemporalAccessor parse = formatter.parse(entry.getKey());
+            view.setYear(parse.get(ChronoField.YEAR));
+            view.setMonth(parse.get(ChronoField.MONTH_OF_YEAR));
+            return view;
+        }).collect(Collectors.toList());
+
+        return RespResult.ok(articleArchivesViewList);
+
     }
 }
 
