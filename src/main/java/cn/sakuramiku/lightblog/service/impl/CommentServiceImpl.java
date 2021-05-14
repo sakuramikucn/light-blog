@@ -67,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
         if (!StringUtils.isEmpty(username)) {
             User user = userService.getUser(username);
             if (Constant.COMMENT_TYPE_ARTICLE.equals(comment.getType())) {
-                article = articleService.getArticle(Long.parseLong(comment.getSubReference()));
+                article = articleService.getArticle(Long.parseLong(comment.getReference()));
                 if (null != article) {
                     String authorId = article.getAuthorId();
                     if (null != user) {
@@ -78,11 +78,12 @@ public class CommentServiceImpl implements CommentService {
                         }
                     }
 
+                }else {
+                    comment.setRoleType(Constant.COMMENT_ROLE_TYPE_MANAGER);
                 }
             } else {
                 if (null != user) {
                     comment.setRoleType(Constant.COMMENT_ROLE_TYPE_MANAGER);
-
                 }
             }
         }
