@@ -255,7 +255,7 @@ public class CommentServiceImpl implements CommentService {
         Map<Long, Comment> commentMap = comments.parallelStream().peek(c-> {
             Long parentId1 = c.getParentId();
             if (parentId1 != null && parentId1.equals(0L)){
-                c.setId(null);
+                c.setParentId(null);
             }
         })
                 .collect(Collectors.toMap(Comment::getId, Function.identity()));
