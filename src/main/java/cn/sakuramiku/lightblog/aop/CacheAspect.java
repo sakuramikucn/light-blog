@@ -73,6 +73,7 @@ public class CacheAspect {
             logger.info("@RedisCachePut 缓存Key生成：{}", key);
             redisUtil.push(key, result);
         }
+
     }
 
     /**

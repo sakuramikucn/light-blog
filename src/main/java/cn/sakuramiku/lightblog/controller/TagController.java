@@ -54,6 +54,7 @@ public class TagController {
         return RespResult.ok(tag);
     }
 
+    @RequiresAuthentication
     @PutMapping
     public Result<Tag> update(@RequestBody Tag tag) throws ApiException {
         ValidateUtil.isNull(tag.getId(), "参数错误，标签名称为空");
@@ -72,6 +73,7 @@ public class TagController {
         PageInfo<Tag> tags = tagService.search(articleId, keyword, page, pageSize);
         return RespResult.ok(tags);
     }
+
 
     @GetMapping("/check/{name}")
     public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {

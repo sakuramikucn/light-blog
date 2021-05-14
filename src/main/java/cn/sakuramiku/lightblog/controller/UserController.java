@@ -5,6 +5,7 @@ import cn.sakuramiku.lightblog.common.Result;
 import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
+import cn.sakuramiku.lightblog.entity.Account;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.UserService;
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.subject.Subject;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,6 +89,7 @@ public class UserController {
         return RespResult.ok(users);
     }
 
+    @RequiresAuthentication
     @PutMapping
     public Result<User> update(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
@@ -98,6 +101,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @PostMapping
     public Result<User> add(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
@@ -118,6 +122,7 @@ public class UserController {
         return RespResult.fail("添加失败");
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @PutMapping("/freez/{id}")
     public Result<User> freez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -127,6 +132,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @PutMapping("/unfreez/{id}")
     public Result<User> unfreez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -136,6 +142,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @PutMapping("/{id}")
     public Result<User> remove(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -145,15 +152,29 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id){
         Boolean aBoolean = userService.delete(id);
         return RespResult.ok(aBoolean);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @PutMapping("/restore/{id}")
     public Result<Boolean> restore(@PathVariable("id") Long id){
         Boolean aBoolean = userService.restoreForRecycle(id);
         return RespResult.ok(aBoolean);
+    }
+
+    @RequiresAuthentication
+    @PutMapping("/password")
+    public Result<Boolean> changePassword(@RequestBody Account account) throws BusinessException, ApiException {
+        ValidateUtil.isEmpty(account.getUsername(),"用户名不能为空");
+        ValidateUtil.isEmpty(account.getPassword(),"密码不能为空");
+        Boolean changePassword = userService.changePassword(account);
+        if (changePassword){
+            return RespResult.ok(true);
+        }
+        return RespResult.fail("修改失败");
     }
 }

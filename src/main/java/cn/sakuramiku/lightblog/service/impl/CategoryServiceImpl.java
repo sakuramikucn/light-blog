@@ -4,9 +4,13 @@ import cn.sakuramiku.lightblog.annotation.*;
 import cn.sakuramiku.lightblog.common.annotation.LogConfig;
 import cn.sakuramiku.lightblog.common.annotation.WriteLog;
 import cn.sakuramiku.lightblog.common.util.IdGenerator;
+import cn.sakuramiku.lightblog.entity.Article;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.mapper.CategoryMapper;
+import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.CategoryService;
+import cn.sakuramiku.lightblog.util.Constant;
+import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -15,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 分类服务实现
@@ -29,6 +34,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     private CategoryMapper categoryMapper;
+
+    @Resource
+    private ArticleService articleService;
 
     @WriteLog(action = WriteLog.Action.INSERT)
     @RedisCachePut(key = "#result.id")
@@ -90,5 +98,18 @@ public class CategoryServiceImpl implements CategoryService {
         }
         List<Category> categories = categoryMapper.search(keyword, begin, end);
         return PageInfo.of(categories);
+    }
+
+    @OnCacheChange
+    @RedisCache
+    @Override
+    public List<Category> hotCategory() {
+        SearchArticleParam searchArticleParam = new SearchArticleParam();
+        searchArticleParam.setState(Constant.ARTICLE_STATE_NORMAL);
+        PageInfo<Article> info = articleService.searchArticle(searchArticleParam);
+        Set<Category> set = new HashSet<>();
+        Map<Long, Long> collect = info.getList().parallelStream().peek(article -> set.add(article.getCategory()))
+                .collect(Collectors.groupingBy(article -> article.getCategory().getId(), Collectors.counting()));
+        return set.parallelStream().distinct().sorted((o1, o2) -> (int) (collect.get(o2.getId()) - collect.get(o1.getId()))).collect(Collectors.toList());
     }
 }

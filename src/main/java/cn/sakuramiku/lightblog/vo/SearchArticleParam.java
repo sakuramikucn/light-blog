@@ -1,6 +1,7 @@
 package cn.sakuramiku.lightblog.vo;
 
 import cn.sakuramiku.lightblog.util.Constant;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -35,6 +36,8 @@ public class SearchArticleParam extends PageParam {
     protected Boolean isSimple = false;
     @ApiModelProperty(value = "分类")
     protected String category;
+    @JsonIgnore
+    protected Integer mask;
 
     public String getKeyword() {
         return keyword;
@@ -114,6 +117,14 @@ public class SearchArticleParam extends PageParam {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public Integer getMask() {
+        return mask;
+    }
+
+    public void setMask(Integer mask) {
+        this.mask = mask;
     }
 
     @Override

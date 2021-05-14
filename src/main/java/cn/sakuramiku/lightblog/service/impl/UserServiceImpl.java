@@ -19,6 +19,7 @@ import cn.sakuramiku.lightblog.util.Constant;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,9 @@ public class UserServiceImpl implements UserService {
     private RedisUtil redisUtil;
     @Resource
     private RoleService roleService;
+    @Autowired
+    @Lazy
+    private UserService userService;
 
     @WriteLog(action = WriteLog.Action.UPDATE)
     @RedisCachePut(key = "#result.id")
@@ -57,7 +61,7 @@ public class UserServiceImpl implements UserService {
     public User login(@NonNull String username, @NonNull String password, String ipAddr) throws BusinessException {
         Account account = accountMapper.checkLogin(username, password);
         if (null != account) {
-            User old = userMapper.get(null, username);
+            User old = userService.getUser(username);
             if (Constant.USER_STATE_FREEZ.equals(old.getState())) {
                 throw new BusinessException("账号已冻结，请联系管理员");
             }
@@ -69,7 +73,7 @@ public class UserServiceImpl implements UserService {
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(ipAddr);
             userMapper.update(user);
-            return userMapper.get(account.getId(), null);
+            return userService.getUser(account.getId());
         }
         return null;
     }
@@ -100,6 +104,16 @@ public class UserServiceImpl implements UserService {
             }
         }
         return null;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean changePassword(Account account) throws BusinessException {
+//        Account account1 = accountMapper.checkLogin(account.getUsername(), SecurityUtil.md5(account.getPassword()));
+//        if (null == account1){
+//            throw new BusinessException("密码错误");
+//        }
+        return accountMapper.update(account.getId(), account.getUsername(), SecurityUtil.md5(account.getPassword()));
     }
 
     @Override
@@ -140,18 +154,21 @@ public class UserServiceImpl implements UserService {
     public User updateUser(@NonNull User user) throws BusinessException {
         Boolean update = userMapper.update(user);
         if (update) {
+            if (null == user.getRoles()){
+                return userService.getUser(user.getId());
+            }
             roleService.removeRoleForUser(user.getId());
             List<BatchInsertParam> insertParams = user.getRoles().parallelStream()
                     .map(role -> BatchInsertParam.valueOf(user.getId(), role.getId())).collect(Collectors.toList());
             if (CollectionUtil.isNotEmpty(insertParams)) {
                 Boolean aBoolean = roleService.addRoles(insertParams);
                 if (aBoolean) {
-                    return userMapper.get(user.getId(), null);
+                    return userService.getUser(user.getId());
                 } else {
                     throw new BusinessException("更新失败");
                 }
             } else {
-                return userMapper.get(user.getId(), null);
+                return userService.getUser(user.getId());
             }
         }
         return null;

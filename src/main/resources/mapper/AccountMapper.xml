@@ -53,7 +53,7 @@
                 username = #{username,jdbcType=VARCHAR}
             </when>
             <otherwise>
-                1 != 1
+                false
             </otherwise>
         </choose>
     </update>

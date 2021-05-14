@@ -63,4 +63,5 @@ public interface CategoryMapper {
      * @return 是否成功
      */
     Boolean update(@NonNull @Param("id") Long id, @NonNull @Param("name") String name);
+
 }

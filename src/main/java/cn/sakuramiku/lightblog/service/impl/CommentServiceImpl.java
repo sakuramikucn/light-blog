@@ -252,7 +252,13 @@ public class CommentServiceImpl implements CommentService {
         }
         List<Comment> comments = commentMapper.search(state, ref, keyword, type, parentId);
         // id == 评论
-        Map<Long, Comment> commentMap = comments.parallelStream().collect(Collectors.toMap(Comment::getId, Function.identity()));
+        Map<Long, Comment> commentMap = comments.parallelStream().peek(c-> {
+            Long parentId1 = c.getParentId();
+            if (parentId1 != null && parentId1.equals(0L)){
+                c.setId(null);
+            }
+        })
+                .collect(Collectors.toMap(Comment::getId, Function.identity()));
 
         // 一级评论
         List<Comment> topList = comments.parallelStream().filter(c -> c.getParentId() == null || c.getParentId().equals(0L)).collect(Collectors.toList());

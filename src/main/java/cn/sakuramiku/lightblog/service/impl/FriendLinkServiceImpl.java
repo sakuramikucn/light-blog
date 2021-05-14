@@ -76,7 +76,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     public PageInfo<FriendLink> searchLink(String keyword, Integer page, Integer pageSize) {
         if (null != page && null != pageSize) {
             Page<Object> objects = PageHelper.startPage(page, pageSize, true);
-            objects.setOrderBy("modified_time DESC");
+//            objects.setOrderBy("modified_time DESC");
         }
         List<FriendLink> links = linkMapper.search(keyword);
         return PageInfo.of(links);

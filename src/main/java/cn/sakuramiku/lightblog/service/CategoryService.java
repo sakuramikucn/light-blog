@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 分类服务接口
@@ -59,4 +60,6 @@ public interface CategoryService {
      */
     PageInfo<Category> search(@Nullable String keyword, @Nullable LocalDateTime begin, @Nullable LocalDateTime end,
                               @Nullable Integer page, @Nullable Integer pageSize);
+
+    List<Category> hotCategory();
 }

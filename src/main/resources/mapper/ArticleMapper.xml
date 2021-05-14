@@ -99,6 +99,9 @@
             <if test="null != category">
                 and article.category = #{category}
             </if>
+            <if test="null != mask">
+                and article.mask = #{mask}
+            </if>
         </where>
     </select>
     <select id="search_COUNT" parameterType="cn.sakuramiku.lightblog.vo.SearchArticleParam" resultType="long">
@@ -120,6 +123,9 @@
             </if>
             <if test="null != category">
                 and article.category = #{category}
+            </if>
+            <if test="null != mask">
+                and article.mask = #{mask}
             </if>
         </where>
     </select>

@@ -67,6 +67,7 @@ public class LinkController {
         return RespResult.ok(linkService.removeLink(id));
     }
 
+    @RequiresAuthentication
     @PutMapping
     public Result<FriendLink> update(@RequestBody FriendLink link) throws ApiException {
         ValidateUtil.isNull(link.getId(),"参数异常，ID为空");

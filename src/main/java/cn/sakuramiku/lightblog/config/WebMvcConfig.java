@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.config;
 
+import cn.sakuramiku.lightblog.shiro.ShiroConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -34,7 +36,7 @@ import java.util.Locale;
  */
 @EnableWebMvc
 @ComponentScan("cn.sakuramiku.lightblog.controller")
-//@Import(Swagger2Config.class)
+@Import({Swagger2Config.class, ShiroConfig.class})
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override

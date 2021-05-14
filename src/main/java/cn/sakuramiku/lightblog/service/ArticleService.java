@@ -68,4 +68,6 @@ public interface ArticleService {
     Boolean restoreForRecycle(Long id);
 
     PageInfo<Article> queryByTag(QueryArticleByTag param);
+
+    Article changeMask(Article article);
 }

@@ -79,4 +79,27 @@ public class Category implements Serializable {
                 ", modifiedTime=" + modifiedTime +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Category)) return false;
+
+        Category category = (Category) o;
+
+        if (getId() != null ? !getId().equals(category.getId()) : category.getId() != null) return false;
+        if (getName() != null ? !getName().equals(category.getName()) : category.getName() != null) return false;
+        if (getCreateTime() != null ? !getCreateTime().equals(category.getCreateTime()) : category.getCreateTime() != null)
+            return false;
+        return getModifiedTime() != null ? getModifiedTime().equals(category.getModifiedTime()) : category.getModifiedTime() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getCreateTime() != null ? getCreateTime().hashCode() : 0);
+        result = 31 * result + (getModifiedTime() != null ? getModifiedTime().hashCode() : 0);
+        return result;
+    }
 }

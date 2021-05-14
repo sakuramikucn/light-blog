@@ -104,7 +104,7 @@ public class CommentController {
     }
 
     @RequiresAuthentication
-    @ApiOperation("评论屏蔽操作")
+    @ApiOperation("评论恢复操作")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true),
             @ApiImplicitParam(name = "isHidden", dataTypeClass = Boolean.class, value = "true=屏蔽，false=正常", required = true)

@@ -14,7 +14,6 @@ import cn.sakuramiku.lightblog.mapper.ArticleMapper;
 import cn.sakuramiku.lightblog.model.BatchInsertParam;
 import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.TagService;
-import cn.sakuramiku.lightblog.util.BlogHelper;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
 import cn.sakuramiku.lightblog.vo.QueryArticleByTag;
@@ -25,6 +24,7 @@ import com.github.pagehelper.PageInfo;
 import io.jsonwebtoken.Claims;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +50,11 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleMapper articleMapper;
     @Resource
     private TagService tagService;
+    @Resource
+    @Lazy
+    private ArticleService articleService;
 
+    @RedisCachePut(key = "id")
     @WriteLog(action = WriteLog.Action.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -94,9 +98,7 @@ public class ArticleServiceImpl implements ArticleService {
     public Article updateArticle(@NonNull Article article) throws BusinessException {
         // 更新mask
         Boolean aPublic = article.isPublic();
-        Article old = articleMapper.get(article.getId());
-        int mask = BlogHelper.setMask(old.getMask(), aPublic ? Article.MASK_PUBLIC : -Article.MASK_PUBLIC);
-        article.setMask(mask);
+        article.setMask(aPublic ? 1 : 0);
         //
         Boolean update = articleMapper.update(article);
         List<Tag> tags = article.getTags();
@@ -154,10 +156,12 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (param.getPage() != null && param.getPageSize() != null) {
             Page<Article> page = PageHelper.startPage(param.getPage(), param.getPageSize(), true);
-            String orderby = "article.create_time " + param.getOrder();
+            String orderby = "";
             Boolean hotOrderBy = param.getHotOrderBy();
             if (hotOrderBy) {
-                orderby += ",article.page_views DESC";
+                orderby += "article.page_views DESC";
+            }else {
+                orderby = "article.create_time " + param.getOrder();
             }
             page.setOrderBy(orderby);
         }
@@ -165,11 +169,20 @@ public class ArticleServiceImpl implements ArticleService {
         if (StrUtil.isBlank(keyword)) {
             param.setKeyword(null);
         }
-        List<Article> articles = articleMapper.search(param);
         if (null != param.getPublic()) {
-            articles = articles.parallelStream().filter(val -> param.getPublic().equals(val.getPublic())).collect(Collectors.toList());
+            Boolean isPublic = param.getPublic();
+            param.setMask(isPublic ? 1 : 0);
         }
-        return new PageInfo<>(articles);
+        List<Article> articles = articleMapper.search(param);
+        PageInfo<Article> of = PageInfo.of(articles);
+//        if (null != param.getPublic()) {
+//            articles = articles.stream().filter(val -> param.getPublic().equals(val.getPublic())).collect(Collectors.toList());
+//        }
+//        long offset = of.getTotal() - articles.size();
+//        of.setList(articles);
+//        long total = of.getTotal();
+//        of.setTotal(total-offset);
+        return of;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -180,6 +193,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.deleteForRecycle(status, start);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @RedisCachePut(key = "id")
     @Override
     public Boolean restoreForRecycle(Long id) {
@@ -189,21 +203,38 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.update(article);
     }
 
+    @RedisCache
+    @OnCacheChange
     @Override
     public PageInfo<Article> queryByTag(QueryArticleByTag param) {
         Integer page = param.getPage();
         Integer pageSize = param.getPageSize();
         Long tagId = param.getTagId();
         Boolean aPublic = param.getPublic();
+        Integer mask = aPublic ? 1 : 0;
         if (null != page && null != pageSize) {
             PageHelper.startPage(page, pageSize);
         }
         List<Long> ids = articleMapper.queryByTag(tagId);
         ArticleService bean = SpringContextUtil.getBean(ArticleService.class);
         assert bean != null;
-        List<Article> articles = ids.parallelStream().map(bean::getArticle).filter(val -> aPublic.equals(val.getPublic()))
+        List<Article> articles = ids.parallelStream().map(bean::getArticle).filter(val -> mask.equals(val.getMask()))
                 .sorted(Comparator.comparing(Article::getCreateTime)).collect(Collectors.toList());
         return PageInfo.of(articles);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @RedisCachePut(key = "id")
+    @Override
+    public Article changeMask(Article article) {
+        // 更新mask
+        Boolean aPublic = article.isPublic();
+        article.setMask(aPublic ? 1 : 0);
+        Boolean update = articleMapper.update(article);
+        if (update) {
+            return article;
+        }
+        return null;
     }
 
 }

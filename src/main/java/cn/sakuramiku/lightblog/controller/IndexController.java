@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,6 +69,7 @@ public class IndexController {
         return RespResult.fail("用户名或密码错误");
     }
 
+    @RequiresRoles("register")
     @PostMapping("/register")
     @ApiOperation("注册")
     @ApiImplicitParams({

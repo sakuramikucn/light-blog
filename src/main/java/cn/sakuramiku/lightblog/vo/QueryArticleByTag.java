@@ -8,6 +8,7 @@ public class QueryArticleByTag extends PageParam {
     protected Long tagId;
     protected Boolean isPublic;
     protected Boolean isSimple = false;
+    protected Integer mask;
 
     public Long getTagId() {
         return tagId;
@@ -31,5 +32,13 @@ public class QueryArticleByTag extends PageParam {
 
     public void setSimple(Boolean simple) {
         isSimple = simple;
+    }
+
+    public Integer getMask() {
+        return mask;
+    }
+
+    public void setMask(Integer mask) {
+        this.mask = mask;
     }
 }

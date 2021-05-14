@@ -1,5 +1,6 @@
 package cn.sakuramiku.lightblog.service;
 
+import cn.sakuramiku.lightblog.entity.Account;
 import cn.sakuramiku.lightblog.entity.User;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import com.github.pagehelper.PageInfo;
@@ -34,6 +35,8 @@ public interface UserService {
      * @return 是否成功
      */
     User register(@NonNull String username, @NonNull String password);
+
+    Boolean changePassword(Account account) throws BusinessException;
 
     /**
      * 获取用户

@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,11 +64,11 @@ public class ArticleController {
 
     @ShiroPass
     @ApiOperation("搜索文章")
-    @GetMapping("/search")
-    public Result<PageInfo<SimpleArticleView>> search(SearchArticleParam param) {
+    @PostMapping("/search")
+    public Result<PageInfo<SimpleArticleView>> search(@RequestBody SearchArticleParam param) {
         param.setState(1);
         PageInfo<Article> articles = articleService.searchArticle(param);
-        List<SimpleArticleView> views = articles.getList().parallelStream().map(article -> {
+        List<SimpleArticleView> views = articles.getList().stream().map(article -> {
             Boolean simple = param.getSimple();
             if (simple){
                 SimpleArticleView view = new SimpleArticleView();
@@ -135,7 +136,7 @@ public class ArticleController {
         return RespResult.ok(article1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresAuthentication
     @ApiOperation("修改文章")
     @PutMapping
     public Result<Article> update(@RequestBody Article article) throws BusinessException {
@@ -146,7 +147,7 @@ public class ArticleController {
         return RespResult.ok(article1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresAuthentication
     @ApiOperation("移动到回收站")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
@@ -173,7 +174,7 @@ public class ArticleController {
         return RespResult.ok(succ);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresAuthentication
     @ApiOperation("恢复文章")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
@@ -185,6 +186,7 @@ public class ArticleController {
         return RespResult.ok(succ);
     }
 
+    @ShiroPass
     @GetMapping("/archives")
     public Result<List<ArticleArchivesView>> archives(){
         SearchArticleParam param = new SearchArticleParam();
@@ -192,7 +194,9 @@ public class ArticleController {
         param.setPublic(true);
         PageInfo<Article> searchArticle = articleService.searchArticle(param);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月");
-        Map<String, List<SimpleArticleView>> collect = searchArticle.getList().parallelStream().map(article -> {
+        Map<String, List<SimpleArticleView>> collect = searchArticle.getList().parallelStream()
+                .sorted(Comparator.comparing(Article::getCreateTime).reversed())
+                .map(article -> {
             Long id = article.getId();
             PageInfo<Comment> comments = commentService.searchComment(Constant.COMMENT_STATE_NORMAL, id.toString(),
                     null, null, Constant.COMMENT_TYPE_ARTICLE, null, null);
@@ -210,10 +214,20 @@ public class ArticleController {
             view.setYear(parse.get(ChronoField.YEAR));
             view.setMonth(parse.get(ChronoField.MONTH_OF_YEAR));
             return view;
-        }).collect(Collectors.toList());
+        }).sorted(Comparator.comparing(ArticleArchivesView::getKey).reversed()).collect(Collectors.toList());
 
         return RespResult.ok(articleArchivesViewList);
 
+    }
+
+    @RequiresAuthentication
+    @PutMapping("/mask")
+    public Result<Article> changeMask(@RequestBody Article article){
+        Article changeMask = articleService.changeMask(article);
+        if (null == changeMask){
+            return RespResult.fail("修改失败");
+        }
+        return RespResult.ok(changeMask);
     }
 }
 

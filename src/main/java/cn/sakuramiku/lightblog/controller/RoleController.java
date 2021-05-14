@@ -65,6 +65,7 @@ public class RoleController {
         return RespResult.ok(roles);
     }
 
+    @RequiresRoles(Constant.ROLE_ADMIN)
     @ApiOperation("删除角色")
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
@@ -72,6 +73,7 @@ public class RoleController {
         return RespResult.ok(roleService.removeRole(id));
     }
 
+    @RequiresAuthentication
     @PutMapping
     public Result<Role> edit(@RequestBody Role role) throws BusinessException {
         Role role1 = roleService.updateRole(role);

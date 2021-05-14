@@ -74,6 +74,7 @@ public class RightController {
         return RespResult.ok(right1);
     }
 
+    @RequiresAuthentication
     @ApiOperation("检查权限名称")
     @GetMapping("/check")
     public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {

@@ -7,7 +7,6 @@ import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Category;
 import cn.sakuramiku.lightblog.service.CategoryService;
-import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.vo.SearchCategoryParam;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -15,11 +14,11 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 文章分类模块方法集
@@ -94,7 +93,7 @@ public class CategoryController {
         return RespResult.fail("修改失败");
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresAuthentication
     @ApiOperation("删除分类")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "分类ID", required = true)
@@ -113,5 +112,12 @@ public class CategoryController {
             return RespResult.ok(true);
         }
         return RespResult.ok(false);
+    }
+
+    @ShiroPass
+    @GetMapping("/hot")
+    public Result<List<Category>> hotCategory(){
+        List<Category> categories = categoryService.hotCategory();
+        return RespResult.ok(categories);
     }
 }

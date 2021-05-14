@@ -1,6 +1,5 @@
 package cn.sakuramiku.lightblog.entity;
 
-import cn.sakuramiku.lightblog.util.BlogHelper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
@@ -228,7 +227,7 @@ public class Article implements Serializable {
     }
 
     public Boolean getPublic() {
-        return BlogHelper.isMask(mask,MASK_PUBLIC);
+        return null != mask && (mask.equals(1));
     }
     public Boolean isPublic() {
         return isPublic;

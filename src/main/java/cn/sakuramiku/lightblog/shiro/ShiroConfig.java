@@ -58,7 +58,7 @@ public class ShiroConfig {
         defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
         subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
         defaultSecurityManager.setSubjectDAO(subjectDAO);
-        defaultSecurityManager.setCacheManager(new CustomCacheManager());
+//        defaultSecurityManager.setCacheManager(new CustomCacheManager());
         return defaultSecurityManager;
     }
 
@@ -84,7 +84,12 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/tag/**", "jwt");
         filterChainDefinitionMap.put("/link/**", "jwt");
         filterChainDefinitionMap.put("/category/**", "jwt");
+
+        // index
         filterChainDefinitionMap.put("/logout", "jwt");
+        filterChainDefinitionMap.put("/register", "jwt");
+        filterChainDefinitionMap.put("/upload", "jwt");
+
         if (Boolean.parseBoolean(System.getProperty("shiro.enable", "true"))) {
             filterChainDefinitionMap.putAll(getPassUrls());
         }
