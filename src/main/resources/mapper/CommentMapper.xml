@@ -162,7 +162,7 @@
                 #{username,jdbcType=VARCHAR},
             </if>
             <if test="roleType != null">
-                #{role_type},
+                #{roleType},
             </if>
             <if test="email != null">
                 #{email,jdbcType=VARCHAR},
