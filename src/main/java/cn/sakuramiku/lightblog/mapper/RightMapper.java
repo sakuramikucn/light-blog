@@ -79,8 +79,9 @@ public interface RightMapper {
      * 搜索权限
      *
      * @return
+     * @param keyword
      */
-    List<Right> find();
+    List<Right> find(@Param("keyword") String keyword);
 
     Boolean batchInsert(List<BatchInsertParam> params);
 

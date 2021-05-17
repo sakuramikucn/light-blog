@@ -17,8 +17,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,7 +90,7 @@ public class UserController {
         return RespResult.ok(users);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"user","user:update"},logical = Logical.OR)
     @PutMapping
     public Result<User> update(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
@@ -101,7 +102,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:add"},logical = Logical.OR)
     @PostMapping
     public Result<User> add(@RequestBody User user) throws ApiException, BusinessException {
         ValidateUtil.isNull(user,"参数错误，参数值为空");
@@ -122,7 +123,7 @@ public class UserController {
         return RespResult.fail("添加失败");
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:turnStatus"},logical = Logical.OR)
     @PutMapping("/freez/{id}")
     public Result<User> freez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -132,7 +133,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:turnStatus"},logical = Logical.OR)
     @PutMapping("/unfreez/{id}")
     public Result<User> unfreez(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -142,7 +143,7 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:remove"},logical = Logical.OR)
     @PutMapping("/{id}")
     public Result<User> remove(@PathVariable("id") Long id) throws BusinessException {
         User user = new User();
@@ -152,21 +153,21 @@ public class UserController {
         return RespResult.ok(user1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:delete"},logical = Logical.OR)
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id){
         Boolean aBoolean = userService.delete(id);
         return RespResult.ok(aBoolean);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"user","user:turnStatus"},logical = Logical.OR)
     @PutMapping("/restore/{id}")
     public Result<Boolean> restore(@PathVariable("id") Long id){
         Boolean aBoolean = userService.restoreForRecycle(id);
         return RespResult.ok(aBoolean);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"user","user:password"},logical = Logical.OR)
     @PutMapping("/password")
     public Result<Boolean> changePassword(@RequestBody Account account) throws BusinessException, ApiException {
         ValidateUtil.isEmpty(account.getUsername(),"用户名不能为空");

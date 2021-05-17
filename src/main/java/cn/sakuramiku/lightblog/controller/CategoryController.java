@@ -13,7 +13,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -61,7 +63,7 @@ public class CategoryController {
         return RespResult.ok(categories);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"category","category:add"},logical = Logical.OR)
     @ApiOperation("添加分类")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "name", dataTypeClass = String.class, value = "名称", required = true)
@@ -76,7 +78,7 @@ public class CategoryController {
         return RespResult.fail("添加失败");
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"category","category:update"},logical = Logical.OR)
     @ApiOperation("修改分类名称")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "分类ID", required = true),
@@ -93,7 +95,7 @@ public class CategoryController {
         return RespResult.fail("修改失败");
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"category","category:delete"},logical = Logical.OR)
     @ApiOperation("删除分类")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "分类ID", required = true)
@@ -104,6 +106,7 @@ public class CategoryController {
         return RespResult.ok(categoryService.removeCategory(id));
     }
 
+    @RequiresAuthentication
     @GetMapping("/check/{name}")
     public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");

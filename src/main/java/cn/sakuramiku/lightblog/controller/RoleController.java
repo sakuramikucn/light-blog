@@ -7,13 +7,13 @@ import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Role;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.RoleService;
-import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.vo.SearchRoleParam;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +33,7 @@ public class RoleController {
     @Resource
     private RoleService roleService;
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"role","role:add"},logical = Logical.OR)
     @ApiOperation("添加角色")
     @PostMapping
     public Result<Role> add(@Validated @RequestBody Role role) {
@@ -65,7 +65,7 @@ public class RoleController {
         return RespResult.ok(roles);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"role","role:delete"},logical = Logical.OR)
     @ApiOperation("删除角色")
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
@@ -73,7 +73,7 @@ public class RoleController {
         return RespResult.ok(roleService.removeRole(id));
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"role","role:update"},logical = Logical.OR)
     @PutMapping
     public Result<Role> edit(@RequestBody Role role) throws BusinessException {
         Role role1 = roleService.updateRole(role);
@@ -83,8 +83,9 @@ public class RoleController {
         return RespResult.ok(role1);
     }
 
-    @ApiOperation("检查权限名称")
-    @GetMapping("/check")
+    @RequiresAuthentication
+    @ApiOperation("检查角色名称")
+    @GetMapping("/check/{name}")
     public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Role roleByName = roleService.getRoleByName(name);

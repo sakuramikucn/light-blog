@@ -55,10 +55,22 @@
         select
         <include refid="Base_Column_List"/>
         from `right`
+        <where>
+            <if test="null != keyword">
+                name like concat('%',#{keyword},'%')
+                or `desc` like concat('%',#{keyword},'%')
+            </if>
+        </where>
     </select>
-    <select id="find_COUNT" resultMap="BaseResultMap">
+    <select id="find_COUNT" resultType="long">
         select count(0)
         from `right`
+        <where>
+            <if test="null != keyword">
+                name like concat('%',#{keyword},'%')
+                or `desc` like concat('%',#{keyword},'%')
+            </if>
+        </where>
     </select>
     <select id="roleCount" parameterType="long" resultType="java.lang.Long">
         select COUNT(0) from role_right where right_id = #{right}

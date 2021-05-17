@@ -19,8 +19,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,6 +86,7 @@ public class ArticleController {
         return RespResult.ok(BlogHelper.toPageInfo(articles, views));
     }
 
+
     @RequiresAuthentication
     @ApiOperation("搜索文章")
     @PostMapping("/list")
@@ -125,7 +127,7 @@ public class ArticleController {
     }
 
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"article","article:add"},logical = Logical.OR)
     @ApiOperation("添加文章")
     @PostMapping
     public Result<Article> create(@Validated @RequestBody Article article) throws BusinessException {
@@ -136,7 +138,7 @@ public class ArticleController {
         return RespResult.ok(article1);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"article","article:update"},logical = Logical.OR)
     @ApiOperation("修改文章")
     @PutMapping
     public Result<Article> update(@RequestBody Article article) throws BusinessException {
@@ -147,7 +149,7 @@ public class ArticleController {
         return RespResult.ok(article1);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"article","article:remove"},logical = Logical.OR)
     @ApiOperation("移动到回收站")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
@@ -162,7 +164,7 @@ public class ArticleController {
         return RespResult.ok(article1);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"article","article:delete"},logical = Logical.OR)
     @ApiOperation("删除文章")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
@@ -174,7 +176,7 @@ public class ArticleController {
         return RespResult.ok(succ);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"article","article:turnStatus"},logical = Logical.OR)
     @ApiOperation("恢复文章")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "文章ID", required = true)
@@ -220,7 +222,7 @@ public class ArticleController {
 
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"article","article:turnStatus"},logical = Logical.OR)
     @PutMapping("/mask")
     public Result<Article> changeMask(@RequestBody Article article){
         Article changeMask = articleService.changeMask(article);

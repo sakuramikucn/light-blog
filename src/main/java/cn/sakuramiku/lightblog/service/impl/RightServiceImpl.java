@@ -69,6 +69,7 @@ public class RightServiceImpl implements RightService {
 
     @WriteLog(action = WriteLog.Action.UPDATE)
     @RedisCachePut(key = "#result.id")
+    @RedisClean(key = {"light_blog:user:*","light_blog:role:*"})
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Right updateRight(@NonNull Right right) {
@@ -110,7 +111,7 @@ public class RightServiceImpl implements RightService {
             Page<Object> objects = PageHelper.startPage(page, pageSize, true);
             objects.setOrderBy("modified_time DESC");
         }
-        List<Right> rights = rightMapper.find();
+        List<Right> rights = rightMapper.find(keyword);
         return PageInfo.of(rights);
     }
 

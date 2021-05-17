@@ -24,11 +24,11 @@ public class Right implements Serializable {
     /**
      * 规则-允许
      */
-    public static final int RULE_ALLOW = 2;
+    public static final int RULE_ALLOW = 1;
     /**
      * 规则-禁止
      */
-    public static final int RULE_BAN = 3;
+    public static final int RULE_BAN = 2;
 
     /**
      * 唯一标识

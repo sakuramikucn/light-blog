@@ -126,9 +126,7 @@ public class UserServiceImpl implements UserService {
             Long id = old.getId();
             // 用id才拿的到最新缓存
             User user = (User) redisUtil.get("light_blog:user::" + id);
-            if (null == user) {
-                return old;
-            } else {
+            if (user != null){
                 return user;
             }
         }
@@ -199,7 +197,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @RedisCleanQuery
+    @RedisClean
     @WriteLog(action = WriteLog.Action.DELETE, result = true)
     @Override
     public Integer deleteForRecycle(Integer status, Date start) {

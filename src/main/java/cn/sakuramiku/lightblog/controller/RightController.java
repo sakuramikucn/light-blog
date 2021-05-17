@@ -7,12 +7,12 @@ import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Right;
 import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.RightService;
-import cn.sakuramiku.lightblog.util.Constant;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -31,7 +31,7 @@ public class RightController {
     @Resource
     private RightService rightService;
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"right","right:add"},logical = Logical.OR)
     @ApiOperation("添加权限")
     @PostMapping
     public Result<Right> add(@RequestBody Right right) {
@@ -45,17 +45,17 @@ public class RightController {
     @RequiresAuthentication
     @ApiOperation("搜索权限")
     @GetMapping("/search")
-    public Result<PageInfo<Right>> search(Long roleId, Integer page, Integer pageSize) {
+    public Result<PageInfo<Right>> search(Long roleId,String keyword, Integer page, Integer pageSize) {
         PageInfo<Right> rights;
         if (null != roleId) {
             rights = rightService.searchRight(roleId, null, page, pageSize);
         } else {
-            rights = rightService.findRight(null, page, pageSize);
+            rights = rightService.findRight(keyword, page, pageSize);
         }
         return RespResult.ok(rights);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"right","right:delete"},logical = Logical.OR)
     @ApiOperation("删除权限")
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
@@ -63,7 +63,7 @@ public class RightController {
         return RespResult.ok(rightService.removeRight(id));
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"right","right:update"},logical = Logical.OR)
     @ApiOperation("修改权限")
     @PutMapping
     public Result<Right> update(@RequestBody Right right){
@@ -76,7 +76,7 @@ public class RightController {
 
     @RequiresAuthentication
     @ApiOperation("检查权限名称")
-    @GetMapping("/check")
+    @GetMapping("/check/{name}")
     public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Right right1 = rightService.getRightByName(name.trim());

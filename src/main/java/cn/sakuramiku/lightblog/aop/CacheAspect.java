@@ -34,7 +34,7 @@ public class CacheAspect {
     @Resource
     private RedisUtil redisUtil;
 
-    private final Boolean openCache = Boolean.parseBoolean(System.getProperty("cache.customize.enable","false"));
+    private final Boolean openCache = Boolean.parseBoolean(System.getProperty("cache.customize.enable", "false"));
 
     /**
      * 更新缓存
@@ -46,7 +46,7 @@ public class CacheAspect {
     @Order(1)
     @AfterReturning(value = "@annotation(redisCachePut)", returning = "result", argNames = "joinPoint,result,redisCachePut")
     public void removeCacheByCachePut(JoinPoint joinPoint, Object result, RedisCachePut redisCachePut) {
-        if (!openCache){
+        if (!openCache) {
             return;
         }
         if (result instanceof Boolean) {
@@ -86,7 +86,7 @@ public class CacheAspect {
     @Order(1)
     @AfterReturning(value = "@annotation(redisCacheDelete)", returning = "result", argNames = "joinPoint,result,redisCacheDelete")
     public void removeCacheByCacheEvict(JoinPoint joinPoint, Object result, RedisCacheDelete redisCacheDelete) {
-        if (!openCache){
+        if (!openCache) {
             return;
         }
         if (result instanceof Boolean) {
@@ -115,13 +115,28 @@ public class CacheAspect {
         redisUtil.delete(key);
     }
 
+    @Order(2)
+    @AfterReturning(value = "@annotation(redisCleanQuery)", returning = "result", argNames = "joinPoint,result,redisCleanQuery")
+    public void cleanQuery(JoinPoint joinPoint, Object result, RedisClean redisCleanQuery) {
+        // 删除指定key的缓存
+        String[] keys = redisCleanQuery.key();
+        if (!StringUtils.isEmpty(keys)) {
+            for (String key : keys) {
+                Long deletekeys = redisUtil.deletekeys(key);
+                logger.info("移除缓存，key：{}，结果：{}", key, deletekeys);
+                return;
+            }
+        }
+        cleanQueryCache(joinPoint);
+    }
+
     /**
      * 用自己的缓存
      *
      * @param point
      * @param redisCache
      */
-    @Order(2)
+    @Order(6)
     @Around(value = "@annotation(redisCache)")
     public Object cache(ProceedingJoinPoint point, RedisCache redisCache) throws Throwable {
         String property = System.getProperty("cache.customize.enable", "false");
@@ -177,25 +192,6 @@ public class CacheAspect {
         return result;
     }
 
-
-    @Order(4)
-    @AfterReturning(value = "@annotation(redisCleanQuery)", returning = "result", argNames = "joinPoint,result,redisCleanQuery")
-    public void cleanQuery(JoinPoint joinPoint, Object result, RedisCleanQuery redisCleanQuery) {
-        // 删除指定key的缓存
-        String key = redisCleanQuery.key();
-        if (!StringUtils.isEmpty(key)) {
-            Class<?> aClass = joinPoint.getTarget().getClass();
-            RedisCacheConfig declaredAnnotation = aClass.getDeclaredAnnotation(RedisCacheConfig.class);
-            if (null != declaredAnnotation) {
-                String prefix = declaredAnnotation.cacheName();
-                Long deletekeys = redisUtil.deletekeys(prefix + ":" + key);
-                logger.info("移除搜索缓存，生成key：{}，结果：{}", prefix + ":" + key, deletekeys);
-                return;
-            }
-        }
-
-        cleanQueryCache(joinPoint);
-    }
 
     /**
      * 清除 @OnCacheChange 标记方法的缓存

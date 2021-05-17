@@ -7,14 +7,13 @@ import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.FriendLink;
 import cn.sakuramiku.lightblog.service.FriendLinkService;
-import cn.sakuramiku.lightblog.util.Constant;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ public class LinkController {
     @Resource
     private FriendLinkService linkService;
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"link","link:add"},logical = Logical.OR)
     @ApiOperation("添加友链")
     @PostMapping
     public Result<FriendLink> add(@Validated @RequestBody FriendLink link) {
@@ -56,7 +55,7 @@ public class LinkController {
         return RespResult.ok(links);
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"link","link:delete"},logical = Logical.OR)
     @ApiOperation("删除友链")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "友链ID", required = true)
@@ -67,7 +66,7 @@ public class LinkController {
         return RespResult.ok(linkService.removeLink(id));
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"link","link:update"},logical = Logical.OR)
     @PutMapping
     public Result<FriendLink> update(@RequestBody FriendLink link) throws ApiException {
         ValidateUtil.isNull(link.getId(),"参数异常，ID为空");

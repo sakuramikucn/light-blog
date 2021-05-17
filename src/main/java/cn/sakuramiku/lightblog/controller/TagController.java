@@ -6,11 +6,14 @@ import cn.sakuramiku.lightblog.common.exception.ApiException;
 import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Tag;
+import cn.sakuramiku.lightblog.exception.BusinessException;
 import cn.sakuramiku.lightblog.service.TagService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -42,7 +45,7 @@ public class TagController {
         return RespResult.fail("没有该标签");
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"tag","tag:add"},logical = Logical.OR)
     @ApiOperation("添加标签")
     @PostMapping("/{name}")
     public Result<Tag> add(@PathVariable("name") String name) throws ApiException {
@@ -54,7 +57,7 @@ public class TagController {
         return RespResult.ok(tag);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"tag","tag:update"},logical = Logical.OR)
     @PutMapping
     public Result<Tag> update(@RequestBody Tag tag) throws ApiException {
         ValidateUtil.isNull(tag.getId(), "参数错误，标签名称为空");
@@ -74,7 +77,18 @@ public class TagController {
         return RespResult.ok(tags);
     }
 
+    @RequiresPermissions(value = {"tag","tag:delete"},logical = Logical.OR)
+    @DeleteMapping("/{id}")
+    public Result<Boolean> delete(@PathVariable("id") Long id) throws ApiException, BusinessException {
+        ValidateUtil.isNull(id, "参数错误，标签ID为空");
+        Boolean removeTag = tagService.removeTag(id);
+        if (!removeTag){
+            return RespResult.fail("删除标签失败");
+        }
+        return RespResult.ok(true);
+    }
 
+    @RequiresAuthentication
     @GetMapping("/check/{name}")
     public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");

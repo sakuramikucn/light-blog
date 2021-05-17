@@ -7,7 +7,6 @@ import cn.sakuramiku.lightblog.common.util.RespResult;
 import cn.sakuramiku.lightblog.common.util.ValidateUtil;
 import cn.sakuramiku.lightblog.entity.Comment;
 import cn.sakuramiku.lightblog.service.CommentService;
-import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.vo.CommentWrapView;
 import cn.sakuramiku.lightblog.vo.SearchCommentParam;
 import com.github.pagehelper.PageInfo;
@@ -15,8 +14,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +67,7 @@ public class CommentController {
         return RespResult.ok(comments);
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"comment","comment:remove"},logical = Logical.OR)
     @ApiOperation("删除评论（逻辑删除）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true)
@@ -79,7 +78,7 @@ public class CommentController {
         return RespResult.ok(commentService.removeComment(id));
     }
 
-    @RequiresRoles(Constant.ROLE_ADMIN)
+    @RequiresPermissions(value = {"comment","comment:delete"},logical = Logical.OR)
     @ApiOperation("删除评论（真实删除）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true)
@@ -90,7 +89,7 @@ public class CommentController {
         return RespResult.ok(commentService.deleteComment(id));
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"comment","comment:turnStatus"},logical = Logical.OR)
     @ApiOperation("评论屏蔽操作")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true),
@@ -103,7 +102,7 @@ public class CommentController {
         return RespResult.ok(commentService.hiddenComment(id, isHidden));
     }
 
-    @RequiresAuthentication
+    @RequiresPermissions(value = {"comment","comment:turnStatus"},logical = Logical.OR)
     @ApiOperation("评论恢复操作")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataTypeClass = Long.class, value = "评论ID", required = true),

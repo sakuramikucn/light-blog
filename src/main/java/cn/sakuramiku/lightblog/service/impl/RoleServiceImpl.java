@@ -64,6 +64,7 @@ public class RoleServiceImpl implements RoleService {
 
     @WriteLog(action = WriteLog.Action.UPDATE)
     @RedisCachePut(key = "#result.id")
+    @RedisClean(key = "light_blog:user:*")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Role updateRole(@NonNull Role role) throws BusinessException {

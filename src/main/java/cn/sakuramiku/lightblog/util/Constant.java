@@ -10,6 +10,15 @@ import java.util.Set;
  */
 public class Constant {
 
+    /** 角色-管理员（admin） */
+    public static final String ROLE_ADMIN = "admin";
+    /** 角色-访客（guest） */
+    public static final String ROLE_GUEST = "guest";
+    /** 角色-测试（test） */
+    public static final String ROLE_TEST = "test";
+    /** 角色-超级管理员（root） */
+    public static final String ROLE_ROOT= "root";
+
     /** Token可刷新名单 */
     public static final String PREFIX_REFRESH_TOKEN_REFRESH = "light_blog:token:refresh:";
     /** Token黑名单 */
@@ -30,8 +39,7 @@ public class Constant {
     /** shiro 过滤器放行的 url */
     public static final Set<String> SHIRO_PASS_URL = new ConcurrentHashSet<>();
 
-    /** 角色-管理员（admin） */
-    public static final String ROLE_ADMIN = "admin";
+
 
     /** MySQL排序-降序 */
     public static final String ORDERBY_DESC = "DESC";

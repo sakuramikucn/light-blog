@@ -218,7 +218,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @RedisCleanQuery
+    @RedisClean
     @WriteLog(action = WriteLog.Action.DELETE, result = true)
     @Override
     public Long deleteForRecycle(Integer status, Date start) {
