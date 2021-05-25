@@ -110,7 +110,7 @@ public class ArticleController {
     @ShiroPass
     @ApiOperation("搜索文章")
     @PostMapping("/query/tag")
-    public Result<PageInfo<ArticleView>> queryByTag(@RequestBody QueryArticleByTag param) {
+    public Result<PageInfo<ArticleView>> queryByTag(@RequestBody QueryArticleByTagParam param) {
         PageInfo<Article> articles = articleService.queryByTag(param);
         List<ArticleView> views = articles.getList().parallelStream().map(article -> {
             Boolean simple = param.getSimple();

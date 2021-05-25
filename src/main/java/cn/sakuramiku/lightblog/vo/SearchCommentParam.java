@@ -2,6 +2,8 @@ package cn.sakuramiku.lightblog.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.StringJoiner;
+
 /**
  * @author lyy
  */
@@ -58,4 +60,16 @@ public class SearchCommentParam extends PageParam {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SearchCommentParam.class.getSimpleName() + "[", "]")
+                .add("page=" + page)
+                .add("pageSize=" + pageSize)
+                .add("ref='" + ref + "'")
+                .add("parentId=" + parentId)
+                .add("state=" + state)
+                .add("keyword='" + keyword + "'")
+                .add("type=" + type)
+                .toString();
+    }
 }

@@ -1,9 +1,11 @@
 package cn.sakuramiku.lightblog.vo;
 
+import java.util.StringJoiner;
+
 /**
  * @author lyy
  */
-public class QueryArticleByTag extends PageParam {
+public class QueryArticleByTagParam extends PageParam {
 
     protected Long tagId;
     protected Boolean isPublic;
@@ -40,5 +42,17 @@ public class QueryArticleByTag extends PageParam {
 
     public void setMask(Integer mask) {
         this.mask = mask;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", QueryArticleByTagParam.class.getSimpleName() + "[", "]")
+                .add("page=" + page)
+                .add("pageSize=" + pageSize)
+                .add("tagId=" + tagId)
+                .add("isPublic=" + isPublic)
+                .add("isSimple=" + isSimple)
+                .add("mask=" + mask)
+                .toString();
     }
 }

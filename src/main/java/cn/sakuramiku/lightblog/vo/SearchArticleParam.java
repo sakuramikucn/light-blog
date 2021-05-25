@@ -142,6 +142,7 @@ public class SearchArticleParam extends PageParam {
                 .add("isPublic=" + isPublic)
                 .add("isSimple=" + isSimple)
                 .add("category='" + category + "'")
+                .add("mask=" + mask)
                 .toString();
     }
 }

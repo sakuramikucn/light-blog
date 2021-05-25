@@ -16,7 +16,7 @@ import cn.sakuramiku.lightblog.service.ArticleService;
 import cn.sakuramiku.lightblog.service.TagService;
 import cn.sakuramiku.lightblog.util.Constant;
 import cn.sakuramiku.lightblog.util.JwtUtil;
-import cn.sakuramiku.lightblog.vo.QueryArticleByTag;
+import cn.sakuramiku.lightblog.vo.QueryArticleByTagParam;
 import cn.sakuramiku.lightblog.vo.SearchArticleParam;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -206,7 +206,7 @@ public class ArticleServiceImpl implements ArticleService {
     @RedisCache
     @OnCacheChange
     @Override
-    public PageInfo<Article> queryByTag(QueryArticleByTag param) {
+    public PageInfo<Article> queryByTag(QueryArticleByTagParam param) {
         Integer page = param.getPage();
         Integer pageSize = param.getPageSize();
         Long tagId = param.getTagId();

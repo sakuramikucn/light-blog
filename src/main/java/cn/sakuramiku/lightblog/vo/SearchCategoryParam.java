@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 /**
  * @author lyy
@@ -40,5 +41,16 @@ public class SearchCategoryParam extends PageParam {
 
     public void setEnd(LocalDateTime end) {
         this.end = end;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SearchCategoryParam.class.getSimpleName() + "[", "]")
+                .add("page=" + page)
+                .add("pageSize=" + pageSize)
+                .add("keyword='" + keyword + "'")
+                .add("begin=" + begin)
+                .add("end=" + end)
+                .toString();
     }
 }

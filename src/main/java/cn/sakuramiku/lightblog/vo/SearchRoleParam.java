@@ -2,6 +2,8 @@ package cn.sakuramiku.lightblog.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.StringJoiner;
+
 /**
  * @author lyy
  */
@@ -26,5 +28,15 @@ public class SearchRoleParam extends PageParam {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SearchRoleParam.class.getSimpleName() + "[", "]")
+                .add("page=" + page)
+                .add("pageSize=" + pageSize)
+                .add("userId=" + userId)
+                .add("keyword='" + keyword + "'")
+                .toString();
     }
 }
