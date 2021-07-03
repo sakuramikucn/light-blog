@@ -4,4 +4,4 @@
 - Spring、SpringMVC、MyBatis ：基础架构
 - MySQL：数据持久化
 - Redis：缓存中间件
-- ElasticSearch：搜索中间件
+- Shiro+jwt：鉴权
