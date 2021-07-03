@@ -17,7 +17,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <spring.version>5.2.7.RELEASE</spring.version>
         <mysql.connector.version>8.0.21</mysql.connector.version>
-        <mybatis.version>3.5.5</mybatis.version>
+        <mybatis.version>3.5.6</mybatis.version>
         <mybatis.spring.version>2.0.5</mybatis.spring.version>
         <mybatis.generator.version>1.4.0</mybatis.generator.version>
         <druid.version>1.1.22</druid.version>
@@ -28,10 +28,10 @@
         <jackson.version>2.11.2</jackson.version>
         <hutool.version>5.5.4</hutool.version>
         <swagger2.version>2.9.2</swagger2.version>
-        <tomcat.version>9.0.37</tomcat.version>
+        <tomcat.version>9.0.43</tomcat.version>
         <spring.data.elasticsearch.version>4.1.2</spring.data.elasticsearch.version>
         <pagehelper.version>5.2.0</pagehelper.version>
-        <shiro.spring.version>1.5.3</shiro.spring.version>
+        <shiro.spring.version>1.7.0</shiro.spring.version>
     </properties>
 
     <dependencies>
