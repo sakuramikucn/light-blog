@@ -28,7 +28,7 @@
         <jackson.version>2.11.2</jackson.version>
         <hutool.version>5.5.4</hutool.version>
         <swagger2.version>2.9.2</swagger2.version>
-        <tomcat.version>9.0.37</tomcat.version>
+        <tomcat.version>9.0.43</tomcat.version>
         <spring.data.elasticsearch.version>4.1.2</spring.data.elasticsearch.version>
         <pagehelper.version>5.2.0</pagehelper.version>
         <shiro.spring.version>1.5.3</shiro.spring.version>
