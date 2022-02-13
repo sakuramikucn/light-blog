@@ -117,7 +117,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         // 登录没有错误 => 1.Token有效 2.Token 过期
         HttpServletResponse servletResponse = (HttpServletResponse) response;
         //  cors情况下，自定义请求头是需要设置暴露出来的
-        servletResponse.setHeader("Access-Control-Expose-Headers ", AUTHORIZATION_HEADER + ",Token-Refresh");
+        servletResponse.setHeader("Access-Control-Expose-Headers", AUTHORIZATION_HEADER + ",Token-Refresh");
         try {
             JwtUtil.getUserName(authzHeader);
         } catch (ExpiredJwtException e) {
