@@ -64,9 +64,10 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         String uri = httpServletRequest.getRequestURI();
         String method = httpServletRequest.getMethod();
         uri = BlogHelper.genReqUrl(method, uri);
+        uri = uri.split("\\?")[0];
         // 处理标记为 @ShiroPass 的方法
         for (String url : Constant.SHIRO_PASS_URL) {
-            if (!StrUtil.isEmpty(uri) && uri.startsWith(url)) {
+            if (!StrUtil.isEmpty(uri) && uri.equals(url)) {
                 return true;
             }
         }
