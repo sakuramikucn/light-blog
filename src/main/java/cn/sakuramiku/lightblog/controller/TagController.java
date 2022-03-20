@@ -89,8 +89,8 @@ public class TagController {
     }
 
     @RequiresAuthentication
-    @GetMapping("/check/{name}")
-    public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
+    @GetMapping("/check")
+    public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Tag tagByName = tagService.getTagByName(name);
         if (null == tagByName){

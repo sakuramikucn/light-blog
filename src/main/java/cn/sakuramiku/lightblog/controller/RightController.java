@@ -76,7 +76,7 @@ public class RightController {
 
     @RequiresAuthentication
     @ApiOperation("检查权限名称")
-    @GetMapping("/check/{name}")
+    @GetMapping("/check")
     public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Right right1 = rightService.getRightByName(name.trim());

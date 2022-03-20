@@ -14,7 +14,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.Logical;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,9 +105,8 @@ public class CategoryController {
         return RespResult.ok(categoryService.removeCategory(id));
     }
 
-    @RequiresAuthentication
-    @GetMapping("/check/{name}")
-    public Result<Boolean> check(@PathVariable("name") String name) throws ApiException {
+    @GetMapping("/check")
+    public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Category byName = categoryService.getByName(name);
         if (null == byName){

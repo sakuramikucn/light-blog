@@ -85,7 +85,7 @@ public class RoleController {
 
     @RequiresAuthentication
     @ApiOperation("检查角色名称")
-    @GetMapping("/check/{name}")
+    @GetMapping("/check")
     public Result<Boolean> check(@RequestParam("name") String name) throws ApiException {
         ValidateUtil.isEmpty(name,"名称不能为空");
         Role roleByName = roleService.getRoleByName(name);
