@@ -5,3 +5,6 @@
 - MySQL：数据持久化
 - Redis：缓存中间件
 - Shiro+jwt：鉴权
+
+
+演示地址：http://blog.sakuramiku.cn/
