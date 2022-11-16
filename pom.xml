@@ -25,7 +25,7 @@
         <jedis.version>3.3.0</jedis.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
         <junit.version>4.13.1</junit.version>
-        <jackson.version>2.12.6.1</jackson.version>
+        <jackson.version>2.12.7.1</jackson.version>
         <hutool.version>5.5.4</hutool.version>
         <swagger2.version>2.9.2</swagger2.version>
         <tomcat.version>9.0.43</tomcat.version>
