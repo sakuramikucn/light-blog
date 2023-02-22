@@ -23,7 +23,7 @@
         <druid.version>1.1.22</druid.version>
         <spring.data.redis.version>2.3.1.RELEASE</spring.data.redis.version>
         <jedis.version>3.3.0</jedis.version>
-        <commons.fileupload.version>1.4</commons.fileupload.version>
+        <commons.fileupload.version>1.5</commons.fileupload.version>
         <junit.version>4.13.1</junit.version>
         <jackson.version>2.12.6.1</jackson.version>
         <hutool.version>5.5.4</hutool.version>
